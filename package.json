@@ -28,6 +28,18 @@
       {
         "command": "skk-vscode.ctrlJInput",
         "title": "Ctrl-J Input"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "title": "Number Input"
+      },
+      {
+        "command": "skk-vscode.backspaceInput",
+        "title": "Backspace Key Input"
+      },
+      {
+        "command": "skk-vscode.cursorMove",
+        "title": "Cursor Move"
       }
     ],
     "keybindings": [
@@ -344,6 +356,66 @@
         "args": "Z"
       },
       {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "0",
+        "args": "0"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "1",
+        "args": "1"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "2",
+        "args": "2"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "3",
+        "args": "3"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "4",
+        "args": "4"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "5",
+        "args": "5"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "6",
+        "args": "6"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "7",
+        "args": "7"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "8",
+        "args": "8"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "9",
+        "args": "9"
+      },
+      {
         "command": "skk-vscode.spaceInput",
         "when": "editorTextFocus",
         "key": "space"
@@ -352,6 +424,11 @@
         "command": "skk-vscode.ctrlJInput",
         "when": "editorTextFocus",
         "key": "ctrl+j"
+      },
+      {
+        "command": "skk-vscode.backspaceInput",
+        "when": "editorTextFocus",
+        "key": "backspace"
       }
     ]
   },

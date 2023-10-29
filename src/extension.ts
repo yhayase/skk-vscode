@@ -16,6 +16,7 @@ enum HenkanMode {
 }
 
 
+var timestampOfCursorMoveCausedByKeyInput : number|undefined = undefined;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -41,6 +42,13 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage("skk-vscode: " + romBuffer.join(''));
 	}
 
+    let previousTextEditor = vscode.window.activeTextEditor;
+    let previousSelections = vscode.window.activeTextEditor?.selections;
+    function updatePreviousEditorAndSelections() {
+        previousTextEditor = vscode.window.activeTextEditor;
+        previousSelections = vscode.window.activeTextEditor?.selections;
+    }
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
@@ -53,7 +61,9 @@ export function activate(context: vscode.ExtensionContext) {
 			default:
 				break;
 		}
+        updatePreviousEditorAndSelections();
 	});
+	context.subscriptions.push(lowerAlphaInput);
 
 	let upperAlphaInput = vscode.commands.registerCommand('skk-vscode.upperAlphabetInput', (key: string) => {
 		switch (henkanMode) {
@@ -61,13 +71,17 @@ export function activate(context: vscode.ExtensionContext) {
 				midashigoStart = vscode.window.activeTextEditor?.selection.start;
 				insertOrReplaceSelection('▽');
 				henkanMode = HenkanMode.midashigo;
+                // fall through
 			default:
 				processRomInput(key.toLowerCase());
 				break;
 		}
+        updatePreviousEditorAndSelections();
 	});
+	context.subscriptions.push(upperAlphaInput);
 
 	let spaceInput = vscode.commands.registerCommand('skk-vscode.spaceInput', () => {
+        updatePreviousEditorAndSelections();
 		switch (henkanMode) {
 			case HenkanMode.kakutei:
 				insertOrReplaceSelection(' ');
@@ -86,9 +100,10 @@ export function activate(context: vscode.ExtensionContext) {
 								if (value) {
 									replaceRange(midashigoRange, value);
 								}
+                                romBuffer = [];
 							});
-							// replaceRange(midashigoRange, '漢字');
 						} else {
+                            romBuffer = [];
 							insertOrReplaceSelection('変換できません');
 						}
 					} else {
@@ -97,7 +112,9 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 				break;
 		}
+        updatePreviousEditorAndSelections();
 	});
+	context.subscriptions.push(spaceInput);
 
 	let ctrlJInput = vscode.commands.registerCommand('skk-vscode.ctrlJInput', () => {
 		switch (henkanMode) {
@@ -106,13 +123,57 @@ export function activate(context: vscode.ExtensionContext) {
 				romBuffer = [];
 				break;
 		}
+        updatePreviousEditorAndSelections();
 	});
-
-	context.subscriptions.push(lowerAlphaInput);
-	context.subscriptions.push(upperAlphaInput);
-	context.subscriptions.push(spaceInput);
 	context.subscriptions.push(ctrlJInput);
 
+    let backspaceInput = vscode.commands.registerCommand('skk-vscode.backspaceInput', () => {
+        switch (henkanMode) {
+            case HenkanMode.midashigo:
+                if (romBuffer.length > 0) {
+                    romBuffer.pop();
+                    break;
+                }
+                // fall through
+            default:
+                // delete backward char in the editor
+                const editor = vscode.window.activeTextEditor;
+                if (editor) {
+                    vscode.commands.executeCommand('deleteLeft');
+                }
+        }
+        updatePreviousEditorAndSelections();
+    });
+    context.subscriptions.push(backspaceInput);
+
+    let numberInput = vscode.commands.registerCommand('skk-vscode.numberInput', (key: string) => {
+        switch (henkanMode) {
+            case HenkanMode.midashigo:
+                processRomInput(key);
+                break;
+            default:
+                insertOrReplaceSelection(key);
+                break;
+        }
+        updatePreviousEditorAndSelections();
+    });
+    context.subscriptions.push(numberInput);
+
+    vscode.window.onDidChangeTextEditorSelection(event => {
+        // On cursor moves in event.textEditor
+
+        // Ignore cursor moves caused by other key input events
+        if (event.textEditor === previousTextEditor) {
+            if (timestampOfCursorMoveCausedByKeyInput && timestampOfCursorMoveCausedByKeyInput >= Date.now() - 100) {
+                timestampOfCursorMoveCausedByKeyInput = undefined;
+                return;
+            }
+        }
+
+        vscode.window.showInformationMessage("skk-vscode: cursor moves");
+        // clear romBuffer
+        romBuffer = [];
+    });
 }
 
 function insertOrReplaceSelection(str: string) {
@@ -129,6 +190,7 @@ function insertOrReplaceSelection(str: string) {
 			}
 		});
 	}
+    timestampOfCursorMoveCausedByKeyInput = Date.now();
 }
 
 function replaceRange(range: vscode.Range, str: string) {
@@ -138,6 +200,7 @@ function replaceRange(range: vscode.Range, str: string) {
 			editBuilder.replace(range, str);
 		});
 	}
+    timestampOfCursorMoveCausedByKeyInput = Date.now();
 }
 
 // This method is called when your extension is deactivated
@@ -256,7 +319,7 @@ let romKanaBaseRule: {[key: string]: RomKanaRule} = {
     "myo": {"remain": "", "katakana": "ミョ", "hiragana": "みょ"},
     "myu": {"remain": "", "katakana": "ミュ", "hiragana": "みゅ"},
     "n": {"remain": "", "katakana": "ン", "hiragana": "ん"},
-    "n\'": {"remain": "", "katakana": "ン", "hiragana": "ん"},
+    "n'": {"remain": "", "katakana": "ン", "hiragana": "ん"},
     "na": {"remain": "", "katakana": "ナ", "hiragana": "な"},
     "ne": {"remain": "", "katakana": "ネ", "hiragana": "ね"},
     "ni": {"remain": "", "katakana": "ニ", "hiragana": "に"},
