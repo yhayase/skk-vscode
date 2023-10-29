@@ -5,9 +5,9 @@ import { insertOrReplaceSelection } from './extension';
 export class RomajiInput {
     private romBuffer: string[] = [];
 
-    private static romToHiragana(str: string): string[] | undefined {
+    private static romToHiragana(str: string): [string, string] {
         if (str.length === 0) {
-            return undefined;
+            return ["", str];
         }
 
         const rule = romKanaBaseRule[str];
@@ -20,7 +20,7 @@ export class RomajiInput {
                 // Multiple rules with the same prefix match
                 
                 // Postpone the conversion until the next input
-                return undefined;
+                return ["", str];
             }
         }
         
@@ -34,23 +34,26 @@ export class RomajiInput {
                 return [ruleForPrefix.hiragana, ruleForPrefix.remain + str.slice(i)];
             }
         }
-        return undefined;
+        return ["", str];
     }
 
     static countPrefixOf(romKanaBaseRule: { [key: string]: RomKanaRule }, str: string) : number {
         return Object.keys(romKanaBaseRule).filter(key => key.startsWith(str)).length;
     }
 
-    public processInput(key: string): void {
+    public processInput(key: string): string {
         this.romBuffer.push(key);
         let romBufferStr = this.romBuffer.join('');
         let kana = RomajiInput.romToHiragana(romBufferStr);
-        if (kana) {
-            insertOrReplaceSelection(kana[0]);
-            this.romBuffer = [kana[1]];
+        if (kana[0]) {
+            this.setRomBuffer(kana[1]);
+            vscode.window.showInformationMessage("skk-vscode: " + this.romBuffer.join(''));
         }
-        // show romBuffer content in a line annotation
-        vscode.window.showInformationMessage("skk-vscode: " + this.romBuffer.join(''));
+        return kana[0];
+    }
+    
+    private setRomBuffer(romaji: string) : void {
+        this.romBuffer = romaji.split('');
     }
 
     public reset(): void {

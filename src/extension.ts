@@ -16,6 +16,11 @@ enum HenkanMode {
 	henkan // ▼モード
 }
 
+enum MidashigoMode {
+	start, // ▽あい
+	okurigana // ▽あい*s
+}
+
 
 var timestampOfCursorMoveCausedByKeyInput : number|undefined = undefined;
 
@@ -27,6 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let midashigoStart: vscode.Position | undefined = undefined; // vscode.window.activeTextEditor?.selection.start;
 
 	let henkanMode = HenkanMode.kakutei;
+	let midashigoMode = MidashigoMode.start;
 
     var romajiInput = new RomajiInput();
 
@@ -37,14 +43,102 @@ export function activate(context: vscode.ExtensionContext) {
         previousSelections = vscode.window.activeTextEditor?.selections;
     }
 
+	function doHenkan(okuri: string|undefined = undefined) {
+		const editor = vscode.window.activeTextEditor;
+		if (midashigoStart === undefined) {
+			vscode.window.showInformationMessage('変換開始位置が不明です');
+			henkanMode = HenkanMode.kakutei;
+			romajiInput.reset();
+			return;
+		}
+
+		if (editor === undefined) {
+			return;
+		}
+		// check if content of the editor is longer than midashigoStart
+		if (editor.document.getText().length < midashigoStart.character) {
+			vscode.window.showInformationMessage('変換開始位置が不正です');
+			henkanMode = HenkanMode.kakutei;
+			romajiInput.reset();
+			return;
+		}
+			
+		if (!midashigoStart?.isBefore(editor.selection.start)) {
+			vscode.window.showInformationMessage('変換開始位置よりも前にカーソルがあります');
+			return;
+		}
+
+		const midashigoRange = new vscode.Range(midashigoStart, editor.selection.end);
+		let midashigo = editor.document.getText(midashigoRange);
+
+		if (midashigo[0] !== '▽') {
+			// In case of the begginning ▽ is deleted by the user or other causes
+			
+			vscode.window.showInformationMessage('It seems that you have deleted ▽');
+
+			// clear midashigoStart
+			henkanMode = HenkanMode.kakutei;
+
+			return;
+		}
+
+		if (okuri) {
+			const sagyo = ["さ", "し", "す", "せ", "そ"];
+			if (midashigo === "▽か" && sagyo.includes(okuri[0])) {
+				let candidates : string[] = ["課", "貸"];
+				
+				vscode.window.showQuickPick(
+					candidates.map((value) => value + okuri)
+					).then((value) => {
+					if (value) {
+						replaceRange(midashigoRange, value);
+						henkanMode = HenkanMode.kakutei;
+					}
+				});
+			} else {
+				vscode.window.showInformationMessage('変換できません');
+				henkanMode = HenkanMode.kakutei;
+				romajiInput.reset();
+			}
+		} else {
+			if (midashigo === '▽かんじ') {
+				let candidates = ["漢字", "幹事"];
+				
+				vscode.window.showQuickPick(candidates).then((value) => {
+					if (value) {
+						replaceRange(midashigoRange, value);
+						henkanMode = HenkanMode.kakutei;
+					}
+				});
+			} else {
+				vscode.window.showInformationMessage('変換できません');
+				henkanMode = HenkanMode.kakutei;
+				romajiInput.reset();
+			}
+		}
+	}
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	let lowerAlphaInput = vscode.commands.registerCommand('skk-vscode.lowerAlphabetInput', (key: string) => {
 		switch (henkanMode) {
-			case HenkanMode.kakutei:
 			case HenkanMode.midashigo:
-				romajiInput.processInput(key);
+				if (midashigoMode === MidashigoMode.okurigana) {
+					let okuri = romajiInput.processInput(key.toLowerCase());
+					if (okuri.length === 0) {
+						break;
+					}
+					
+					doHenkan(okuri);
+					break;
+				}
+				// fall through
+			case HenkanMode.kakutei:
+				let rval = romajiInput.processInput(key);
+				if (rval) {
+					insertOrReplaceSelection(rval);
+				}
 				break;
 			default:
 				break;
@@ -53,12 +147,24 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(lowerAlphaInput);
 
+
 	let upperAlphaInput = vscode.commands.registerCommand('skk-vscode.upperAlphabetInput', (key: string) => {
 		switch (henkanMode) {
+			case HenkanMode.midashigo:
+				midashigoMode = MidashigoMode.okurigana;
+
+				let okuri = romajiInput.processInput(key.toLowerCase());
+				if (okuri.length === 0) {
+					break;
+				}
+				
+				doHenkan(okuri);
+				break;
 			case HenkanMode.kakutei:
 				midashigoStart = vscode.window.activeTextEditor?.selection.start;
 				insertOrReplaceSelection('▽');
 				henkanMode = HenkanMode.midashigo;
+				midashigoMode = MidashigoMode.start;
                 // fall through
 			default:
 				romajiInput.processInput(key.toLowerCase());
@@ -75,41 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
 				insertOrReplaceSelection(' ');
 				break;
 			case HenkanMode.midashigo:
-				henkanMode = HenkanMode.kakutei;
-				const editor = vscode.window.activeTextEditor;
-				if (editor) {
-					if (midashigoStart?.isBefore(editor.selection.start)) {
-                        romajiInput.reset();
-
-                        const midashigoRange = new vscode.Range(midashigoStart, editor.selection.end);
-						let midashigo = editor.document.getText(midashigoRange);
-                        
-                        if (midashigo[0] !== '▽') {
-                            // In case of the begginning ▽ is deleted by the user or other causes
-                            
-                            vscode.window.showInformationMessage('It seems that you have deleted ▽');
-
-                            // clear midashigoStart
-                            henkanMode = HenkanMode.kakutei;
-
-                            return;
-                        }
-
-						if (midashigo === '▽かんじ') {
-							let candidates = ["漢字", "幹事"];
-							
-							vscode.window.showQuickPick(candidates).then((value) => {
-								if (value) {
-									replaceRange(midashigoRange, value);
-								}
-							});
-						} else {
-							insertOrReplaceSelection('変換できません');
-						}
-					} else {
-						vscode.window.showInformationMessage('変換開始位置よりも前にカーソルがあります');
-					}
-				}
+				doHenkan();
 				break;
 		}
         updatePreviousEditorAndSelections();
