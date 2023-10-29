@@ -106,9 +106,23 @@ export function activate(context: vscode.ExtensionContext) {
 				henkanMode = HenkanMode.kakutei;
 				const editor = vscode.window.activeTextEditor;
 				if (editor) {
-					if (midashigoStart && midashigoStart.isBefore(editor.selection.start)) {
-						const midashigoRange = new vscode.Range(midashigoStart, editor.selection.end);
+					if (midashigoStart?.isBefore(editor.selection.start)) {
+                        romajiInput.reset();
+
+                        const midashigoRange = new vscode.Range(midashigoStart, editor.selection.end);
 						let midashigo = editor.document.getText(midashigoRange);
+                        
+                        if (midashigo[0] !== '▽') {
+                            // In case of the begginning ▽ is deleted by the user or other causes
+                            
+                            vscode.window.showInformationMessage('It seems that you have deleted ▽');
+
+                            // clear midashigoStart
+                            henkanMode = HenkanMode.kakutei;
+
+                            return;
+                        }
+
 						if (midashigo === '▽かんじ') {
 							let candidates = ["漢字", "幹事"];
 							
@@ -116,10 +130,8 @@ export function activate(context: vscode.ExtensionContext) {
 								if (value) {
 									replaceRange(midashigoRange, value);
 								}
-                                romajiInput.reset();
 							});
 						} else {
-                            romajiInput.reset();
 							insertOrReplaceSelection('変換できません');
 						}
 					} else {
@@ -148,7 +160,7 @@ export function activate(context: vscode.ExtensionContext) {
             case HenkanMode.midashigo:
                 if (! romajiInput.isEmpty()) {
                     romajiInput.deleteLastChar();
-                    return;
+                    break;
                 }
                 // fall through
             default:
