@@ -18,6 +18,35 @@ enum HenkanMode {
 
 var timestampOfCursorMoveCausedByKeyInput : number|undefined = undefined;
 
+class RomajiInput {
+	private romBuffer : string[] = [];
+
+	public processInput(key: string) : void {
+		this.romBuffer.push(key);
+		let romBufferStr = this.romBuffer.join('');
+		let kana = romToHiragana(romBufferStr);
+		if (kana) {
+			insertOrReplaceSelection(kana[0]);
+			this.romBuffer = [kana[1]];
+		}
+		// show romBuffer content in a line annotation
+
+		vscode.window.showInformationMessage("skk-vscode: " + this.romBuffer.join(''));
+	}
+
+    public reset() : void {
+        this.romBuffer = [];
+    }
+
+    public isEmpty() : boolean {
+        return this.romBuffer.length === 0; 
+    }
+
+    public deleteLastChar() : void {
+        this.romBuffer.pop();
+    }
+}
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -27,20 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let henkanMode = HenkanMode.kakutei;
 
-	let romBuffer : string[] = [];
-
-	function processRomInput(key: string) {
-		romBuffer.push(key);
-		let romBufferStr = romBuffer.join('');
-		let kana = romToHiragana(romBufferStr);
-		if (kana) {
-			insertOrReplaceSelection(kana[0]);
-			romBuffer = [kana[1]];
-		}
-		// show romBuffer content in a line annotation
-
-		vscode.window.showInformationMessage("skk-vscode: " + romBuffer.join(''));
-	}
+    var romajiInput = new RomajiInput();
 
     let previousTextEditor = vscode.window.activeTextEditor;
     let previousSelections = vscode.window.activeTextEditor?.selections;
@@ -56,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
 		switch (henkanMode) {
 			case HenkanMode.kakutei:
 			case HenkanMode.midashigo:
-				processRomInput(key);
+				romajiInput.processInput(key);
 				break;
 			default:
 				break;
@@ -73,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
 				henkanMode = HenkanMode.midashigo;
                 // fall through
 			default:
-				processRomInput(key.toLowerCase());
+				romajiInput.processInput(key.toLowerCase());
 				break;
 		}
         updatePreviousEditorAndSelections();
@@ -100,10 +116,10 @@ export function activate(context: vscode.ExtensionContext) {
 								if (value) {
 									replaceRange(midashigoRange, value);
 								}
-                                romBuffer = [];
+                                romajiInput.reset();
 							});
 						} else {
-                            romBuffer = [];
+                            romajiInput.reset();
 							insertOrReplaceSelection('変換できません');
 						}
 					} else {
@@ -120,7 +136,7 @@ export function activate(context: vscode.ExtensionContext) {
 		switch (henkanMode) {
 			default:
 				henkanMode = HenkanMode.kakutei;
-				romBuffer = [];
+				romajiInput.reset();
 				break;
 		}
         updatePreviousEditorAndSelections();
@@ -130,9 +146,9 @@ export function activate(context: vscode.ExtensionContext) {
     let backspaceInput = vscode.commands.registerCommand('skk-vscode.backspaceInput', () => {
         switch (henkanMode) {
             case HenkanMode.midashigo:
-                if (romBuffer.length > 0) {
-                    romBuffer.pop();
-                    break;
+                if (! romajiInput.isEmpty()) {
+                    romajiInput.deleteLastChar();
+                    return;
                 }
                 // fall through
             default:
@@ -149,7 +165,7 @@ export function activate(context: vscode.ExtensionContext) {
     let numberInput = vscode.commands.registerCommand('skk-vscode.numberInput', (key: string) => {
         switch (henkanMode) {
             case HenkanMode.midashigo:
-                processRomInput(key);
+                romajiInput.processInput(key);
                 break;
             default:
                 insertOrReplaceSelection(key);
@@ -172,7 +188,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         vscode.window.showInformationMessage("skk-vscode: cursor moves");
         // clear romBuffer
-        romBuffer = [];
+        romajiInput.reset();
     });
 }
 
