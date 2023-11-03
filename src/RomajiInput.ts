@@ -10,47 +10,52 @@ export class RomajiInput {
 
     /**
      * Convert the given romaji sequence to hiragana and remaining romaji sequence 
-     * @param str romaji sequence
+     * @param inputRomaji romaji sequence
      * @returns [hiragana, remaining romaji]
      */
-    private static romToHiragana(str: string): [string, string] {
-        if (str.length === 0) {
-            return ["", str];
+    private static romToHiragana(inputRomaji: string): [string, string] {
+        if (inputRomaji.length === 0) {
+            return ["", inputRomaji];
         }
 
-        const rule = romKanaBaseRule[str];
+        const rule = romKanaBaseRule[inputRomaji];
+        const prefixMatchCount = RomajiInput.countPrefixOf(romKanaBaseRule, inputRomaji);
         if (rule) {
-            const count = RomajiInput.countPrefixOf(romKanaBaseRule, str);
-            if (count === 1) {
-                // Only one rule matches
+            // Exact match found
+            if (prefixMatchCount === 1) {
+                // No other rules which start with str
                 return [rule.hiragana, rule.remain];
             } else {
-                // Multiple rules with the same prefix match
-                
-                // Postpone the conversion until the next input
-                return ["", str];
+                // , but multiple rules start with inputRomaji exist. (e.g. inputRomaji === "n")
+
+                // Postpone the conversion
+                return ["", inputRomaji];
             }
+        } else if (prefixMatchCount >= 1) {
+            // Future input may match the rule. (e.g. inputRomaji === "ky")
+            // Postpone the conversion
+            return ["", inputRomaji];
         }
-        
-        // No exact match found.
-        // Try to find the longest prefix
+
+        // No exact match and no prefix match found.
+        // Try to find the longest prefix which matches the rule exactly.
         let kana = "";
         outer: do {
-            for (let i = str.length; i > 0; i--) {
-                const prefix = str.slice(0, i);
+            for (let i = inputRomaji.length; i > 0; i--) {
+                const prefix = inputRomaji.slice(0, i);
                 const ruleForPrefix = romKanaBaseRule[prefix];
                 if (ruleForPrefix) {
                     kana += ruleForPrefix.hiragana;
-                    str = ruleForPrefix.remain + str.slice(i);
+                    inputRomaji = ruleForPrefix.remain + inputRomaji.slice(i);
                     continue outer;
                 }
             }
         } while (false);
         // All possible prefixes are converted to kanas
 
-        // Check remaining input string is possibly convertible to kana
-        while (str.length > 0) {
-            const count = RomajiInput.countPrefixOf(romKanaBaseRule, str);
+        // Find the longest suffix which is the prefix of any rule, then keep the suffix for future conversion
+        while (inputRomaji.length > 0) {
+            const count = RomajiInput.countPrefixOf(romKanaBaseRule, inputRomaji);
             if (count > 0) {
                 console.assert(count > 1);
                 // Multiple rules with the same prefix match
@@ -58,11 +63,11 @@ export class RomajiInput {
             }
 
             // retry with the first character removed
-            str = str.slice(1);
+            inputRomaji = inputRomaji.slice(1);
         }
 
         // Match found for the prefix, convert the prefix and postpone the rest
-        return [kana, str];
+        return [kana, inputRomaji];
     }
 
     /**

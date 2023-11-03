@@ -34,8 +34,8 @@ suite('RomajiInput.romToHiragana test', () => {
         assert.deepEqual(RomajiInput["romToHiragana"]("nk"), ["ん", "k"]);
 	});
 
-	test('nyという入力に対して「ん」と未変換のyを返す', () => {
-		assert.deepEqual(RomajiInput["romToHiragana"]("ny"), ["ん", "y"]);
+	test('nyという入力に対して未変換のnyを返す', () => {
+		assert.deepEqual(RomajiInput["romToHiragana"]("ny"), ["", "ny"]);
 	});
 
 	test('拗音を含むローマ字の入力を取り扱える', () => {
