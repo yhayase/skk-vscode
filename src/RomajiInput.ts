@@ -26,7 +26,7 @@ export class RomajiInput {
                 // No other rules which start with str
                 return [rule.hiragana, rule.remain];
             } else {
-                // , but multiple rules start with inputRomaji exist. (e.g. inputRomaji === "n")
+                // ..., but multiple rules start with inputRomaji exist. (e.g. inputRomaji === "n")
 
                 // Postpone the conversion
                 return ["", inputRomaji];
@@ -39,6 +39,7 @@ export class RomajiInput {
 
         // No exact match and no prefix match found.
         // Try to find the longest prefix which matches the rule exactly.
+        // (e.g. inputRomaji === "nk", "n" is the longest prefix which matches the rule exactly)
         let kana = "";
         outer: do {
             for (let i = inputRomaji.length; i > 0; i--) {
@@ -53,17 +54,16 @@ export class RomajiInput {
         } while (false);
         // All possible prefixes are converted to kanas
 
-        // Find the longest suffix which is the prefix of any rule, then keep the suffix for future conversion
-        while (inputRomaji.length > 0) {
-            const count = RomajiInput.countPrefixOf(romKanaBaseRule, inputRomaji);
-            if (count > 0) {
-                console.assert(count > 1);
-                // Multiple rules with the same prefix match
-                break;
-            }
+        // If the inputRomaji never matches the rule and the inputRomaji is longer than 1 character,
+        // keep the last character of the inputRomaji for the next input.
+        if (inputRomaji.length >= 1) {
+            inputRomaji = inputRomaji.slice(-1);
+        }
+        // Hereinafter, inputRomaji is either empty or a single character.
 
-            // retry with the first character removed
-            inputRomaji = inputRomaji.slice(1);
+        // In case no rule starts with the single character, clear the inputRomaji
+        if (inputRomaji.length === 1 && this.countPrefixOf(romKanaBaseRule, inputRomaji) === 0) {
+            inputRomaji = "";
         }
 
         // Match found for the prefix, convert the prefix and postpone the rest

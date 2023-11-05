@@ -50,12 +50,12 @@ suite('RomajiInput.romToHiragana test', () => {
 		assert.deepEqual(RomajiInput["romToHiragana"]("あ"), ["", ""]);
 	});
 
-	test('ローマ字表に存在しないアルファベット2文字の並びに対して候補がありうるサフィックスを返す', () => {
+	test('ローマ字表に存在しないアルファベット2文字の並びに対して最後の一文字を返す', () => {
 		assert.deepEqual(RomajiInput["romToHiragana"]("ht"), ["", "t"]);
 	});
 
-	test('ローマ字表に存在しないアルファベット3文字の並びに対して候補がありうるサフィックスを返す', () => {
-		assert.deepEqual(RomajiInput["romToHiragana"]("cht"), ["", "t"]);
+	test('ローマ字表に存在しないアルファベット3文字の並びに対して最後の一文字を返す', () => {
+		assert.deepEqual(RomajiInput["romToHiragana"]("chy"), ["", "y"]); // hy はローマ字表に存在するが， y を返すのが SKK の仕様
 	});
 });
 
