@@ -1,7 +1,7 @@
 {
   "name": "skk-vscode",
   "displayName": "skk-vscode",
-  "description": "Simple Kana Kanji conversion (SKK) in VSCode",
+  "description": "Simple Kana Kanji conversion (SKK) for VSCode",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.83.0"
@@ -14,8 +14,421 @@
   "contributes": {
     "commands": [
       {
-        "command": "skk-vscode.helloWorld",
-        "title": "Hello World"
+        "command": "skk-vscode.upperAlphabetInput",
+        "title": "Upper Alphabet Input"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "title": "Lower Alphabet Input"
+      },
+      {
+        "command": "skk-vscode.spaceInput",
+        "title": "Space Input"
+      },
+      {
+        "command": "skk-vscode.ctrlJInput",
+        "title": "Ctrl-J Input"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "title": "Number Input"
+      },
+      {
+        "command": "skk-vscode.backspaceInput",
+        "title": "Backspace Key Input"
+      },
+      {
+        "command": "skk-vscode.cursorMove",
+        "title": "Cursor Move"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "a",
+        "args": "a"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "b",
+        "args": "b"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "c",
+        "args": "c"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "d",
+        "args": "d"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "e",
+        "args": "e"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "f",
+        "args": "f"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "g",
+        "args": "g"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "h",
+        "args": "h"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "i",
+        "args": "i"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "j",
+        "args": "j"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "k",
+        "args": "k"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "l",
+        "args": "l"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "m",
+        "args": "m"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "n",
+        "args": "n"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "o",
+        "args": "o"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "p",
+        "args": "p"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "q",
+        "args": "q"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "r",
+        "args": "r"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "s",
+        "args": "s"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "t",
+        "args": "t"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "u",
+        "args": "u"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "v",
+        "args": "v"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "w",
+        "args": "w"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "x",
+        "args": "x"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "y",
+        "args": "y"
+      },
+      {
+        "command": "skk-vscode.lowerAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "z",
+        "args": "z"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+a",
+        "args": "A"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+b",
+        "args": "B"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+c",
+        "args": "C"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+d",
+        "args": "D"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+e",
+        "args": "E"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+f",
+        "args": "F"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+g",
+        "args": "G"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+h",
+        "args": "H"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+i",
+        "args": "I"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+j",
+        "args": "J"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+k",
+        "args": "K"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+l",
+        "args": "L"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+m",
+        "args": "M"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+n",
+        "args": "N"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+o",
+        "args": "O"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+p",
+        "args": "P"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+q",
+        "args": "Q"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+r",
+        "args": "R"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+s",
+        "args": "S"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+t",
+        "args": "T"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+u",
+        "args": "U"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+v",
+        "args": "V"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+w",
+        "args": "W"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+x",
+        "args": "X"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+y",
+        "args": "Y"
+      },
+      {
+        "command": "skk-vscode.upperAlphabetInput",
+        "when": "editorTextFocus",
+        "key": "shift+z",
+        "args": "Z"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "0",
+        "args": "0"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "1",
+        "args": "1"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "2",
+        "args": "2"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "3",
+        "args": "3"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "4",
+        "args": "4"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "5",
+        "args": "5"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "6",
+        "args": "6"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "7",
+        "args": "7"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "8",
+        "args": "8"
+      },
+      {
+        "command": "skk-vscode.numberInput",
+        "when": "editorTextFocus",
+        "key": "9",
+        "args": "9"
+      },
+      {
+        "command": "skk-vscode.spaceInput",
+        "when": "editorTextFocus",
+        "key": "space"
+      },
+      {
+        "command": "skk-vscode.ctrlJInput",
+        "when": "editorTextFocus",
+        "key": "ctrl+j"
+      },
+      {
+        "command": "skk-vscode.backspaceInput",
+        "when": "editorTextFocus",
+        "key": "backspace"
       }
     ]
   },
