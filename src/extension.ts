@@ -7,7 +7,7 @@ enum InputMode {
 	hiragana,
 	katakana,
 	zekakuEisu,
-	direct
+	ascii
 }
 
 enum HenkanMode {
@@ -31,6 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let midashigoStart: vscode.Position | undefined = undefined; // vscode.window.activeTextEditor?.selection.start;
 
+	let inputMode = InputMode.ascii;
 	let henkanMode = HenkanMode.kakutei;
 	let midashigoMode = MidashigoMode.start;
 
@@ -122,52 +123,87 @@ export function activate(context: vscode.ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	let lowerAlphaInput = vscode.commands.registerCommand('skk-vscode.lowerAlphabetInput', (key: string) => {
-		switch (henkanMode) {
-			case HenkanMode.midashigo:
-				if (midashigoMode === MidashigoMode.okurigana) {
-					let okuri = romajiInput.processInput(key.toLowerCase());
-					if (okuri.length === 0) {
+		switch (inputMode) {
+			case InputMode.ascii:
+				insertOrReplaceSelection(key);
+				break;
+			case InputMode.hiragana:
+				switch (henkanMode) {
+					case HenkanMode.midashigo:
+						if (midashigoMode === MidashigoMode.okurigana) {
+							let okuri = romajiInput.processInput(key.toLowerCase());
+							if (okuri.length === 0) {
+								break;
+							}
+							
+							doHenkan(okuri);
+							break;
+						}
+						// fall through
+					case HenkanMode.kakutei:
+						if (key === 'l') {
+							inputMode = InputMode.ascii;
+							vscode.window.showInformationMessage('skk-vscode: ascii mode');
+							break;
+						}
+						
+						let rval = romajiInput.processInput(key);
+						if (rval) {
+							insertOrReplaceSelection(rval);
+						}
 						break;
-					}
-					
-					doHenkan(okuri);
-					break;
-				}
-				// fall through
-			case HenkanMode.kakutei:
-				let rval = romajiInput.processInput(key);
-				if (rval) {
-					insertOrReplaceSelection(rval);
+					default:
+						break;
 				}
 				break;
+
+			case InputMode.katakana:
+				// fall through
+			case InputMode.zekakuEisu:
+				// fall through
 			default:
+				inputMode = InputMode.ascii;
 				break;
 		}
-        updatePreviousEditorAndSelections();
+		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(lowerAlphaInput);
 
 
 	let upperAlphaInput = vscode.commands.registerCommand('skk-vscode.upperAlphabetInput', (key: string) => {
-		switch (henkanMode) {
-			case HenkanMode.midashigo:
-				midashigoMode = MidashigoMode.okurigana;
-
-				let okuri = romajiInput.processInput(key.toLowerCase());
-				if (okuri.length === 0) {
-					break;
-				}
-				
-				doHenkan(okuri);
+		switch (inputMode) {
+			case InputMode.ascii:
+				insertOrReplaceSelection(key);
 				break;
-			case HenkanMode.kakutei:
-				midashigoStart = vscode.window.activeTextEditor?.selection.start;
-				insertOrReplaceSelection('▽');
-				henkanMode = HenkanMode.midashigo;
-				midashigoMode = MidashigoMode.start;
-                // fall through
+			case InputMode.hiragana:
+				switch (henkanMode) {
+					case HenkanMode.midashigo:
+						midashigoMode = MidashigoMode.okurigana;
+		
+						let okuri = romajiInput.processInput(key.toLowerCase());
+						if (okuri.length === 0) {
+							break;
+						}
+						
+						doHenkan(okuri);
+						break;
+					case HenkanMode.kakutei:
+						midashigoStart = vscode.window.activeTextEditor?.selection.start;
+						insertOrReplaceSelection('▽');
+						henkanMode = HenkanMode.midashigo;
+						midashigoMode = MidashigoMode.start;
+						// fall through
+					default:
+						romajiInput.processInput(key.toLowerCase());
+						break;
+				}
+				break;
+			case InputMode.katakana:
+				// fall through
+			case InputMode.zekakuEisu:
+				// fall through
 			default:
-				romajiInput.processInput(key.toLowerCase());
+				inputMode = InputMode.ascii;
 				break;
 		}
         updatePreviousEditorAndSelections();
@@ -175,24 +211,51 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(upperAlphaInput);
 
 	let spaceInput = vscode.commands.registerCommand('skk-vscode.spaceInput', () => {
-        updatePreviousEditorAndSelections();
-		switch (henkanMode) {
-			case HenkanMode.kakutei:
+        switch (inputMode) {
+			case InputMode.ascii:
 				insertOrReplaceSelection(' ');
 				break;
-			case HenkanMode.midashigo:
-				doHenkan();
+			case InputMode.hiragana:
+				switch (henkanMode) {
+					case HenkanMode.kakutei:
+						insertOrReplaceSelection(' ');
+						break;
+					case HenkanMode.midashigo:
+						doHenkan();
+						break;
+				}
+				break;
+			case InputMode.katakana:
+				// fall through
+			case InputMode.zekakuEisu:
+				// fall through
+			default:
+				inputMode = InputMode.ascii;
 				break;
 		}
-        updatePreviousEditorAndSelections();
+		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(spaceInput);
 
 	let ctrlJInput = vscode.commands.registerCommand('skk-vscode.ctrlJInput', () => {
-		switch (henkanMode) {
+		switch (inputMode) {
+			case InputMode.ascii:
+				inputMode = InputMode.hiragana;
+				vscode.window.showInformationMessage('skk-vscode: hiragana mode');
+				break;
+			case InputMode.hiragana:
+				switch (henkanMode) {
+					default:
+						henkanMode = HenkanMode.kakutei;
+						romajiInput.reset();
+				}
+				break;
+			case InputMode.katakana:
+				// fall through
+			case InputMode.zekakuEisu:
+				// fall through
 			default:
-				henkanMode = HenkanMode.kakutei;
-				romajiInput.reset();
+				inputMode = InputMode.ascii;
 				break;
 		}
         updatePreviousEditorAndSelections();
@@ -200,33 +263,64 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(ctrlJInput);
 
     let backspaceInput = vscode.commands.registerCommand('skk-vscode.backspaceInput', () => {
-        switch (henkanMode) {
-            case HenkanMode.midashigo:
-                if (! romajiInput.isEmpty()) {
-                    romajiInput.deleteLastChar();
-                    break;
-                }
-                // fall through
-            default:
-                // delete backward char in the editor
-                const editor = vscode.window.activeTextEditor;
-                if (editor) {
-                    vscode.commands.executeCommand('deleteLeft');
-                }
-        }
+		switch (inputMode) {
+			case InputMode.katakana:
+				// fall through
+			case InputMode.zekakuEisu:
+				// fall through
+			default:
+				// fall through	
+			case InputMode.ascii: {
+				// delete backward char in the editor
+				const editor = vscode.window.activeTextEditor;
+				if (editor) {
+					vscode.commands.executeCommand('deleteLeft');
+				}
+				break;
+			}
+			case InputMode.hiragana:
+				switch (henkanMode) {
+					case HenkanMode.midashigo:
+						if (! romajiInput.isEmpty()) {
+							romajiInput.deleteLastChar();
+							break;
+						}
+					default:
+						// delete backward char in the editor
+						const editor = vscode.window.activeTextEditor;
+						if (editor) {
+							vscode.commands.executeCommand('deleteLeft');
+						}
+				}
+				break;
+			}
         updatePreviousEditorAndSelections();
     });
     context.subscriptions.push(backspaceInput);
 
     let numberInput = vscode.commands.registerCommand('skk-vscode.numberInput', (key: string) => {
-        switch (henkanMode) {
-            case HenkanMode.midashigo:
-                romajiInput.processInput(key);
-                break;
-            default:
-                insertOrReplaceSelection(key);
-                break;
-        }
+		switch (inputMode) {
+			case InputMode.ascii:
+				insertOrReplaceSelection(key);
+				break;
+			case InputMode.hiragana:
+				switch (henkanMode) {
+					case HenkanMode.midashigo:
+						romajiInput.processInput(key);
+						break;
+					default:
+						insertOrReplaceSelection(key);
+						break;
+				}
+				break;
+			case InputMode.katakana:
+				// fall through
+			case InputMode.zekakuEisu:
+				// fall through
+			default:
+				inputMode = InputMode.ascii;
+				break;
+		}
         updatePreviousEditorAndSelections();
     });
     context.subscriptions.push(numberInput);
