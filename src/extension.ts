@@ -1,8 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { RomajiInput } from './RomajiInput';
-// import { HiraganaMode } from './input-mode/HiraganaMode';
 import { InputMode } from './input-mode/InputMode';
 import { AsciiMode } from './input-mode/AsciiMode';
 
@@ -19,9 +17,6 @@ export function setInputMode(mode: InputMode) {
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 	// vscode.window.showInformationMessage("skk-vscode: start");
-
-	
-
 
     let previousTextEditor = vscode.window.activeTextEditor;
     let previousSelections = vscode.window.activeTextEditor?.selections;
