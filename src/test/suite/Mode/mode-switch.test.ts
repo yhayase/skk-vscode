@@ -24,7 +24,7 @@ suite('Switching between modes test', () => {
             let disposable = vscode.workspace.onDidChangeTextDocument(e => {
                 if (e.document === document) {
                     disposable.dispose();
-                    assert.equal(vscode.window.activeTextEditor?.document.getText(), "a");
+                    assert.equal(document.getText(), "a");
                     resolve();
                 }
             });
@@ -43,7 +43,7 @@ suite('Switching between modes test', () => {
             let disposable = vscode.workspace.onDidChangeTextDocument(e => {
                 if (e.document === document) {
                     disposable.dispose();
-                    assert.equal(vscode.window.activeTextEditor?.document.getText(), "あ");
+                    assert.equal(document.getText(), "あ");
                     resolve();
                 }
             });
@@ -65,7 +65,53 @@ suite('Switching between modes test', () => {
             let disposable = vscode.workspace.onDidChangeTextDocument(e => {
                 if (e.document === document) {
                     disposable.dispose();
-                    assert.equal(vscode.window.activeTextEditor?.document.getText(), "a");
+                    assert.equal(document.getText(), "a");
+                    resolve();
+                }
+            });
+        });
+    });
+
+    test('ひらがなモードで L を入力すると、全英モードに切り替わり、アルファベットの入力が全角文字としてエディタに出力される', async () => {
+        // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        // ひらがなモードで L を入力して全英モードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.upperAlphabetInput", "L");
+
+        // 全英モードで a を入力する
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+
+        // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
+        let document = vscode.window.activeTextEditor?.document;
+        return new Promise(resolve => {
+            let disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                if (e.document === document) {
+                    disposable.dispose();
+                    assert.equal(document.getText(), "ａ");
+                    resolve();
+                }
+            });
+        });
+    });
+
+    test('全英モードで Ctrl+J を押すとひらがなモードに切り替わり、アルファベットの入力はひらがなに変換されてエディタに出力される', async () => {
+        // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        // ひらがなモードで L を入力して全英モードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "L");
+        // 全英モードで Ctrl+J を入力してひらがなモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+
+        // ひらがなモードで a を入力する
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+
+        // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
+        let document = vscode.window.activeTextEditor?.document;
+        return new Promise(resolve => {
+            let disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                if (e.document === document) {
+                    disposable.dispose();
+                    assert.equal(document.getText(), "あ");
                     resolve();
                 }
             });

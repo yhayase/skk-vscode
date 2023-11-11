@@ -4,6 +4,7 @@ import { insertOrReplaceSelection, replaceRange } from '../extension';
 import { setInputMode } from '../extension';
 import { InputMode } from './InputMode';
 import { AsciiMode } from './AsciiMode';
+import { ZeneiMode } from './ZeneiMode';
 
 enum HenkanMode {
 	kakutei, // (■モード)
@@ -109,7 +110,13 @@ export class HiraganaMode implements InputMode {
 
 
     public lowerAlphabetInput(key: string): void {
-        switch (this.henkanMode) {
+        if (key === 'l') {
+            setInputMode(AsciiMode.getInstance());
+            vscode.window.showInformationMessage('skk-vscode: ascii mode');
+            return;
+        }
+        
+switch (this.henkanMode) {
             case HenkanMode.midashigo:
                 if (this.midashigoMode === MidashigoMode.okurigana) {
                     let okuri = this.romajiInput.processInput(key.toLowerCase());
@@ -122,12 +129,6 @@ export class HiraganaMode implements InputMode {
                 }
                 // fall through
             case HenkanMode.kakutei:
-                if (key === 'l') {
-                    setInputMode(AsciiMode.getInstance());
-                    vscode.window.showInformationMessage('skk-vscode: ascii mode');
-                    break;
-                }
-                
                 let rval = this.romajiInput.processInput(key);
                 if (rval) {
                     insertOrReplaceSelection(rval);
@@ -139,6 +140,12 @@ export class HiraganaMode implements InputMode {
     }
 
     public upperAlphabetInput(key: string): void {
+        if (key === 'L') {
+            setInputMode(ZeneiMode.getInstance());
+            vscode.window.showInformationMessage('skk-vscode: 全英 mode');
+            return;
+        }
+
         switch (this.henkanMode) {
             case HenkanMode.midashigo:
                 this.midashigoMode = MidashigoMode.okurigana;
