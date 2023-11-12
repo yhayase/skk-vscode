@@ -10,6 +10,7 @@ var timestampOfCursorMoveCausedByKeyInput : number|undefined = undefined;
 let inputMode: InputMode = AsciiMode.getInstance();
 
 export function setInputMode(mode: InputMode) {
+	mode.reset();
 	inputMode = mode;
 }
 

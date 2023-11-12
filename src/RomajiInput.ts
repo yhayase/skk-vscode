@@ -5,15 +5,35 @@ import { insertOrReplaceSelection } from './extension';
 /**
  * Class of Romaji Input State and Conversion
  */
+
+enum KanaType {
+    hiragana = "hiragana",
+    katakana = "katakana"
+};
+
 export class RomajiInput {
     private romBuffer: string[] = [];
+
+    private kanaType: KanaType;
+
+    constructor(katakana=false) {
+        this.kanaType = katakana ? KanaType.katakana : KanaType.hiragana;
+    }
+
+    private static ruleToPair(rule: RomKanaRule, kanaType: KanaType): [string, string] {
+        if (kanaType === KanaType.katakana && rule.katakana) {
+            return [rule.katakana, rule.remain];
+        }
+        
+        return [rule.hiragana, rule.remain];
+    }
 
     /**
      * Convert the given romaji sequence to hiragana and remaining romaji sequence 
      * @param inputRomaji romaji sequence
      * @returns [hiragana, remaining romaji]
      */
-    private static romToHiragana(inputRomaji: string): [string, string] {
+    private static romToHiragana(inputRomaji: string, kanaType: KanaType = KanaType.hiragana): [string, string] {
         if (inputRomaji.length === 0) {
             return ["", inputRomaji];
         }
@@ -24,7 +44,7 @@ export class RomajiInput {
             // Exact match found
             if (prefixMatchCount === 1) {
                 // No other rules which start with str
-                return [rule.hiragana, rule.remain];
+                return RomajiInput.ruleToPair(rule, kanaType);
             } else {
                 // ..., but multiple rules start with inputRomaji exist. (e.g. inputRomaji === "n")
 
@@ -46,7 +66,11 @@ export class RomajiInput {
                 const prefix = inputRomaji.slice(0, i);
                 const ruleForPrefix = romKanaBaseRule[prefix];
                 if (ruleForPrefix) {
-                    kana += ruleForPrefix.hiragana;
+                    if (ruleForPrefix[kanaType]) {
+                        kana += ruleForPrefix[kanaType];
+                    } else {
+                        kana += ruleForPrefix.hiragana;
+                    }
                     inputRomaji = ruleForPrefix.remain + inputRomaji.slice(i);
                     continue outer;
                 }
@@ -88,7 +112,7 @@ export class RomajiInput {
     public processInput(key: string): string {
         this.romBuffer.push(key);
         let romBufferStr = this.romBuffer.join('');
-        let kana = RomajiInput.romToHiragana(romBufferStr);
+        let kana = RomajiInput.romToHiragana(romBufferStr, this.kanaType);
         if (kana[0]) {
             // new kana is generated
             this.setRomBuffer(kana[1]); // update romBuffer to remaining romaji

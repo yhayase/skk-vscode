@@ -5,8 +5,7 @@ import { setInputMode } from '../extension';
 import { InputMode } from './InputMode';
 import { AsciiMode } from './AsciiMode';
 import { ZeneiMode } from './ZeneiMode';
-import { AbstractKanaMode } from './AbstractKanaMode';
-import { KatakanaMode } from './KatakanaMode';
+import { HiraganaMode } from './HiraganaMode';
 
 enum HenkanMode {
 	kakutei, // (■モード)
@@ -19,15 +18,15 @@ enum MidashigoMode {
 	okurigana // ▽あい*s
 }
 
-export class HiraganaMode implements InputMode {
-    private static instance: HiraganaMode = new HiraganaMode();
-    static getInstance(): HiraganaMode {
-        return HiraganaMode.instance;
+export class KatakanaMode implements InputMode {
+    private static instance: KatakanaMode = new KatakanaMode();
+    static getInstance(): KatakanaMode {
+        return KatakanaMode.instance;
     }
 
     private henkanMode: HenkanMode = HenkanMode.kakutei;
 	private midashigoMode: MidashigoMode = MidashigoMode.start;
-    private romajiInput: RomajiInput = new RomajiInput();
+    private romajiInput: RomajiInput = new RomajiInput(true);
 
     private midashigoStart: vscode.Position | undefined = undefined;
 
@@ -75,8 +74,8 @@ export class HiraganaMode implements InputMode {
 		}
 
 		if (okuri) {
-			const sagyo = ["さ", "し", "す", "せ", "そ"];
-			if (midashigo === "▽か" && sagyo.includes(okuri[0])) {
+			const sagyo = ["サ", "シ", "ス", "セ", "ソ"];
+			if (midashigo === "▽カ" && sagyo.includes(okuri[0])) {
 				let candidates : string[] = ["課", "貸"];
 				
 				vscode.window.showQuickPick(
@@ -93,7 +92,7 @@ export class HiraganaMode implements InputMode {
 				this.romajiInput.reset();
 			}
 		} else {
-			if (midashigo === '▽かんじ') {
+			if (midashigo === '▽カンジ') {
 				let candidates = ["漢字", "幹事"];
 				
 				vscode.window.showQuickPick(candidates).then((value) => {
@@ -132,10 +131,11 @@ export class HiraganaMode implements InputMode {
                 // fall through
             case HenkanMode.kakutei:
                 if (key === 'q') {
-                    setInputMode(KatakanaMode.getInstance());
-                    vscode.window.showInformationMessage('skk-vscode: カナ mode');
+                    setInputMode(HiraganaMode.getInstance());
+                    vscode.window.showInformationMessage('skk-vscode: かな mode');
                     break;
                 }
+
                 let rval = this.romajiInput.processInput(key);
                 if (rval) {
                     insertOrReplaceSelection(rval);
