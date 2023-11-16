@@ -1,5 +1,8 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { setInputMode } from '../../../extension';
+import { AsciiMode } from '../../../input-mode/AsciiMode';
+import { KatakanaMode } from '../../../input-mode/KatakanaMode';
 
 suite('Switching between modes test', () => {
     setup('Open a new empty editor', async () => {
@@ -72,10 +75,77 @@ suite('Switching between modes test', () => {
         });
     });
 
+    test('ひらがなモードで q を入力すると、カタカナモードに切り替わり、アルファベットの入力がカタカナに変換されてエディタに出力される', async () => {
+        // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        // ひらがなモードで q を入力してカタカナモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "q");
+
+        // カタカナモードで a を入力する
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+
+        // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
+        let document = vscode.window.activeTextEditor?.document;
+        return new Promise(resolve => {
+            let disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                if (e.document === document) {
+                    disposable.dispose();
+                    assert.equal(document.getText(), "ア");
+                    resolve();
+                }
+            });
+        });
+    });
+
+    test('カタカナモードで q を入力すると、ひらがなモードに切り替わり、アルファベットの入力がひらがなに変換されてエディタに出力される', async () => {
+        setInputMode(KatakanaMode.getInstance());
+        // カタカナモードで q を入力してひらがなモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "q");
+
+        // ひらがなモードで a を入力する
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+
+        // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
+        let document = vscode.window.activeTextEditor?.document;
+        return new Promise(resolve => {
+            let disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                if (e.document === document) {
+                    disposable.dispose();
+                    assert.equal(document.getText(), "あ");
+                    resolve();
+                }
+            });
+        });
+    });
+
     test('ひらがなモードで L を入力すると、全英モードに切り替わり、アルファベットの入力が全角文字としてエディタに出力される', async () => {
         // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
         await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
         // ひらがなモードで L を入力して全英モードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.upperAlphabetInput", "L");
+
+        // 全英モードで a を入力する
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+
+        // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
+        let document = vscode.window.activeTextEditor?.document;
+        return new Promise(resolve => {
+            let disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                if (e.document === document) {
+                    disposable.dispose();
+                    assert.equal(document.getText(), "ａ");
+                    resolve();
+                }
+            });
+        });
+    });
+
+    test('カタカナモードで L を入力すると、全英モードに切り替わり、アルファベットの入力が全角文字としてエディタに出力される', async () => {
+        // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        // ひらがなモードで q を入力してカタカナモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "q");
+        // カタカナモードで L を入力して全英モードに切り替える
         await vscode.commands.executeCommand("skk-vscode.upperAlphabetInput", "L");
 
         // 全英モードで a を入力する

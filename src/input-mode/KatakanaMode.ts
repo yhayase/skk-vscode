@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { RomajiInput } from '../RomajiInput';
 import { InputMode } from './InputMode';
-import { KatakanaMode } from './KatakanaMode';
+import { HiraganaMode } from './HiraganaMode';
 import { AbstractKanaMode } from './AbstractKanaMode';
 
 enum HenkanMode {
@@ -15,33 +15,33 @@ enum MidashigoMode {
     okurigana // ▽あい*s
 }
 
-export class HiraganaMode extends AbstractKanaMode implements InputMode {
-    private static instance: HiraganaMode = new HiraganaMode();
-    static getInstance(): HiraganaMode {
-        return HiraganaMode.instance;
+export class KatakanaMode extends AbstractKanaMode implements InputMode {
+    private static instance: KatakanaMode = new KatakanaMode();
+    static getInstance(): KatakanaMode {
+        return KatakanaMode.instance;
     }
 
     constructor() {
-        super(new RomajiInput(false));
+        super(new RomajiInput(true));
     }
 
     public toString(): string {
-        return "かな";
+        return "カナ";
     }
 
     protected generateWholeYomigana() {
-        return '▽かんじ';
+        return '▽カンジ';
     }
 
     protected generateAllGokan() {
-        return "▽か";
+        return "▽カ";
     }
 
     protected generateAllOkurigana(): string[] {
-        return ["さ", "し", "す", "せ", "そ"];
+        return ["サ", "シ", "ス", "セ", "ソ"];
     }
 
     protected nextMode() {
-        return KatakanaMode.getInstance();
+        return HiraganaMode.getInstance();
     }
 }
