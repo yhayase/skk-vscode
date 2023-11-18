@@ -12,8 +12,40 @@ export class JisyoCandidate {
 
 type Jisyo = Map<string, JisyoCandidate[]>;
 
-export const globalJisyo: Jisyo = new Map([
-    ["かんじ", [new JisyoCandidate("漢字", "中国から伝わった文字"), new JisyoCandidate("幹事", "宴会の幹事")]],
-    ["かs", [new JisyoCandidate("課", "税金を〜"), new JisyoCandidate("貸", "お金を〜")]]
-]);
+export const globalJisyo: Jisyo = loadJisyo("/usr/share/skk/SKK-JISYO.L");
 
+function loadJisyo(path: string): Jisyo {
+    const jisyo: Jisyo = new Map();
+    const rawLines: Buffer = fs.readFileSync(path);
+    const eucJpDecoder = new TextDecoder('euc-jp');
+    const lines = eucJpDecoder.decode(rawLines).split("\n");
+    for (const line of lines) {
+        if (line.startsWith(";;")) {
+            // Skip comments
+            continue;
+        }
+
+        const [word, candidates] = line.split(" /", 2);
+        if (word === undefined || candidates === undefined) {
+            // Skip malformed or empty lines
+            continue;
+        }
+
+        const candidateList: JisyoCandidate[] = [];
+        candidates.split("/").forEach((candidateStr) => {
+            const [candidate, annotation] = candidateStr.split(";", 2);
+            if (candidate === undefined || candidate === "") {
+                // Skip empty candidate
+                return;
+            }
+            candidateList.push(new JisyoCandidate(candidate, annotation));
+        });
+
+        if (jisyo.has(word)) {
+            jisyo.get(word)?.push(...candidateList);
+        } else {
+            jisyo.set(word, candidateList);
+        }
+    }
+    return jisyo;
+}
