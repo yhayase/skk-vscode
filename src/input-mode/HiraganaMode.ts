@@ -1,19 +1,7 @@
-import * as vscode from 'vscode';
 import { RomajiInput } from '../RomajiInput';
 import { InputMode } from './InputMode';
 import { KatakanaMode } from './KatakanaMode';
 import { AbstractKanaMode } from './AbstractKanaMode';
-
-enum HenkanMode {
-    kakutei, // (■モード)
-    midashigo, // ▽モード
-    henkan // ▼モード
-}
-
-enum MidashigoMode {
-    start, // ▽あい
-    okurigana // ▽あい*s
-}
 
 export class HiraganaMode extends AbstractKanaMode implements InputMode {
     private static instance: HiraganaMode = new HiraganaMode();
@@ -27,18 +15,6 @@ export class HiraganaMode extends AbstractKanaMode implements InputMode {
 
     public toString(): string {
         return "かな";
-    }
-
-    protected generateWholeYomigana() {
-        return '▽かんじ';
-    }
-
-    protected generateAllGokan() {
-        return "▽か";
-    }
-
-    protected generateAllOkurigana(): string[] {
-        return ["さ", "し", "す", "せ", "そ"];
     }
 
     protected nextMode() {
