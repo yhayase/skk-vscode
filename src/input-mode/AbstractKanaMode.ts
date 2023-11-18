@@ -33,18 +33,6 @@ export abstract class AbstractKanaMode implements InputMode {
 
     public reset(): void {
         this.romajiInput.reset();
-        this.henkanMode = HenkanMode.kakutei;
-        if (this.midashigoStart) {
-            const editor = vscode.window.activeTextEditor;
-            if (editor) {
-                const midashigoStartRange = new vscode.Range(this.midashigoStart, this.midashigoStart.translate(0, 1));
-                let possibleMarker = editor.document.getText(midashigoStartRange);
-                if (possibleMarker === '▽') {
-                    replaceRange(midashigoStartRange, '');
-                }
-            }
-        }
-        this.midashigoStart = undefined;
     }
 
     private doHenkan(okuri: string | undefined = undefined) {
