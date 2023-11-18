@@ -38,7 +38,7 @@ export class RomajiInput {
             return ["", inputRomaji];
         }
 
-        const rule = romKanaBaseRule[inputRomaji];
+        const rule = romKanaBaseRule.get(inputRomaji);
         const prefixMatchCount = RomajiInput.countPrefixOf(romKanaBaseRule, inputRomaji);
         if (rule) {
             // Exact match found
@@ -64,7 +64,7 @@ export class RomajiInput {
         outer: do {
             for (let i = inputRomaji.length; i > 0; i--) {
                 const prefix = inputRomaji.slice(0, i);
-                const ruleForPrefix = romKanaBaseRule[prefix];
+                const ruleForPrefix = romKanaBaseRule.get(prefix);
                 if (ruleForPrefix) {
                     if (ruleForPrefix[kanaType]) {
                         kana += ruleForPrefix[kanaType];
@@ -100,8 +100,17 @@ export class RomajiInput {
      * @param str string to be matched
      * @returns number of rules whose key starts with the given string
      */
-    static countPrefixOf(romKanaBaseRule: { [key: string]: RomKanaRule }, str: string) : number {
-        return Object.keys(romKanaBaseRule).filter(key => key.startsWith(str)).length;
+    static countPrefixOf(romKanaBaseRule: Map<string, RomKanaRule>, str: string) : number {
+        // This code does not work in current VSCode (2023-11-18)
+        // return romKanaBaseRule.keys().filter(key => key.startsWith(str)).length;
+        
+        let count = 0;
+        for (let key of romKanaBaseRule.keys()) {
+            if (key.startsWith(str)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
