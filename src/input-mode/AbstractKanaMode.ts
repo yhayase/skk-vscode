@@ -193,6 +193,20 @@ export abstract class AbstractKanaMode implements InputMode {
 
     public ctrlJInput(): void {
         switch (this.henkanMode) {
+            case HenkanMode.midashigo:
+                // delete heading ▽ and fix the remaining text
+                const editor = vscode.window.activeTextEditor;
+                if (editor && this.midashigoStart) {
+                    const midashigoRange = new vscode.Range(this.midashigoStart, editor.selection.end);
+                    let midashigo = editor.document.getText(midashigoRange);
+                    if (midashigo[0] === '▽') {
+                        replaceRange(midashigoRange, midashigo.slice(1));
+                    } else {
+                        vscode.window.showInformationMessage('It seems that you have deleted ▽');
+                    }
+                }
+                this.henkanMode = HenkanMode.kakutei;
+                break;
             default:
                 this.henkanMode = HenkanMode.kakutei;
                 this.romajiInput.reset();
