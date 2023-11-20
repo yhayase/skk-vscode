@@ -123,6 +123,13 @@ export abstract class AbstractKanaMode implements InputMode {
 
         switch (this.henkanMode) {
             case HenkanMode.midashigo:
+                if (key === 'q') {
+                    this.toggleCharTypeInMidashigoAndFixateMidashigo();
+                    this.henkanMode = HenkanMode.kakutei;
+                    this.romajiInput.reset();
+                    break;
+                }
+
                 if (this.midashigoMode === MidashigoMode.okurigana) {
                     let okuri = this.romajiInput.processInput(key.toLowerCase());
                     if (okuri.length === 0) {
@@ -213,6 +220,87 @@ export abstract class AbstractKanaMode implements InputMode {
             } else {
                 vscode.window.showInformationMessage('It seems that you have deleted ▽');
             }
+        }
+    }
+
+    /**
+     * Change character type according to the first character of the midashigo
+     * and fixate the midashigo.
+     * In case of the first character is
+     * - hiragana, convert all appearing hiragana to katakana,
+     * - katakana, convert all appearing katakana to hiragana,
+     * - ascii, convert all appearing ascii to full-width ascii.
+     * - full-width ascii, convert all appearing full-width ascii to ascii.
+     * @returns void
+     */
+    private toggleCharTypeInMidashigoAndFixateMidashigo() {
+        const editor = vscode.window.activeTextEditor;
+        if (editor && this.midashigoStart) {
+            const midashigoRange = new vscode.Range(this.midashigoStart, editor.selection.end);
+            let midashigo = editor.document.getText(midashigoRange);
+
+            if (midashigo[0] !== '▽') {
+                return;
+            }
+            midashigo = midashigo.slice(1);
+
+            // function retruns parameter without any conversion
+            function identity<T>(c: T): T {
+                return c;
+            }
+            
+            // function converts ascii to full-width ascii
+            function toFullWidth(text: string): string {
+                return text.replace(/[\x20-\x7E]/g, function(c) {
+                    // space
+                    if (c === ' ') {
+                        return '　';
+                    }
+
+                    // other ascii printable characters
+                    return String.fromCharCode(c.charCodeAt(0) + 0xFEE0);
+                });
+            }
+            function toHalfWidth(text: string): string {
+                return text.replace(/(\u3000|[\uFF01-\uFF5E])/g, function(c) {
+                    // full width space
+                    if (c === '　') {
+                        return ' ';
+                    }
+                    // other full width ascii characters
+                    return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+                });
+            }
+            function isPrintableAsciiOrAsciiSpace(c: string): boolean {
+                if (c.length !== 1) {
+                    return false;
+                }
+                return ' ' <= c && c <= '~';
+            }
+            function isFullWidthAscii(c: string): boolean {
+                if (c.length !== 1) {
+                    return false;
+                }
+                return '！' <= c && c <= '～';
+            }
+
+            let convFunc = identity<string>;
+            let converted = midashigo.split('').map((c) => {
+                if (convFunc === identity<string>) {
+                    if (wanakana.isHiragana(c)) {
+                        convFunc = wanakana.toKatakana;
+                    } else if (wanakana.isKatakana(c)) {
+                        convFunc = wanakana.toHiragana;
+                    } else if (isPrintableAsciiOrAsciiSpace(c)) {
+                        convFunc = toFullWidth;
+                    } else if (isFullWidthAscii(c)) {
+                        convFunc = toHalfWidth;
+                    }
+                }
+                return convFunc(c);                    
+            }).join('');
+            
+            replaceRange(midashigoRange, converted);
         }
     }
 
