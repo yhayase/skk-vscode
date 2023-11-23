@@ -125,7 +125,6 @@ export class RomajiInput {
         if (kana[0]) {
             // new kana is generated
             this.setRomBuffer(kana[1]); // update romBuffer to remaining romaji
-            vscode.window.showInformationMessage("skk-vscode: " + this.romBuffer.join(''));
         }
         return kana[0]; // return the new kana or empty string
     }
@@ -149,6 +148,13 @@ export class RomajiInput {
      */
     public isEmpty(): boolean {
         return this.romBuffer.length === 0;
+    }
+
+    /**
+     * Returns the remaining romaji sequence
+     */
+    getRemainingRomaji(): string {
+        return this.romBuffer.join('');
     }
 
     /**

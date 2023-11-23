@@ -26,6 +26,15 @@ export abstract class AbstractKanaMode implements InputMode {
 
     protected abstract nextMode(): InputMode;
 
+    private readonly remainingRomajiDecorationType: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
+        after: {
+            margin: '0 0 0 0em',
+            textDecoration: 'none',
+        },
+        rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen,
+    });
+    
+
     constructor(romajiInput: RomajiInput) {
         this.romajiInput = romajiInput;
     }
@@ -33,6 +42,7 @@ export abstract class AbstractKanaMode implements InputMode {
 
     public reset(): void {
         this.romajiInput.reset();
+        this.showRemainingRomaji(); // clear remaining romaji annotation
     }
 
     private doHenkan(okuri: string | undefined = undefined) {
@@ -113,6 +123,32 @@ export abstract class AbstractKanaMode implements InputMode {
         }
     }
     
+    private showRemainingRomaji(offset: number = 0) {
+        if (this.romajiInput.isEmpty()) {
+            vscode.window.activeTextEditor?.setDecorations(this.remainingRomajiDecorationType, []);
+        } else {
+            const editor = vscode.window.activeTextEditor;
+            if (editor) {
+                editor.setDecorations(this.remainingRomajiDecorationType, []);
+                const remainingRomaji = this.romajiInput.getRemainingRomaji();
+                // annotation position is the same as the cursor position, but the character offset is adjusted
+                const pos = editor.selection.start.with(undefined, editor.selection.start.character+offset);
+                // create annotation whose content is remainingRomaji
+                const remainingRomajiRange = new vscode.Range(pos, pos);
+                const prefix = this.midashigoMode === MidashigoMode.okurigana ? '*' : '';
+                const remainingRomajiAnnotation = {
+                    range: remainingRomajiRange,
+                    renderOptions: {
+                        after: {
+                            color: 'green',
+                            contentText: prefix + remainingRomaji,
+                        }
+                    }
+                };
+                editor.setDecorations(this.remainingRomajiDecorationType, [remainingRomajiAnnotation]);
+            }
+        }
+    }
 
     public lowerAlphabetInput(key: string): void {
         if (key === 'l') {
@@ -121,6 +157,7 @@ export abstract class AbstractKanaMode implements InputMode {
             return;
         }
 
+        let insertStr = "";
         switch (this.henkanMode) {
             case HenkanMode.midashigo:
                 if (key === 'q') {
@@ -147,14 +184,15 @@ export abstract class AbstractKanaMode implements InputMode {
                     vscode.window.showInformationMessage('skk-vscode: ' + nextMode.toString());
                     break;
                 }
-                let rval = this.romajiInput.processInput(key);
-                if (rval) {
-                    insertOrReplaceSelection(rval);
-                }
+                insertStr += this.romajiInput.processInput(key);
                 break;
             default:
                 break;
         }
+
+        insertOrReplaceSelection(insertStr).then((value) => {
+            this.showRemainingRomaji();
+        });
     }
     
     public upperAlphabetInput(key: string): void {
@@ -164,6 +202,7 @@ export abstract class AbstractKanaMode implements InputMode {
             return;
         }
 
+        let insertStr = "";
         switch (this.henkanMode) {
             case HenkanMode.midashigo:
                 this.midashigoMode = MidashigoMode.okurigana;
@@ -177,14 +216,18 @@ export abstract class AbstractKanaMode implements InputMode {
                 break;
             case HenkanMode.kakutei:
                 this.midashigoStart = vscode.window.activeTextEditor?.selection.start;
-                insertOrReplaceSelection('▽');
+                insertStr += '▽';
                 this.henkanMode = HenkanMode.midashigo;
                 this.midashigoMode = MidashigoMode.start;
             // fall through
             default:
-                this.romajiInput.processInput(key.toLowerCase());
+                insertStr += this.romajiInput.processInput(key.toLowerCase());
                 break;
         }
+
+        insertOrReplaceSelection(insertStr).then((value) => {
+            this.showRemainingRomaji();
+        });
     }
 
     public spaceInput(): void {
@@ -309,6 +352,7 @@ export abstract class AbstractKanaMode implements InputMode {
             case HenkanMode.midashigo:
                 if (!this.romajiInput.isEmpty()) {
                     this.romajiInput.deleteLastChar();
+                    this.showRemainingRomaji();
                     break;
                 }
             default:
