@@ -122,10 +122,7 @@ export class RomajiInput {
         this.romBuffer.push(key);
         let romBufferStr = this.romBuffer.join('');
         let kana = RomajiInput.romToHiragana(romBufferStr, this.kanaType);
-        if (kana[0]) {
-            // new kana is generated
-            this.setRomBuffer(kana[1]); // update romBuffer to remaining romaji
-        }
+        this.setRomBuffer(kana[1]); // update romBuffer to remaining romaji
         return kana[0]; // return the new kana or empty string
     }
 
