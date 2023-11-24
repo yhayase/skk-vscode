@@ -15,13 +15,13 @@ enum HenkanMode {
 }
 
 enum MidashigoMode {
-    start, // ▽あい
+    gokan, // ▽あい
     okurigana // ▽あい*s
 }
 
 export abstract class AbstractKanaMode implements InputMode {
     protected henkanMode: HenkanMode = HenkanMode.kakutei;
-    protected midashigoMode: MidashigoMode = MidashigoMode.start;
+    protected midashigoMode: MidashigoMode = MidashigoMode.gokan;
     protected romajiInput: RomajiInput;
 
     protected abstract nextMode(): InputMode;
@@ -45,29 +45,29 @@ export abstract class AbstractKanaMode implements InputMode {
         this.showRemainingRomaji(); // clear remaining romaji annotation
     }
 
-    private doHenkan(okuri: string | undefined = undefined) {
+    private doHenkan(okuri: string | undefined = undefined): boolean {
         const editor = vscode.window.activeTextEditor;
         if (this.midashigoStart === undefined) {
             vscode.window.showInformationMessage('変換開始位置が不明です');
             this.henkanMode = HenkanMode.kakutei;
             this.romajiInput.reset();
-            return;
+            return false;
         }
 
         if (editor === undefined) {
-            return;
+            return false;
         }
         // check if content of the editor is longer than midashigoStart
         if (editor.document.getText().length < this.midashigoStart.character) {
             vscode.window.showInformationMessage('変換開始位置が不正です');
             this.henkanMode = HenkanMode.kakutei;
             this.romajiInput.reset();
-            return;
+            return false;
         }
 
         if (!this.midashigoStart?.isBefore(editor.selection.start)) {
             vscode.window.showInformationMessage('変換開始位置よりも前にカーソルがあります');
-            return;
+            return false;
         }
 
         const midashigoRange = new vscode.Range(this.midashigoStart, editor.selection.end);
@@ -80,30 +80,35 @@ export abstract class AbstractKanaMode implements InputMode {
 
             // clear midashigoStart
             this.henkanMode = HenkanMode.kakutei;
+            this.romajiInput.reset();
 
-            return;
+            return false;
         }
 
-        let candidates = this.doHenkanInternal(convertKatakanaToHiragana(midashigo.slice(1)), okuri);
+        let candidates = this.findCandidates(convertKatakanaToHiragana(midashigo.slice(1)), okuri);
 
+        let success = false;
         if (candidates instanceof Error) {
             vscode.window.showInformationMessage(candidates.message);
             this.henkanMode = HenkanMode.kakutei;
             this.romajiInput.reset();
+            return false;
         } else {
             vscode.window.showQuickPick(
                 candidates.map((cand) => ({label: cand.word, description: cand.annotation}))
-            ).then((cand) => {
-                if (cand) {
-                    replaceRange(midashigoRange, cand.label);
+            ).then((selected) => {
+                if (selected) {
+                    replaceRange(midashigoRange, selected.label);
                     this.henkanMode = HenkanMode.kakutei;
                     this.romajiInput.reset();
+                    success = true;
                 }
             });
         }
+        return success;
     }
 
-    private doHenkanInternal(midashigo: string, okuri: string | undefined): JisyoCandidate[]|Error {
+    private findCandidates(midashigo: string, okuri: string | undefined): JisyoCandidate[]|Error {
         if (okuri) {
             const okuriAlpha = calcFirstAlphabetOfOkurigana(okuri);
             const key = midashigo + okuriAlpha;
@@ -173,7 +178,12 @@ export abstract class AbstractKanaMode implements InputMode {
                         break;
                     }
 
-                    this.doHenkan(okuri);
+                    if (!this.doHenkan(okuri)) {
+                        insertOrReplaceSelection(okuri);
+                        if (this.henkanMode === HenkanMode.midashigo) {
+                            this.midashigoMode = MidashigoMode.gokan;
+                        }
+                    }
                     break;
                 }
             // fall through
@@ -212,13 +222,18 @@ export abstract class AbstractKanaMode implements InputMode {
                     break;
                 }
 
-                this.doHenkan(okuri);
+                if (!this.doHenkan(okuri)) {
+                    insertOrReplaceSelection(okuri);
+                    if (this.henkanMode === HenkanMode.midashigo) {
+                        this.midashigoMode = MidashigoMode.gokan;
+                    }
+                }
                 break;
             case HenkanMode.kakutei:
                 this.midashigoStart = vscode.window.activeTextEditor?.selection.start;
                 insertStr += '▽';
                 this.henkanMode = HenkanMode.midashigo;
-                this.midashigoMode = MidashigoMode.start;
+                this.midashigoMode = MidashigoMode.gokan;
             // fall through
             default:
                 insertStr += this.romajiInput.processInput(key.toLowerCase());
@@ -350,11 +365,33 @@ export abstract class AbstractKanaMode implements InputMode {
     public backspaceInput(): void {
         switch (this.henkanMode) {
             case HenkanMode.midashigo:
-                if (!this.romajiInput.isEmpty()) {
-                    this.romajiInput.deleteLastChar();
-                    this.showRemainingRomaji();
-                    break;
+                {
+                    if (!this.romajiInput.isEmpty()) {
+                        this.romajiInput.deleteLastChar();
+                        this.showRemainingRomaji();
+                        break;
+                    }
+
+                    // When the midashigo start marker "▽" is deleted, HenkanMode is transitioned to kakutei mode.
+                    const editor = vscode.window.activeTextEditor;
+                    if (editor && this.midashigoStart) {
+                        // Check if the cursor is at the position just after the midashigo start marker, and the character is "▽"
+                        if (editor.selection.start.character === this.midashigoStart.character+1) {
+                            if (editor.document.getText(new vscode.Range(this.midashigoStart, editor.selection.start)) === '▽') {
+                                vscode.commands.executeCommand('deleteLeft');
+                                this.henkanMode = HenkanMode.kakutei;
+                                // No need to reset romajiInput because it is empty
+                                break;
+                            } else {
+                                vscode.window.showInformationMessage('It seems start marker "▽" is gone');
+                                vscode.commands.executeCommand('deleteLeft');
+                                this.henkanMode = HenkanMode.kakutei;
+                                break;
+                            }
+                        }
+                    }
                 }
+                // fall through
             default:
                 // delete backward char in the editor
                 const editor = vscode.window.activeTextEditor;
