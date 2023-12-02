@@ -9,8 +9,8 @@ export class KatakanaMode extends AbstractKanaMode implements InputMode {
         return KatakanaMode.instance;
     }
 
-    constructor() {
-        super(new RomajiInput(true));
+    newRomajiInput(): RomajiInput {
+        return new RomajiInput(true);
     }
 
     public toString(): string {

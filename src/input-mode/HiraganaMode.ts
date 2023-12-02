@@ -9,8 +9,8 @@ export class HiraganaMode extends AbstractKanaMode implements InputMode {
         return HiraganaMode.instance;
     }
 
-    constructor() {
-        super(new RomajiInput(false));
+    newRomajiInput(): RomajiInput {
+        return new RomajiInput(false);
     }
 
     public toString(): string {
