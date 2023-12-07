@@ -4,6 +4,7 @@ import { RomajiInput } from "../../RomajiInput";
 import { insertOrReplaceSelection } from "../../extension";
 import { JisyoCandidate, globalJisyo } from "../../jisyo";
 import { KakuteiMode } from "./KakuteiMode";
+import { InlineHenkanMode } from "./InlineHenkanMode";
 
 export enum MidashigoType {
     gokan, // ▽あ
@@ -14,43 +15,49 @@ export class MidashigoMode extends AbstractHenkanMode {
     private romajiInput: RomajiInput;
     midashigoMode: MidashigoType = MidashigoType.gokan;
 
-    constructor(context: AbstractKanaMode, initialRomajiInput: string|undefined = undefined) {
+    constructor(context: AbstractKanaMode, initialRomajiInput: string | undefined = undefined) {
         super("▽");
         this.romajiInput = context.newRomajiInput();
 
         if (initialRomajiInput) {
             let insertStr = "▽";
             context.setMidashigoStartToCurrentPosition();
-            
+
             insertStr += this.romajiInput.processInput(initialRomajiInput.toLowerCase());
             context.setMidashigoStartToCurrentPosition();
             context.insertStringAndShowRemaining(insertStr, this.romajiInput.getRemainingRomaji(), false);
         }
     }
 
-    findCandidates(midashigo: string, okuri: string | undefined): JisyoCandidate[]|Error {
-        if (okuri) {
-            const okuriAlpha = calcFirstAlphabetOfOkurigana(okuri);
-            const key = midashigo + okuriAlpha;
-            const candidates = globalJisyo.get(key);
-            if (candidates === undefined) {
-                return new Error('変換できません');
-            } else {
-                return candidates.map((cand) => new JisyoCandidate(cand.word + okuri, cand.annotation));
-            }
+    findCandidates(midashigo: string, okuri: string): JisyoCandidate[] | Error {
+        const okuriAlpha = okuri.length>0 ? calcFirstAlphabetOfOkurigana(okuri) : "";
+        const key = midashigo + okuriAlpha;
+        const candidates = globalJisyo.get(key);
+        if (candidates === undefined) {
+            return new Error('変換できません');
         } else {
-            const candidates = globalJisyo.get(midashigo);
-            if (candidates === undefined) {
-                return new Error('変換できません');
-            } else {
-                return candidates;
-            }
+            return candidates.map((cand) => new JisyoCandidate(cand.word + okuri, cand.annotation));
         }
     }
 
-
     getRomajiInput(): RomajiInput {
         return this.romajiInput;
+    }
+
+    henkan(context: AbstractKanaMode, okuri: string): void {
+        let midashigo = context.extractMidashigo();
+        if (!midashigo || midashigo.length === 0) {
+            context.setHenkanMode(KakuteiMode.create(context));
+            return;
+        }
+
+        let candidateList = this.findCandidates(midashigo, okuri);
+        if (candidateList instanceof Error) {
+            context.showErrorMessage(candidateList.message);
+            return;
+        }
+
+        context.setHenkanMode(new InlineHenkanMode(context, this, midashigo, candidateList));
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
@@ -69,16 +76,7 @@ export class MidashigoMode extends AbstractHenkanMode {
             }
 
             this.romajiInput.reset();
-            context.doHenkan(this, okuri);
-            // if (!context.doHenkan(this, okuri)) {
-            //     // SKK inserts okuri-gana as gokan when henkan is canceled
-            //     this.midashigoMode = MidashigoType.gokan;
-            //     insertOrReplaceSelection(okuri).then((value) => {
-            //         context.showRemainingRomaji("", false);
-            //     });
-            //     this.midashigoMode = MidashigoType.gokan;
-            // }
-            return;
+            this.henkan(context, okuri);
         } else {
             // in case this.midashigoMode === MidashigoType.gokan
             let insertStr = this.romajiInput.processInput(key);
@@ -90,8 +88,8 @@ export class MidashigoMode extends AbstractHenkanMode {
                 context.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), false);
             }
         }
-
     }
+
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
         this.midashigoMode = MidashigoType.okurigana;
 
@@ -102,28 +100,26 @@ export class MidashigoMode extends AbstractHenkanMode {
         }
 
         this.romajiInput.reset();
-        context.doHenkan(this, okuri);
-        // if (!context.doHenkan(this, okuri)) {
-        //     // SKK inserts okuri-gana as gokan when henkan is canceled
-        //     this.midashigoMode = MidashigoType.gokan;
-        //     insertOrReplaceSelection(okuri).then((value) => {
-        //         context.showRemainingRomaji("", false);
-        //     });
-        //     this.midashigoMode = MidashigoType.gokan;
-        // }
+        this.henkan(context, okuri);
     }
+
     onNumber(context: AbstractKanaMode, key: string): void {
         throw new Error("Method not implemented.");
     }
+
     onSymbol(context: AbstractKanaMode, key: string): void {
         throw new Error("Method not implemented.");
     }
+
     onSpace(context: AbstractKanaMode): void {
-        context.doHenkan(this);
+        this.romajiInput.reset();
+        this.henkan(context, "");
     }
+
     onEnter(context: AbstractKanaMode): void {
         throw new Error("Method not implemented.");
     }
+
     onBackspace(context: AbstractKanaMode): void {
         if (!this.romajiInput.isEmpty()) {
             this.romajiInput.deleteLastChar();
@@ -131,7 +127,7 @@ export class MidashigoMode extends AbstractHenkanMode {
             return;
         }
 
-        switch(context.deleteLeft()) {
+        switch (context.deleteLeft()) {
             case DeleteLeftResult.markerDeleted:
             case DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted:
                 context.setHenkanMode(KakuteiMode.create(context));
@@ -152,12 +148,13 @@ export class MidashigoMode extends AbstractHenkanMode {
         context.fixateMidashigo();
         context.setHenkanMode(KakuteiMode.create(context));
     }
+
     onCtrlG(context: AbstractKanaMode): void {
         throw new Error("Method not implemented.");
     }
 }
 
-function calcFirstAlphabetOfOkurigana(okurigana: string): string|undefined {
+function calcFirstAlphabetOfOkurigana(okurigana: string): string | undefined {
     return kanaToAlphabet.get(okurigana[0]);
 }
 
@@ -309,4 +306,3 @@ const kanaToAlphabet = new Map<string, string>([
     ["ヲ", "w"],
     ["ン", "n"],
 ]);
-    

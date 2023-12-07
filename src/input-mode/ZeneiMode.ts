@@ -60,6 +60,10 @@ export class ZeneiMode implements InputMode {
         setInputMode(HiraganaMode.getInstance());
     }
 
+    public enterInput(): void {
+        insertOrReplaceSelection("\n");
+    }
+
     public backspaceInput(): void {
         const editor = vscode.window.activeTextEditor;
         if (editor) {
@@ -68,6 +72,10 @@ export class ZeneiMode implements InputMode {
     }
 
     public numberInput(key: string): void {
+        insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
+    }
+
+    public symbolInput(key: string): void {
         insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
     }
 }

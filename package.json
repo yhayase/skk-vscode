@@ -426,6 +426,11 @@
         "key": "ctrl+j"
       },
       {
+        "command": "skk-vscode.enterInput",
+        "when": "editorTextFocus",
+        "key": "enter"
+      },
+      {
         "command": "skk-vscode.backspaceInput",
         "when": "editorTextFocus",
         "key": "backspace"

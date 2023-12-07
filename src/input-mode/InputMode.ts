@@ -4,6 +4,8 @@ export interface InputMode {
     upperAlphabetInput: (key: string) => void;
     spaceInput: () => void;   
     ctrlJInput: () => void;
+    enterInput: () => void;
     backspaceInput: () => void;
     numberInput: (key: string) => void;
+    symbolInput: (key: string) => void;
 };    

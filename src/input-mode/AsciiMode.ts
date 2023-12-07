@@ -1,4 +1,4 @@
-import { insertOrReplaceSelection, setInputMode} from "../extension";
+import { insertOrReplaceSelection, setInputMode } from "../extension";
 import * as vscode from 'vscode';
 import { InputMode } from "./InputMode";
 import { HiraganaMode } from "./HiraganaMode";
@@ -6,7 +6,8 @@ import { HiraganaMode } from "./HiraganaMode";
 export class AsciiMode implements InputMode {
     // AsciiMode is stateless, so the singleton can be stored in a static field.
     private static instance: AsciiMode = new AsciiMode();
-    public static getInstance(): AsciiMode  {
+
+    public static getInstance(): AsciiMode {
         return AsciiMode.instance;
     }
 
@@ -30,6 +31,10 @@ export class AsciiMode implements InputMode {
         setInputMode(HiraganaMode.getInstance());
     }
 
+    public enterInput(): void {
+        insertOrReplaceSelection("\n");
+    }
+
     public backspaceInput(): void {
         const editor = vscode.window.activeTextEditor;
         if (editor) {
@@ -38,6 +43,10 @@ export class AsciiMode implements InputMode {
     }
 
     public numberInput(key: string): void {
+        insertOrReplaceSelection(key);
+    }
+
+    public symbolInput(key: string): void {
         insertOrReplaceSelection(key);
     }
 }

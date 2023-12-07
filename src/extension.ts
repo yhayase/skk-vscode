@@ -5,7 +5,7 @@ import { InputMode } from './input-mode/InputMode';
 import { AsciiMode } from './input-mode/AsciiMode';
 
 
-var timestampOfCursorMoveCausedByKeyInput : number|undefined = undefined;
+var timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
 
 let inputMode: InputMode = AsciiMode.getInstance();
 
@@ -18,7 +18,7 @@ export function setInputMode(mode: InputMode) {
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 	// vscode.window.showInformationMessage("skk-vscode: start");
-	
+
 	let previousTextEditor = vscode.window.activeTextEditor;
 	let previousSelections = vscode.window.activeTextEditor?.selections;
 	function updatePreviousEditorAndSelections() {
@@ -53,6 +53,12 @@ export function activate(context: vscode.ExtensionContext) {
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(ctrlJInput);
+
+	let enterInput = vscode.commands.registerCommand('skk-vscode.enterInput', () => {
+		inputMode.enterInput();
+		updatePreviousEditorAndSelections();
+	});
+	context.subscriptions.push(enterInput);
 
 	let backspaceInput = vscode.commands.registerCommand('skk-vscode.backspaceInput', () => {
 		inputMode.backspaceInput();
@@ -102,14 +108,17 @@ export function insertOrReplaceSelection(str: string): Thenable<boolean> {
 	return rval;
 }
 
-export function replaceRange(range: vscode.Range, str: string) {
+export function replaceRange(range: vscode.Range, str: string): PromiseLike<boolean> {
 	const editor = vscode.window.activeTextEditor;
 	if (editor) {
-		editor.edit(editBuilder => {
+		return editor.edit(editBuilder => {
 			editBuilder.replace(range, str);
+		}).then((value) => {
+			timestampOfCursorMoveCausedByKeyInput = Date.now();
+			return value;
 		});
 	}
-	timestampOfCursorMoveCausedByKeyInput = Date.now();
+	return Promise.resolve(false);
 }
 
 // This method is called when your extension is deactivated
