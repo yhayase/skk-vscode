@@ -426,6 +426,16 @@
         "key": "ctrl+j"
       },
       {
+        "command": "skk-vscode.ctrlGInput",
+        "when": "editorTextFocus",
+        "key": "ctrl+g"
+      },
+      {
+        "command": "skk-vscode.ctrlGInput",
+        "when": "editorTextFocus",
+        "key": "escape"
+      },
+      {
         "command": "skk-vscode.enterInput",
         "when": "editorTextFocus",
         "key": "enter"

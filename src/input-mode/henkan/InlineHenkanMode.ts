@@ -5,12 +5,12 @@ import { JisyoCandidate } from "../../jisyo";
 import * as vscode from 'vscode';
 import { KakuteiMode } from "./KakuteiMode";
 
-export class InlineHenkanMode extends AbstractHenkanMode{
+export class InlineHenkanMode extends AbstractHenkanMode {
     private prevMode: MidashigoMode;
     private origMidashigo: string;
     private candidateList: JisyoCandidate[];
     private candidateIndex: number = 0;
-    
+
     constructor(context: AbstractKanaMode, prevMode: MidashigoMode, origMidashigo: string, candidateList: JisyoCandidate[]) {
         super("▼");
         this.prevMode = prevMode;
@@ -28,14 +28,10 @@ export class InlineHenkanMode extends AbstractHenkanMode{
         if (key === 'x') {
             this.candidateIndex -= 1;
             if (this.candidateIndex < 0) {
-                context.setHenkanMode(this.prevMode);
-                // recover orijinal midashigo
-                context.clearCandidate().then(() => {
-                    context.insertStringAndShowRemaining("▽" + this.origMidashigo, "", false);
-                });
+                this.returnToMidashigoMode(context);
                 return;
             }
-            
+
             this.showCandidate(context);
             return;
         }
@@ -52,6 +48,14 @@ export class InlineHenkanMode extends AbstractHenkanMode{
             return context.lowerAlphabetInput(key);
         });
     }
+    private returnToMidashigoMode(context: AbstractKanaMode) {
+        context.setHenkanMode(this.prevMode);
+        // recover orijinal midashigo
+        context.clearCandidate().then(() => {
+            context.insertStringAndShowRemaining("▽" + this.origMidashigo, "", false);
+        });
+    }
+
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
         // in case "X" is input, the current candidate is asked to be deleted.
         // TODO: implement this
@@ -102,6 +106,6 @@ export class InlineHenkanMode extends AbstractHenkanMode{
     }
 
     onCtrlG(context: AbstractKanaMode): void {
-        context.setHenkanMode(this.prevMode);
+        this.returnToMidashigoMode(context);
     }
 }

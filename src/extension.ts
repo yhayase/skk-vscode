@@ -54,6 +54,12 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(ctrlJInput);
 
+	let ctrlGInput = vscode.commands.registerCommand('skk-vscode.ctrlGInput', () => {
+		inputMode.ctrlGInput();
+		updatePreviousEditorAndSelections();
+	});
+	context.subscriptions.push(ctrlGInput);
+
 	let enterInput = vscode.commands.registerCommand('skk-vscode.enterInput', () => {
 		inputMode.enterInput();
 		updatePreviousEditorAndSelections();

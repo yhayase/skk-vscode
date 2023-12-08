@@ -30,7 +30,7 @@ export class MidashigoMode extends AbstractHenkanMode {
     }
 
     findCandidates(midashigo: string, okuri: string): JisyoCandidate[] | Error {
-        const okuriAlpha = okuri.length>0 ? calcFirstAlphabetOfOkurigana(okuri) : "";
+        const okuriAlpha = okuri.length > 0 ? calcFirstAlphabetOfOkurigana(okuri) : "";
         const key = midashigo + okuriAlpha;
         const candidates = globalJisyo.get(key);
         if (candidates === undefined) {
@@ -150,7 +150,9 @@ export class MidashigoMode extends AbstractHenkanMode {
     }
 
     onCtrlG(context: AbstractKanaMode): void {
-        throw new Error("Method not implemented.");
+        this.romajiInput.reset();
+        context.setHenkanMode(KakuteiMode.create(context));
+        context.clearMidashigo();
     }
 }
 

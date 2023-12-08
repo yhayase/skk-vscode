@@ -260,6 +260,10 @@ export abstract class AbstractKanaMode implements InputMode {
         this.henkanMode.onCtrlJ(this);
     }
 
+    public ctrlGInput(): void {
+        this.henkanMode.onCtrlG(this);
+    }
+
     /**
      * Fixate the unconversioned midashigo.
      * 
@@ -278,6 +282,22 @@ export abstract class AbstractKanaMode implements InputMode {
         }
         return Promise.resolve(false);
     }
+
+    clearMidashigo(): PromiseLike<boolean> {
+        const editor = vscode.window.activeTextEditor;
+        if (editor && this.midashigoStart) {
+            const midashigoRange = new vscode.Range(this.midashigoStart, editor.selection.end);
+            let midashigo = editor.document.getText(midashigoRange);
+            if (midashigo[0] === '▽') {
+                this.midashigoStart = undefined;
+                return replaceRange(midashigoRange, "");
+            }
+            vscode.window.showInformationMessage('It seems that you have deleted ▽');
+            this.midashigoStart = undefined;
+        }
+        return Promise.resolve(false);
+    }
+
 
     /**
      * Change character type according to the first character of the midashigo

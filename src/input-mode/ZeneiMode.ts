@@ -60,6 +60,10 @@ export class ZeneiMode implements InputMode {
         setInputMode(HiraganaMode.getInstance());
     }
 
+    public ctrlGInput(): void {
+        // Do nothing
+    }
+
     public enterInput(): void {
         insertOrReplaceSelection("\n");
     }
