@@ -91,6 +91,17 @@ export class MidashigoMode extends AbstractHenkanMode {
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
+        const midashigo = context.extractMidashigo();
+        if (midashigo === undefined) {
+            context.setHenkanMode(KakuteiMode.create(context));
+            context.showRemainingRomaji("", false);
+            return;
+        }
+
+        if (midashigo.length === 0) {
+            return this.onLowerAlphabet(context, key.toLowerCase());
+        }
+
         this.midashigoMode = MidashigoType.okurigana;
 
         let okuri = this.romajiInput.processInput(key.toLowerCase());
