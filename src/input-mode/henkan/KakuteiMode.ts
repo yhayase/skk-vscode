@@ -3,6 +3,9 @@ import { AbstractKanaMode } from "../AbstractKanaMode";
 import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { RomajiInput } from '../../RomajiInput';
 import { MidashigoMode } from './MidashigoMode';
+import { setInputMode } from '../../extension';
+import { AsciiMode } from '../AsciiMode';
+import { ZeneiMode } from '../ZeneiMode';
 
 
 export class KakuteiMode extends AbstractHenkanMode {
@@ -17,6 +20,11 @@ export class KakuteiMode extends AbstractHenkanMode {
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
+        if (key === 'l') {
+            setInputMode(AsciiMode.getInstance());
+            return;
+        }
+
         if (key === 'q') {
             context.toggleKanaMode();
             return;
@@ -25,6 +33,11 @@ export class KakuteiMode extends AbstractHenkanMode {
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
+        if (key === 'L') {
+            setInputMode(ZeneiMode.getInstance());
+            return;
+        }
+
         let midashigoMode = new MidashigoMode(context, key);
         context.setHenkanMode(midashigoMode);
     }

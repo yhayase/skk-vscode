@@ -5,6 +5,9 @@ import { JisyoCandidate } from "../../jisyo";
 import * as vscode from 'vscode';
 import { KakuteiMode } from "./KakuteiMode";
 import { MenuHenkanMode } from "./MenuHenkanMode";
+import { setInputMode } from "../../extension";
+import { AsciiMode } from "../AsciiMode";
+import { ZeneiMode } from "../ZeneiMode";
 
 export class InlineHenkanMode extends AbstractHenkanMode {
     private prevMode: MidashigoMode;
@@ -26,6 +29,13 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
+        if (key === 'l') {
+            context.fixateCandidate().then(() => {
+                setInputMode(AsciiMode.getInstance());
+            });
+            return;
+        }
+
         if (key === 'x') {
             this.candidateIndex -= 1;
             if (this.candidateIndex < 0) {
@@ -60,7 +70,14 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
-        // in case "X" is input, the current candidate is asked to be deleted.
+        if (key === 'L') {
+            context.fixateCandidate().then(() => {
+                setInputMode(ZeneiMode.getInstance());
+            });
+            return;
+        }
+
+        // in case "X" is input, the current candidate is asked to be deleted from the jisyo
         // TODO: implement this
 
         // other keys

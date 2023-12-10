@@ -1,10 +1,12 @@
 import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { AbstractKanaMode, DeleteLeftResult } from "../AbstractKanaMode";
 import { RomajiInput } from "../../RomajiInput";
-import { insertOrReplaceSelection } from "../../extension";
+import { insertOrReplaceSelection, setInputMode } from "../../extension";
 import { JisyoCandidate, globalJisyo } from "../../jisyo";
 import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
+import { AsciiMode } from "../AsciiMode";
+import { ZeneiMode } from "../ZeneiMode";
 
 export enum MidashigoType {
     gokan, // ▽あ
@@ -61,6 +63,13 @@ export class MidashigoMode extends AbstractHenkanMode {
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
+        if (key === 'l') {
+            context.fixateMidashigo().then(() => {
+                setInputMode(AsciiMode.getInstance());
+            });
+            return;
+        }
+
         if (key === 'q') {
             context.toggleCharTypeInMidashigoAndFixateMidashigo();
             context.setHenkanMode(KakuteiMode.create(context));
@@ -91,6 +100,13 @@ export class MidashigoMode extends AbstractHenkanMode {
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
+        if (key === 'L') {
+            context.fixateMidashigo().then(() => {
+                setInputMode(ZeneiMode.getInstance());
+            });
+            return;
+        }
+
         const midashigo = context.extractMidashigo();
         if (midashigo === undefined) {
             context.setHenkanMode(KakuteiMode.create(context));

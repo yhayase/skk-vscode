@@ -237,12 +237,6 @@ export abstract class AbstractKanaMode implements InputMode {
     }
 
     public lowerAlphabetInput(key: string): void {
-        if (key === 'l') {
-            setInputMode(AsciiMode.getInstance());
-            vscode.window.showInformationMessage('skk-vscode: ascii mode');
-            return;
-        }
-
         this.henkanMode.onLowerAlphabet(this, key);
     }
     toggleKanaMode() {
@@ -251,12 +245,6 @@ export abstract class AbstractKanaMode implements InputMode {
     }
 
     public upperAlphabetInput(key: string): void {
-        if (key === 'L') {
-            setInputMode(ZeneiMode.getInstance());
-            vscode.window.showInformationMessage('skk-vscode: 全英 mode');
-            return;
-        }
-
         this.henkanMode.onUpperAlphabet(this, key);
     }
 
