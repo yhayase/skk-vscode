@@ -378,7 +378,7 @@ export abstract class AbstractKanaMode implements InputMode {
 
     showCandidateList(candidateList: JisyoCandidate[], alphabetList: string[]): void {
         const candidateStr = candidateList.map((cand, idx) => {
-            return `${alphabetList[idx]}:  ${cand.word}` + (cand.annotation ? "; " + cand.annotation : "");
+            return `${alphabetList[idx]}:  ${cand.word}`; // + (cand.annotation ? "; " + cand.annotation : "");
         }).join('  ');
 
         if (candidateStr.length === 0) {
