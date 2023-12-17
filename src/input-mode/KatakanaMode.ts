@@ -4,9 +4,8 @@ import { HiraganaMode } from './HiraganaMode';
 import { AbstractKanaMode } from './AbstractKanaMode';
 
 export class KatakanaMode extends AbstractKanaMode implements InputMode {
-    private static instance: KatakanaMode = new KatakanaMode();
     static getInstance(): KatakanaMode {
-        return KatakanaMode.instance;
+        return new KatakanaMode();
     }
 
     newRomajiInput(): RomajiInput {

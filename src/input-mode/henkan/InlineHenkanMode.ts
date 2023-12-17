@@ -4,6 +4,10 @@ import { MidashigoMode } from "./MidashigoMode";
 import { JisyoCandidate } from "../../jisyo";
 import * as vscode from 'vscode';
 import { KakuteiMode } from "./KakuteiMode";
+import { MenuHenkanMode } from "./MenuHenkanMode";
+import { setInputMode } from "../../extension";
+import { AsciiMode } from "../AsciiMode";
+import { ZeneiMode } from "../ZeneiMode";
 
 export class InlineHenkanMode extends AbstractHenkanMode {
     private prevMode: MidashigoMode;
@@ -25,6 +29,13 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
+        if (key === 'l') {
+            context.fixateCandidate().then(() => {
+                setInputMode(AsciiMode.getInstance());
+            });
+            return;
+        }
+
         if (key === 'x') {
             this.candidateIndex -= 1;
             if (this.candidateIndex < 0) {
@@ -37,18 +48,20 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         }
 
         if (key === 'q') {
-            context.toggleCharTypeInMidashigoAndFixateMidashigo();
-            context.setHenkanMode(KakuteiMode.create(context));
-            return;
+            context.fixateCandidate().then(() => {
+                context.toggleKanaMode();
+                context.setHenkanMode(KakuteiMode.create(context));
+            });
         }
 
         // other keys
         context.fixateCandidate().then(() => {
             context.setHenkanMode(KakuteiMode.create(context));
-            return context.lowerAlphabetInput(key);
+            context.lowerAlphabetInput(key);
         });
     }
-    private returnToMidashigoMode(context: AbstractKanaMode) {
+
+    returnToMidashigoMode(context: AbstractKanaMode) {
         context.setHenkanMode(this.prevMode);
         // recover orijinal midashigo
         context.clearCandidate().then(() => {
@@ -57,7 +70,14 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
-        // in case "X" is input, the current candidate is asked to be deleted.
+        if (key === 'L') {
+            context.fixateCandidate().then(() => {
+                setInputMode(ZeneiMode.getInstance());
+            });
+            return;
+        }
+
+        // in case "X" is input, the current candidate is asked to be deleted from the jisyo
         // TODO: implement this
 
         // other keys
@@ -79,6 +99,12 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     onSpace(context: AbstractKanaMode): void {
         if (this.candidateIndex + 1 >= this.candidateList.length) {
             vscode.window.showInformationMessage("No more candidates");
+            return;
+        }
+
+        const MAX_INLINE_CANDIDATES = 3;
+        if (this.candidateIndex + 1 >= MAX_INLINE_CANDIDATES) {
+            context.setHenkanMode(new MenuHenkanMode(context, this, this.candidateList.slice(MAX_INLINE_CANDIDATES)));
             return;
         }
 

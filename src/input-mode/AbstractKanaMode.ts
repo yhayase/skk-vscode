@@ -32,6 +32,14 @@ export abstract class AbstractKanaMode implements InputMode {
         rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen,
     });
 
+    private readonly candidateListDecorationType: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
+        after: {
+            margin: '0 0 0 0em',
+            textDecoration: 'underline',
+        },
+        rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen,
+    });
+
     private midashigoStart: vscode.Position | undefined = undefined;
 
     setHenkanMode(henkanMode: AbstractHenkanMode) {
@@ -229,12 +237,6 @@ export abstract class AbstractKanaMode implements InputMode {
     }
 
     public lowerAlphabetInput(key: string): void {
-        if (key === 'l') {
-            setInputMode(AsciiMode.getInstance());
-            vscode.window.showInformationMessage('skk-vscode: ascii mode');
-            return;
-        }
-
         this.henkanMode.onLowerAlphabet(this, key);
     }
     toggleKanaMode() {
@@ -243,12 +245,6 @@ export abstract class AbstractKanaMode implements InputMode {
     }
 
     public upperAlphabetInput(key: string): void {
-        if (key === 'L') {
-            setInputMode(ZeneiMode.getInstance());
-            vscode.window.showInformationMessage('skk-vscode: 全英 mode');
-            return;
-        }
-
         this.henkanMode.onUpperAlphabet(this, key);
     }
 
@@ -380,14 +376,54 @@ export abstract class AbstractKanaMode implements InputMode {
         }
     }
 
+    showCandidateList(candidateList: JisyoCandidate[], alphabetList: string[]): void {
+        const candidateStr = candidateList.map((cand, idx) => {
+            return `${alphabetList[idx]}:  ${cand.word}`; // + (cand.annotation ? "; " + cand.annotation : "");
+        }).join('  ');
+
+        if (candidateStr.length === 0) {
+            this.hideCandidateList();
+        } else {
+            const editor = vscode.window.activeTextEditor;
+            if (editor) {
+                editor.setDecorations(this.candidateListDecorationType, []);
+                // calculate the position of the end of line
+                //const pos = new vscode.Position(editor.selection.start.line + 1, 0);
+                const pos = editor.document.lineAt(editor.selection.active.line).range.end;
+                const displayRange = new vscode.Range(pos, pos);
+                const candidateListAnnotation = {
+                    range: displayRange,
+                    renderOptions: {
+                        after: {
+                            backgroundColor: 'lightgreen',
+                            contentText: candidateStr
+                        }
+                    }
+                };
+                editor.setDecorations(this.candidateListDecorationType, [candidateListAnnotation]);
+            }
+        }
+    }
+
+    hideCandidateList(): void {
+        vscode.window.activeTextEditor?.setDecorations(this.candidateListDecorationType, []);
+    }
+
     /**
      * Show henkan candidates over the midashigo.
      * @param candidate The candidate to show
      * @returns Promise that resolves to true if the candidate is shown, false otherwise
      */
-    showCandidate(candidate: JisyoCandidate): PromiseLike<boolean | void> {
+    showCandidate(candidate: JisyoCandidate | undefined): PromiseLike<boolean | void> {
         if (this.midashigoStart && vscode.window.activeTextEditor) {
             const midashigoRange = new vscode.Range(this.midashigoStart, vscode.window.activeTextEditor?.selection.end);
+
+            if (!candidate) {
+                return replaceRange(midashigoRange, "▼").then((value) => {
+                    this.showRemainingRomaji("", false);
+                });
+            }
+
             return replaceRange(midashigoRange, "▼" + candidate.word).then((value) => {
                 if (candidate.annotation) {
                     this.showRemainingRomaji("; " + candidate.annotation, false);
@@ -423,7 +459,7 @@ export abstract class AbstractKanaMode implements InputMode {
      *
      * This method fixate the range from "▼" to the cursor position, then hide the annotation.
      */
-    fixateCandidate(): PromiseLike<boolean> {
+    fixateCandidate(candStr: string | undefined = undefined): PromiseLike<boolean> {
         // Check the first char at the midashigoStart is "▼", then remove it
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -443,7 +479,7 @@ export abstract class AbstractKanaMode implements InputMode {
         this.showRemainingRomaji("", false);
 
         // Delete heading marker "▼"
-        return replaceRange(firstCharRange, '');
+        return replaceRange(firstCharRange, candStr ? candStr : '');
     }
 
 

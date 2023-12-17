@@ -30,8 +30,20 @@
         "title": "Ctrl-J Input"
       },
       {
+        "command": "skk-vscode.ctrlGInput",
+        "title": "Ctrl-G Input"
+      },
+      {
+        "command": "skk-vscode.enterInput",
+        "title": "Enter Input"
+      },
+      {
         "command": "skk-vscode.numberInput",
         "title": "Number Input"
+      },
+      {
+        "command": "skk-vscode.symbolInput",
+        "title": "Symbol Input"
       },
       {
         "command": "skk-vscode.backspaceInput",
