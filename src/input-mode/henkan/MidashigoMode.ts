@@ -2,7 +2,7 @@ import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { AbstractKanaMode, DeleteLeftResult } from "../AbstractKanaMode";
 import { RomajiInput } from "../../RomajiInput";
 import { insertOrReplaceSelection, setInputMode } from "../../extension";
-import { JisyoCandidate, globalJisyo } from "../../jisyo";
+import { JisyoCandidate, getGlobalJisyo } from "../../jisyo";
 import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { AsciiMode } from "../AsciiMode";
@@ -34,7 +34,7 @@ export class MidashigoMode extends AbstractHenkanMode {
     findCandidates(midashigo: string, okuri: string): JisyoCandidate[] | Error {
         const okuriAlpha = okuri.length > 0 ? calcFirstAlphabetOfOkurigana(okuri) : "";
         const key = midashigo + okuriAlpha;
-        const candidates = globalJisyo.get(key);
+        const candidates = getGlobalJisyo().get(key);
         if (candidates === undefined) {
             return new Error('変換できません');
         } else {
