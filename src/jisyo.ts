@@ -1,4 +1,5 @@
-import * as fs from "fs";
+import { Uri } from "vscode";
+import * as vscode from 'vscode';
 
 export class JisyoCandidate {
     word: string;
@@ -12,11 +13,49 @@ export class JisyoCandidate {
 
 type Jisyo = Map<string, JisyoCandidate[]>;
 
-export const globalJisyo: Jisyo = loadJisyo("/usr/share/skk/SKK-JISYO.L");
+var globalJisyo: Jisyo;
 
-function loadJisyo(path: string): Jisyo {
+export async function init(memento: vscode.Memento): Promise<void> {
+    globalJisyo = await loadJisyoFromUri(memento, Uri.parse("https://raw.githubusercontent.com/skk-dev/dict/master/SKK-JISYO.L"));
+}
+
+export function getGlobalJisyo(): Jisyo {
+    return globalJisyo;
+}
+
+async function loadJisyoFromUri(memento: vscode.Memento, uri: Uri): Promise<Jisyo> {
+    const cacheKey = "skk-vscode.jisyo";
+    const cacheExpiryKey = "skk-vscode.jisyo-expiry";
+
+    // check if local cache is available
+    const cache = memento.get<Object>(cacheKey);
+    const cacheExpiry = memento.get<number>(cacheExpiryKey);
+    const now = Date.now();
+    if (cache && cacheExpiry && now < cacheExpiry) {
+        return new Map(Object.entries(cache));
+    }
+
+    // clear cache
+    await memento.update(cacheKey, undefined);
+    await memento.update(cacheExpiryKey, undefined);
+
+    // download jisyo from uri
+    const response = await fetch(uri.toString());
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const rawJisyo = Buffer.from(await response.arrayBuffer());
+
+    const jisyo = rawSKKJisyoToJisyo(rawJisyo);
+    await memento.update(cacheKey, Object.fromEntries(jisyo));
+    await memento.update(cacheExpiryKey, now + 1000 * 60 * 60 * 24 * 30); // 30 days
+    return jisyo;
+}
+
+
+function rawSKKJisyoToJisyo(rawLines: Buffer): Jisyo {
     const jisyo: Jisyo = new Map();
-    const rawLines: Buffer = fs.readFileSync(path);
+
     const eucJpDecoder = new TextDecoder('euc-jp');
     const lines = eucJpDecoder.decode(rawLines).split("\n");
     for (const line of lines) {
@@ -49,3 +88,4 @@ function loadJisyo(path: string): Jisyo {
     }
     return jisyo;
 }
+

@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import { InputMode } from './input-mode/InputMode';
 import { AsciiMode } from './input-mode/AsciiMode';
-
+import * as jisyo from './jisyo';
 
 var timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
 
@@ -16,7 +16,9 @@ export function setInputMode(mode: InputMode) {
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+	await jisyo.init(context.globalState);
+
 	// vscode.window.showInformationMessage("skk-vscode: start");
 
 	let previousTextEditor = vscode.window.activeTextEditor;
