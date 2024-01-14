@@ -1,9 +1,9 @@
 import { insertOrReplaceSelection, setInputMode} from "../extension";
 import * as vscode from 'vscode';
-import { InputMode } from "./InputMode";
+import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
 
-export class ZeneiMode implements InputMode {
+export class ZeneiMode implements IInputMode {
     private static zenkakuEisuuList: string[] = [
     "　", "！", "”", "＃", "＄", "％", "＆", "’",
     "（", "）", "＊", "＋", "，", "−", "．", "／",

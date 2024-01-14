@@ -1,4 +1,4 @@
-export interface InputMode {
+export interface IInputMode {
     reset: () => void;
     lowerAlphabetInput: (key: string) => void;
     upperAlphabetInput: (key: string) => void;

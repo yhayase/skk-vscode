@@ -1,9 +1,9 @@
 import { insertOrReplaceSelection, setInputMode } from "../extension";
 import * as vscode from 'vscode';
-import { InputMode } from "./InputMode";
+import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
 
-export class AsciiMode implements InputMode {
+export class AsciiMode implements IInputMode {
     // AsciiMode is stateless, so the singleton can be stored in a static field.
     private static instance: AsciiMode = new AsciiMode();
 
