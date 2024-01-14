@@ -1,9 +1,9 @@
 import { RomajiInput } from '../RomajiInput';
-import { InputMode } from './InputMode';
+import { IInputMode } from './IInputMode';
 import { KatakanaMode } from './KatakanaMode';
 import { AbstractKanaMode } from './AbstractKanaMode';
 
-export class HiraganaMode extends AbstractKanaMode implements InputMode {
+export class HiraganaMode extends AbstractKanaMode implements IInputMode {
     static getInstance(): HiraganaMode {
         return new HiraganaMode();
     }

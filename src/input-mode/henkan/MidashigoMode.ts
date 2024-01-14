@@ -1,5 +1,5 @@
 import { AbstractHenkanMode } from "./AbstractHenkanMode";
-import { AbstractKanaMode, DeleteLeftResult } from "../AbstractKanaMode";
+import { AbstractKanaMode } from "../AbstractKanaMode";
 import { RomajiInput } from "../../RomajiInput";
 import { insertOrReplaceSelection, setInputMode } from "../../extension";
 import { JisyoCandidate, getGlobalJisyo } from "../../jisyo";
@@ -7,6 +7,7 @@ import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { AsciiMode } from "../AsciiMode";
 import { ZeneiMode } from "../ZeneiMode";
+import { DeleteLeftResult } from "../../editor/IEditor";
 
 export enum MidashigoType {
     gokan, // ▽あ

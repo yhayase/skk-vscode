@@ -1,17 +1,51 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { InputMode } from './input-mode/InputMode';
+import { IInputMode } from './input-mode/IInputMode';
 import { AsciiMode } from './input-mode/AsciiMode';
 import * as jisyo from './jisyo';
 
 var timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
 
-let inputMode: InputMode = AsciiMode.getInstance();
+/**
+ * Map to hold input mode corresponding to each text editor.
+ * The key is a text editor and the value is an input mode.
+ * The value is undefined if no input mode is set to the text editor.
+ * 
+ * Note that WeakMap is used to avoid memory leak.
+ * (TextEditor is a disposable object, so it is not appropriate to use it as a key of a Map.)
+ */
+let inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
 
-export function setInputMode(mode: InputMode) {
+/**
+ * Set input mode to the current active text editor.
+ * @param mode input mode to be set to the current active text editor.
+ * @throws Error if no active text editor is found.
+ */
+export function setInputMode(mode: IInputMode) {
 	mode.reset();
-	inputMode = mode;
+	if (!vscode.window.activeTextEditor) {
+		throw Error("No active text editor");
+	}
+	inputModeMap.set(vscode.window.activeTextEditor.document, mode);
+}
+
+/**
+ * Utility function to find input mode corresponding to the current active text editor.
+ * If not input mode is set to the current active text editor, AsciiMode is set to the current active text editor.
+  * @returns input mode corresponding to the current active text editor.
+  * @throws Error if no active text editor is found.
+ */
+function findInputMode(): IInputMode {
+	if (!vscode.window.activeTextEditor) {
+		throw Error("No active text editor");
+	}
+	let mode = inputModeMap.get(vscode.window.activeTextEditor.document);
+	if (mode === undefined) {
+		mode = AsciiMode.getInstance();
+		inputModeMap.set(vscode.window.activeTextEditor.document, mode);
+	}
+	return mode;
 }
 
 // This method is called when your extension is activated
@@ -32,50 +66,50 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	let lowerAlphaInput = vscode.commands.registerCommand('skk-vscode.lowerAlphabetInput', (key: string) => {
-		inputMode.lowerAlphabetInput(key);
+		findInputMode().lowerAlphabetInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(lowerAlphaInput);
 
 
 	let upperAlphaInput = vscode.commands.registerCommand('skk-vscode.upperAlphabetInput', (key: string) => {
-		inputMode.upperAlphabetInput(key);
+		findInputMode().upperAlphabetInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(upperAlphaInput);
 
 	let spaceInput = vscode.commands.registerCommand('skk-vscode.spaceInput', () => {
-		inputMode.spaceInput();
+		findInputMode().spaceInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(spaceInput);
 
 	let ctrlJInput = vscode.commands.registerCommand('skk-vscode.ctrlJInput', () => {
-		inputMode.ctrlJInput();
+		findInputMode().ctrlJInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(ctrlJInput);
 
 	let ctrlGInput = vscode.commands.registerCommand('skk-vscode.ctrlGInput', () => {
-		inputMode.ctrlGInput();
+		findInputMode().ctrlGInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(ctrlGInput);
 
 	let enterInput = vscode.commands.registerCommand('skk-vscode.enterInput', () => {
-		inputMode.enterInput();
+		findInputMode().enterInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(enterInput);
 
 	let backspaceInput = vscode.commands.registerCommand('skk-vscode.backspaceInput', () => {
-		inputMode.backspaceInput();
+		findInputMode().backspaceInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(backspaceInput);
 
 	let numberInput = vscode.commands.registerCommand('skk-vscode.numberInput', (key: string) => {
-		inputMode.numberInput(key);
+		findInputMode().numberInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(numberInput);
@@ -93,7 +127,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		vscode.window.showInformationMessage("skk-vscode: cursor moves");
 		// clear inputMode state
-		inputMode.reset();
+		findInputMode().reset();
 	});
 }
 
