@@ -1,3 +1,4 @@
+import { IEditor } from "../../editor/IEditor";
 import { AbstractKanaMode } from "../AbstractKanaMode";
 
 /**
@@ -13,11 +14,17 @@ export abstract class AbstractHenkanMode {
     protected name: string;
 
     /**
+     * テキスト編集やカーソル移動，変換候補の表示などを行うための IEditor インスタンス．
+     */
+    protected editor: IEditor;
+
+    /**
      * サブクラスからのみ呼び出されるコンストラクタ．
      * @param name 変換モードの名前
      */
-    protected constructor(name: string) {
+    protected constructor(name: string, editor: IEditor) {
         this.name = name;
+        this.editor = editor;
     }
 
     /**

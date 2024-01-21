@@ -5,7 +5,7 @@ import { VSCodeEditor } from "../editor/VSCodeEditor";
 export abstract class AbstractInputMode implements IInputMode {
     protected editor: IEditor;
     constructor() {
-        this.editor = new VSCodeEditor();
+        this.editor = new VSCodeEditor(); // TODO: inject
         return;
     }
     abstract reset(): void;

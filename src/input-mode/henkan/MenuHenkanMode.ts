@@ -5,6 +5,7 @@ import { JisyoCandidate } from "../../jisyo";
 import * as vscode from 'vscode';
 import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
+import { IEditor } from "../../editor/IEditor";
 
 export class MenuHenkanMode extends AbstractHenkanMode {
     private prevMode: InlineHenkanMode;
@@ -13,25 +14,25 @@ export class MenuHenkanMode extends AbstractHenkanMode {
 
     private readonly selectionKeys = ['a', 's', 'd', 'f', 'j', 'k', 'l'];
 
-    constructor(context: AbstractKanaMode, prevMode: InlineHenkanMode, candidateList: JisyoCandidate[]) {
-        super("▼");
+    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: InlineHenkanMode, candidateList: JisyoCandidate[]) {
+        super("▼", editor);
         this.prevMode = prevMode;
         this.candidateList = candidateList;
 
-        context.showCandidate(undefined);
-        context.showCandidateList(this.candidateList.slice(0, this.nDisplayCandidates), this.selectionKeys.map((s) => s.toUpperCase()));
+        this.editor.showCandidate(undefined);
+        this.editor.showCandidateList(this.candidateList.slice(0, this.nDisplayCandidates), this.selectionKeys.map((s) => s.toUpperCase()));
     }
 
     readonly nDisplayCandidates = 7;
 
     showCandidateList(context: AbstractKanaMode): void {
-        context.showCandidateList(
+        this.editor.showCandidateList(
             this.candidateList.slice(this.candidateIndex, this.candidateIndex + this.nDisplayCandidates),
             this.selectionKeys.map((s) => s.toUpperCase()));
     }
 
     hideCandidateList(context: AbstractKanaMode): void {
-        context.hideCandidateList();
+        this.editor.hideCandidateList();
     }
 
     selectCandidateFromMenu(context: AbstractKanaMode, selectionKeys: string[], key: string) {
@@ -76,7 +77,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     }
 
     private returnToInlineHenkanMode(context: AbstractKanaMode) {
-        context.hideCandidateList();
+        this.editor.hideCandidateList();
         context.setHenkanMode(this.prevMode);
         this.prevMode.showCandidate(context);
     }
@@ -118,12 +119,12 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     }
 
     private fixateAndGoKakuteiMode(context: AbstractKanaMode, candidate: JisyoCandidate): PromiseLike<boolean> {
-        context.setHenkanMode(KakuteiMode.create(context));
-        return context.fixateCandidate(candidate.word);
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        return this.editor.fixateCandidate(candidate.word);
     }
 
     onCtrlG(context: AbstractKanaMode): void {
-        context.hideCandidateList();
+        this.editor.hideCandidateList();
         this.prevMode.returnToMidashigoMode(context);
     }
 }

@@ -6,13 +6,14 @@ import { MidashigoMode } from './MidashigoMode';
 import { setInputMode } from '../../extension';
 import { AsciiMode } from '../AsciiMode';
 import { ZeneiMode } from '../ZeneiMode';
+import { IEditor } from '../../editor/IEditor';
 
 
 export class KakuteiMode extends AbstractHenkanMode {
     romajiInput: RomajiInput;
 
-    static create(context: AbstractKanaMode): KakuteiMode {
-        return new KakuteiMode(context);
+    static create(context: AbstractKanaMode, editor: IEditor): KakuteiMode {
+        return new KakuteiMode(context, editor);
     }
 
     reset(): void {
@@ -38,7 +39,7 @@ export class KakuteiMode extends AbstractHenkanMode {
             return;
         }
 
-        let midashigoMode = new MidashigoMode(context, key);
+        let midashigoMode = new MidashigoMode(context, this.editor, key);
         context.setHenkanMode(midashigoMode);
     }
 
@@ -86,8 +87,8 @@ export class KakuteiMode extends AbstractHenkanMode {
         context.insertStringAndShowRemaining("", "", false);
     }
 
-    public constructor(context: AbstractKanaMode) {
-        super("■");
+    public constructor(context: AbstractKanaMode, editor: IEditor) {
+        super("■", editor);
         this.romajiInput = context.newRomajiInput();
     }
 
