@@ -7,7 +7,7 @@ import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { AsciiMode } from "../AsciiMode";
 import { ZeneiMode } from "../ZeneiMode";
-import { DeleteLeftResult } from "../../editor/IEditor";
+import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 
 export enum MidashigoType {
     gokan, // ▽あ
@@ -18,16 +18,16 @@ export class MidashigoMode extends AbstractHenkanMode {
     private romajiInput: RomajiInput;
     midashigoMode: MidashigoType = MidashigoType.gokan;
 
-    constructor(context: AbstractKanaMode, initialRomajiInput: string | undefined = undefined) {
-        super("▽");
+    constructor(context: AbstractKanaMode, editor: IEditor, initialRomajiInput: string | undefined = undefined) {
+        super("▽", editor);
         this.romajiInput = context.newRomajiInput();
 
         if (initialRomajiInput) {
             let insertStr = "▽";
-            context.setMidashigoStartToCurrentPosition();
+            this.editor.setMidashigoStartToCurrentPosition();
 
             insertStr += this.romajiInput.processInput(initialRomajiInput.toLowerCase());
-            context.setMidashigoStartToCurrentPosition();
+            this.editor.setMidashigoStartToCurrentPosition();
             context.insertStringAndShowRemaining(insertStr, this.romajiInput.getRemainingRomaji(), false);
         }
     }
@@ -48,9 +48,9 @@ export class MidashigoMode extends AbstractHenkanMode {
     }
 
     henkan(context: AbstractKanaMode, okuri: string): void {
-        let midashigo = context.extractMidashigo();
+        let midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
-            context.setHenkanMode(KakuteiMode.create(context));
+            context.setHenkanMode(KakuteiMode.create(context, this.editor));
             return;
         }
 
@@ -60,20 +60,20 @@ export class MidashigoMode extends AbstractHenkanMode {
             return;
         }
 
-        context.setHenkanMode(new InlineHenkanMode(context, this, midashigo, candidateList));
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, candidateList));
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'l') {
-            context.fixateMidashigo().then(() => {
+            this.editor.fixateMidashigo().then(() => {
                 setInputMode(AsciiMode.getInstance());
             });
             return;
         }
 
         if (key === 'q') {
-            context.toggleCharTypeInMidashigoAndFixateMidashigo();
-            context.setHenkanMode(KakuteiMode.create(context));
+            this.editor.toggleCharTypeInMidashigoAndFixateMidashigo();
+            context.setHenkanMode(KakuteiMode.create(context, this.editor));
             this.romajiInput.reset();
             return;
         }
@@ -81,7 +81,7 @@ export class MidashigoMode extends AbstractHenkanMode {
         if (this.midashigoMode === MidashigoType.okurigana) {
             let okuri = this.romajiInput.processInput(key.toLowerCase());
             if (okuri.length === 0) {
-                context.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), true);
+                this.editor.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), true, 0);
                 return;
             }
 
@@ -92,26 +92,26 @@ export class MidashigoMode extends AbstractHenkanMode {
             let insertStr = this.romajiInput.processInput(key);
             if (insertStr.length !== 0) {
                 insertOrReplaceSelection(insertStr).then((value) => {
-                    context.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), false);
+                    this.editor.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), false, 0);
                 });
             } else {
-                context.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), false);
+                this.editor.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), false, 0);
             }
         }
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'L') {
-            context.fixateMidashigo().then(() => {
+            this.editor.fixateMidashigo().then(() => {
                 setInputMode(ZeneiMode.getInstance());
             });
             return;
         }
 
-        const midashigo = context.extractMidashigo();
+        const midashigo = this.editor.extractMidashigo();
         if (midashigo === undefined) {
-            context.setHenkanMode(KakuteiMode.create(context));
-            context.showRemainingRomaji("", false);
+            context.setHenkanMode(KakuteiMode.create(context, this.editor));
+            this.editor.showRemainingRomaji("", false, 0);
             return;
         }
 
@@ -123,7 +123,7 @@ export class MidashigoMode extends AbstractHenkanMode {
 
         let okuri = this.romajiInput.processInput(key.toLowerCase());
         if (okuri.length === 0) {
-            context.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), true);
+            this.editor.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), true, 0);
             return;
         }
 
@@ -155,10 +155,10 @@ export class MidashigoMode extends AbstractHenkanMode {
             return;
         }
 
-        switch (context.deleteLeft()) {
+        switch (this.editor.deleteLeft()) {
             case DeleteLeftResult.markerDeleted:
             case DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted:
-                context.setHenkanMode(KakuteiMode.create(context));
+                context.setHenkanMode(KakuteiMode.create(context, this.editor));
                 break;
             case DeleteLeftResult.otherCharacterDeleted:
                 // do nothing
@@ -173,14 +173,14 @@ export class MidashigoMode extends AbstractHenkanMode {
         this.romajiInput.reset();
 
         // delete heading ▽ and fix the remaining text
-        context.fixateMidashigo();
-        context.setHenkanMode(KakuteiMode.create(context));
+        this.editor.fixateMidashigo();
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
     }
 
     onCtrlG(context: AbstractKanaMode): void {
         this.romajiInput.reset();
-        context.setHenkanMode(KakuteiMode.create(context));
-        context.clearMidashigo();
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        this.editor.clearMidashigo();
     }
 }
 
