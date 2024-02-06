@@ -1,4 +1,4 @@
-import { JisyoCandidate } from "../jisyo";
+import { Candidate } from "../jisyo/candidate";
 
 export enum DeleteLeftResult {
     markerDeleted,
@@ -30,7 +30,7 @@ export interface IEditor {
      * @param candidate The candidate to show
      * @returns Promise that resolves to true if the candidate is shown, false otherwise
      */
-    showCandidate(candidate: JisyoCandidate | undefined): PromiseLike<boolean | void>;
+    showCandidate(candidate: Candidate | undefined): PromiseLike<boolean | void>;
 
     /**
      * Change character type according to the first character of the midashigo
@@ -64,7 +64,7 @@ export interface IEditor {
     fixateMidashigo(): PromiseLike<boolean>;
     setMidashigoStartToCurrentPosition(): void;
     hideCandidateList(): void;
-    showCandidateList(candidateList: JisyoCandidate[], alphabetList: string[]): void;
+    showCandidateList(candidateList: Candidate[], alphabetList: string[]): void;
     showRemainingRomaji(remainingRomaji: string, isOkuri: boolean, offset: number): void;
 
 }

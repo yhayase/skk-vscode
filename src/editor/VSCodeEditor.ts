@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { DeleteLeftResult, IEditor } from "./IEditor";
-import { JisyoCandidate } from '../jisyo';
-import wanakana = require('wanakana');
 import { replaceRange } from '../extension';
+import { Candidate } from '../jisyo/candidate';
+import { DeleteLeftResult, IEditor } from "./IEditor";
+import wanakana = require('wanakana');
 
 export class VSCodeEditor implements IEditor {
     private midashigoStart: vscode.Position | undefined = undefined;
@@ -53,7 +53,7 @@ export class VSCodeEditor implements IEditor {
         }
     }
 
-    showCandidateList(candidateList: JisyoCandidate[], alphabetList: string[]): void {
+    showCandidateList(candidateList: Candidate[], alphabetList: string[]): void {
         const candidateStr = candidateList.map((cand, idx) => {
             return `${alphabetList[idx]}:  ${cand.word}`; // + (cand.annotation ? "; " + cand.annotation : "");
         }).join('  ');
@@ -262,7 +262,7 @@ export class VSCodeEditor implements IEditor {
      * @param candidate The candidate to show
      * @returns Promise that resolves to true if the candidate is shown, false otherwise
      */
-    showCandidate(candidate: JisyoCandidate | undefined): PromiseLike<boolean | void> {
+    showCandidate(candidate: Candidate | undefined): PromiseLike<boolean | void> {
         if (this.midashigoStart && vscode.window.activeTextEditor) {
             const midashigoRange = new vscode.Range(this.midashigoStart, vscode.window.activeTextEditor?.selection.end);
 

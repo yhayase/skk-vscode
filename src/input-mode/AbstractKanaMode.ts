@@ -1,17 +1,13 @@
 import * as vscode from 'vscode';
-import { RomajiInput } from '../RomajiInput';
-import { insertOrReplaceSelection, replaceRange } from '../extension';
-import { setInputMode } from '../extension';
-import { IInputMode } from './IInputMode';
-import { AsciiMode } from './AsciiMode';
-import { ZeneiMode } from './ZeneiMode';
 import * as wanakana from 'wanakana';
+import { RomajiInput } from '../RomajiInput';
+import { insertOrReplaceSelection, replaceRange, setInputMode } from '../extension';
+import { Candidate } from '../jisyo/candidate';
+import { AbstractInputMode } from './AbstractInputMode';
+import { IInputMode } from './IInputMode';
+import { AbstractHenkanMode } from './henkan/AbstractHenkanMode';
 import { KakuteiMode } from './henkan/KakuteiMode';
 import { MidashigoMode, MidashigoType } from './henkan/MidashigoMode';
-import { AbstractHenkanMode } from './henkan/AbstractHenkanMode';
-import { JisyoCandidate } from '../jisyo';
-import { AbstractInputMode } from './AbstractInputMode';
-import { DeleteLeftResult } from '../editor/IEditor';
 
 /**
  * Parent abstract class of Hiragana and Katakana input modes.
@@ -42,7 +38,7 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
      * @param candidateList The list of candidates to show
      * @returns Thenable that resolves to the selected candidate
      */
-    proposeCandidatesToUser(candidateList: JisyoCandidate[]): Thenable<{ label: string, description: string | undefined } | undefined> {
+    proposeCandidatesToUser(candidateList: Candidate[]): Thenable<{ label: string, description: string | undefined } | undefined> {
         const editor = vscode.window.activeTextEditor;
         if (editor === undefined) {
             return Promise.resolve(undefined);
@@ -106,15 +102,15 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
             return false;
         }
 
-        let candidates = midashigoMode.findCandidates(convertKatakanaToHiragana(midashigo), okuri);
-        if (candidates instanceof Error) {
-            vscode.window.showInformationMessage(candidates.message);
+        let entry = midashigoMode.findCandidates(convertKatakanaToHiragana(midashigo), okuri);
+        if (entry instanceof Error) {
+            vscode.window.showInformationMessage(entry.message);
 
             this.setHenkanMode(KakuteiMode.create(this, this.editor));
             return false;
         }
 
-        this.proposeCandidatesToUser(candidates).then((selected) => {
+        this.proposeCandidatesToUser(entry.getCandidateList()).then((selected) => {
             if (selected) {
                 this.fixateSelectedItem(selected.label).then((value) => {
                     this.editor.showRemainingRomaji("", false, 0);

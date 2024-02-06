@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import { IInputMode } from './input-mode/IInputMode';
 import { AsciiMode } from './input-mode/AsciiMode';
-import * as jisyo from './jisyo';
+import * as jisyo from './jisyo/jisyo';
 
 var timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
 

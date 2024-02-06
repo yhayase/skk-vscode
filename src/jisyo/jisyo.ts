@@ -1,19 +1,10 @@
 import { assert } from "console";
 import { Uri } from "vscode";
 import * as vscode from 'vscode';
+import { Candidate } from "./candidate";
 
-export class JisyoCandidate {
-    word: string;
-    annotation?: string;
-
-    constructor(word: string, annotation?: string) {
-        this.word = word;
-        this.annotation = annotation;
-    }
-};
-
-type Jisyo = Map<string, JisyoCandidate[]>;
-type CompositeJisyo = CompositeMap<string, JisyoCandidate[]>;
+type Jisyo = Map<string, Candidate[]>;
+type CompositeJisyo = CompositeMap<string, Candidate[]>;
 
 var userJisyo: Jisyo;
 var systemJisyo: Jisyo;
@@ -76,14 +67,14 @@ function rawSKKJisyoToJisyo(rawLines: Buffer): Jisyo {
             continue;
         }
 
-        const candidateList: JisyoCandidate[] = [];
+        const candidateList: Candidate[] = [];
         candidates.split("/").forEach((candidateStr) => {
             const [candidate, annotation] = candidateStr.split(";", 2);
             if (candidate === undefined || candidate === "") {
                 // Skip empty candidate
                 return;
             }
-            candidateList.push(new JisyoCandidate(candidate, annotation));
+            candidateList.push(new Candidate(candidate, annotation));
         });
 
         if (jisyo.has(word)) {

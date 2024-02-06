@@ -1,13 +1,15 @@
-import { AbstractHenkanMode } from "./AbstractHenkanMode";
-import { AbstractKanaMode } from "../AbstractKanaMode";
 import { RomajiInput } from "../../RomajiInput";
+import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 import { insertOrReplaceSelection, setInputMode } from "../../extension";
-import { JisyoCandidate, getGlobalJisyo } from "../../jisyo";
-import { KakuteiMode } from "./KakuteiMode";
-import { InlineHenkanMode } from "./InlineHenkanMode";
+import { Candidate } from "../../jisyo/candidate";
+import { Entry } from "../../jisyo/entry";
+import { getGlobalJisyo } from "../../jisyo/jisyo";
+import { AbstractKanaMode } from "../AbstractKanaMode";
 import { AsciiMode } from "../AsciiMode";
 import { ZeneiMode } from "../ZeneiMode";
-import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
+import { AbstractHenkanMode } from "./AbstractHenkanMode";
+import { InlineHenkanMode } from "./InlineHenkanMode";
+import { KakuteiMode } from "./KakuteiMode";
 
 export enum MidashigoType {
     gokan, // ▽あ
@@ -32,14 +34,14 @@ export class MidashigoMode extends AbstractHenkanMode {
         }
     }
 
-    findCandidates(midashigo: string, okuri: string): JisyoCandidate[] | Error {
+    findCandidates(midashigo: string, okuri: string): Entry | Error {
         const okuriAlpha = okuri.length > 0 ? calcFirstAlphabetOfOkurigana(okuri) : "";
         const key = midashigo + okuriAlpha;
         const candidates = getGlobalJisyo().get(key);
         if (candidates === undefined) {
             return new Error('変換できません');
         } else {
-            return candidates.map((cand) => new JisyoCandidate(cand.word + okuri, cand.annotation));
+            return new Entry(key, candidates, okuri);
         }
     }
 
@@ -54,13 +56,13 @@ export class MidashigoMode extends AbstractHenkanMode {
             return;
         }
 
-        let candidateList = this.findCandidates(midashigo, okuri);
-        if (candidateList instanceof Error) {
-            context.showErrorMessage(candidateList.message);
+        let jisyoEntry = this.findCandidates(midashigo, okuri);
+        if (jisyoEntry instanceof Error) {
+            context.showErrorMessage(jisyoEntry.message);
             return;
         }
 
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, candidateList));
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, jisyoEntry));
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
