@@ -1,34 +1,61 @@
 import { Uri } from "vscode";
 import * as vscode from 'vscode';
+import { Candidate } from "./candidate";
+import { CompositeMap } from "../lib/composite-map";
 
-export class JisyoCandidate {
-    word: string;
-    annotation?: string;
+type Jisyo = Map<string, Candidate[]>;
 
-    constructor(word: string, annotation?: string) {
-        this.word = word;
-        this.annotation = annotation;
-    }
-};
-
-type Jisyo = Map<string, JisyoCandidate[]>;
+const userJisyoKey = "skk-vscode.user-jisyo";
 
 var globalJisyo: Jisyo;
 
 export async function init(memento: vscode.Memento): Promise<void> {
-    globalJisyo = await loadJisyoFromUri(memento, Uri.parse("https://raw.githubusercontent.com/skk-dev/dict/master/SKK-JISYO.L"));
+    let systemJisyo = await loadSystemJisyoFromUri(memento, Uri.parse("https://raw.githubusercontent.com/skk-dev/dict/master/SKK-JISYO.L"));
+    let userJisyo = loadOrInitUserJisyo(memento);
+    globalJisyo = new CompositeJisyo([userJisyo, systemJisyo], memento);
 }
 
 export function getGlobalJisyo(): Jisyo {
     return globalJisyo;
 }
 
-async function loadJisyoFromUri(memento: vscode.Memento, uri: Uri): Promise<Jisyo> {
-    const cacheKey = "skk-vscode.jisyo";
+class CompositeJisyo extends CompositeMap<string, Candidate[]> {
+    private memento: vscode.Memento;
+
+    constructor(jisyoList: Jisyo[], memento: vscode.Memento) {
+        super(jisyoList);
+        this.memento = memento;
+    }
+
+    set(key: string, value: Candidate[]): this {
+        super.set(key, value);
+        saveUserJisyo(this.memento, this.maps[0]);
+        return this;
+    }
+}
+
+function loadOrInitUserJisyo(memento: vscode.Memento): Jisyo {
+    // check if local cache is available
+    const cache = memento.get<Object>(userJisyoKey);
+    const now = Date.now();
+    if (cache) {
+        return new Map(Object.entries(cache));
+    }
+    
+    return new Map();
+}
+
+async function saveUserJisyo(memento: vscode.Memento, userJisyo: Jisyo): Promise<void> {
+    await memento.update(userJisyoKey, Object.fromEntries(userJisyo));
+}
+
+
+async function loadSystemJisyoFromUri(memento: vscode.Memento, uri: Uri): Promise<Jisyo> {
+    const systemJisyoKey = "skk-vscode.jisyo";
     const cacheExpiryKey = "skk-vscode.jisyo-expiry";
 
     // check if local cache is available
-    const cache = memento.get<Object>(cacheKey);
+    const cache = memento.get<Object>(systemJisyoKey);
     const cacheExpiry = memento.get<number>(cacheExpiryKey);
     const now = Date.now();
     if (cache && cacheExpiry && now < cacheExpiry) {
@@ -36,7 +63,7 @@ async function loadJisyoFromUri(memento: vscode.Memento, uri: Uri): Promise<Jisy
     }
 
     // clear cache
-    await memento.update(cacheKey, undefined);
+    await memento.update(systemJisyoKey, undefined);
     await memento.update(cacheExpiryKey, undefined);
 
     // download jisyo from uri
@@ -47,7 +74,7 @@ async function loadJisyoFromUri(memento: vscode.Memento, uri: Uri): Promise<Jisy
     const rawJisyo = Buffer.from(await response.arrayBuffer());
 
     const jisyo = rawSKKJisyoToJisyo(rawJisyo);
-    await memento.update(cacheKey, Object.fromEntries(jisyo));
+    await memento.update(systemJisyoKey, Object.fromEntries(jisyo));
     await memento.update(cacheExpiryKey, now + 1000 * 60 * 60 * 24 * 30); // 30 days
     return jisyo;
 }
@@ -70,14 +97,14 @@ function rawSKKJisyoToJisyo(rawLines: Buffer): Jisyo {
             continue;
         }
 
-        const candidateList: JisyoCandidate[] = [];
+        const candidateList: Candidate[] = [];
         candidates.split("/").forEach((candidateStr) => {
             const [candidate, annotation] = candidateStr.split(";", 2);
             if (candidate === undefined || candidate === "") {
                 // Skip empty candidate
                 return;
             }
-            candidateList.push(new JisyoCandidate(candidate, annotation));
+            candidateList.push(new Candidate(candidate, annotation));
         });
 
         if (jisyo.has(word)) {
@@ -88,4 +115,3 @@ function rawSKKJisyoToJisyo(rawLines: Buffer): Jisyo {
     }
     return jisyo;
 }
-
