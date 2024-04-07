@@ -368,6 +368,18 @@
         "args": "Z"
       },
       {
+        "command": "skk-vscode.symbolInput",
+        "when": "editorTextFocus",
+        "key": ".",
+        "args": "."
+      },
+      {
+        "command": "skk-vscode.symbolInput",
+        "when": "editorTextFocus",
+        "key": ",",
+        "args": ","
+      },
+      {
         "command": "skk-vscode.numberInput",
         "when": "editorTextFocus",
         "key": "0",

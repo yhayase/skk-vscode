@@ -28,9 +28,10 @@ export interface IEditor {
     /**
      * Show henkan candidates over the midashigo.
      * @param candidate The candidate to show
+     * @param suffix Additional string to show after the candidate. e.g. "、" or "。"
      * @returns Promise that resolves to true if the candidate is shown, false otherwise
      */
-    showCandidate(candidate: Candidate | undefined): PromiseLike<boolean | void>;
+    showCandidate(candidate: Candidate | undefined, suffix: string): PromiseLike<boolean | void>;
 
     /**
      * Change character type according to the first character of the midashigo

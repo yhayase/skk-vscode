@@ -72,6 +72,9 @@ export class RomajiInput {
                         kana += ruleForPrefix.hiragana;
                     }
                     inputRomaji = ruleForPrefix.remain + inputRomaji.slice(i);
+                    let recRval = this.romToHiragana(inputRomaji, kanaType);
+                    kana += recRval[0];
+                    inputRomaji = recRval[1];
                     continue outer;
                 }
             }

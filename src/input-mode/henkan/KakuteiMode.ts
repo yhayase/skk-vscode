@@ -49,9 +49,21 @@ export class KakuteiMode extends AbstractHenkanMode {
     }
 
     onSymbol(context: AbstractKanaMode, key: string): void {
-        // TODO: @ などの特殊な記号の処理を追加する
+        // まずはローマ字テーブルを見て、かなや記号に変換できるならば変換する
+        let kana = this.romajiInput.processInput(key);
+        let remaining = this.romajiInput.getRemainingRomaji();
+
+        // 変換できる文字があればそれを挿入する(例: "n" -> "ん")
+        if (kana.length > 0) {
+            context.insertStringAndShowRemaining(kana, remaining, false);
+            return;
+        }
+
+        // TODO: @ が単体で入力された場合などの特殊な処理を記述する
+
+        // 変換できない場合は， remaining に入っている記号をそのまま挿入
         this.romajiInput.reset();
-        context.insertStringAndShowRemaining(key, "", false);
+        context.insertStringAndShowRemaining(remaining, "", false);
     }
 
     onSpace(context: AbstractKanaMode): void {
