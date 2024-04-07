@@ -49,7 +49,7 @@ export class MidashigoMode extends AbstractHenkanMode {
         return this.romajiInput;
     }
 
-    henkan(context: AbstractKanaMode, okuri: string): void {
+    henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): void {
         let midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
@@ -62,7 +62,7 @@ export class MidashigoMode extends AbstractHenkanMode {
             return;
         }
 
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, jisyoEntry));
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, jisyoEntry, optionalSuffix));
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
@@ -138,6 +138,32 @@ export class MidashigoMode extends AbstractHenkanMode {
     }
 
     onSymbol(context: AbstractKanaMode, key: string): void {
+        // まずはローマ字テーブルを見て、かなや記号に変換できるならば変換する
+        let kana = this.romajiInput.processInput(key);
+
+        // 以下の記号のいずれかが入力された場合には、その記号を入力するとともに，記号以前の部分について変換を始める
+        // 。、．，」』］!！:：;；
+
+        // "n," と入力された場合，kana が "ん、" となる．そのため、最後の1文字で変換を開始するかを決定する
+        let lastKana = kana[kana.length - 1];
+
+        if (new Set(["。", "、", "．", "，", "」", "』", "］", "!", "！", ":", "：", ";", "；"]).has(lastKana)) {
+            // 最後の1文字を除いた kana を挿入
+            this.romajiInput.reset();
+            context.insertStringAndShowRemaining(kana.slice(0, -1), "", false).then(() => {
+                // 変換を開始する
+                this.henkan(context, "", lastKana);
+            });
+            return;
+        }
+
+        // 変換できる文字があればそれを挿入して終了
+        if (kana.length > 0) {
+            let remaining = this.romajiInput.getRemainingRomaji();
+            context.insertStringAndShowRemaining(kana, remaining, false);
+            return;
+        }
+        
         throw new Error("Method not implemented.");
     }
 

@@ -114,6 +114,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(numberInput);
 
+	let symbolInput = vscode.commands.registerCommand('skk-vscode.symbolInput', (key: string) => {
+		findInputMode().symbolInput(key);
+		updatePreviousEditorAndSelections();
+	});
+	context.subscriptions.push(symbolInput);
+
 	vscode.window.onDidChangeTextEditorSelection(event => {
 		// On cursor moves in event.textEditor
 

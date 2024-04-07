@@ -23,10 +23,10 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
         this.henkanMode = henkanMode;
     }
 
-    insertStringAndShowRemaining(str: string, remaining: string, isOkuri: boolean) {
-        insertOrReplaceSelection(str).then((value) => {
-            this.editor.showRemainingRomaji(remaining, isOkuri, 0);
-        });
+    async insertStringAndShowRemaining(str: string, remaining: string, isOkuri: boolean): Promise<void> {
+        await insertOrReplaceSelection(str);
+        this.editor.showRemainingRomaji(remaining, isOkuri, 0);
+        return Promise.resolve();
     }
 
     public reset(): void {

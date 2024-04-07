@@ -15,24 +15,40 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     private origMidashigo: string;
     private jisyoEntry: Entry;
     private candidateIndex: number = 0;
+    private readonly suffix: string;
 
-    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: MidashigoMode, origMidashigo: string, jisyoEntry: Entry) {
+    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: MidashigoMode, origMidashigo: string, jisyoEntry: Entry, optionalSuffix?: string) {
         super("▼", editor);
         this.prevMode = prevMode;
         this.origMidashigo = origMidashigo;
         this.jisyoEntry = jisyoEntry;
+        this.suffix = optionalSuffix || "";
 
         this.showCandidate(context);
     }
 
     showCandidate(context: AbstractKanaMode) {
-        this.editor.showCandidate(this.jisyoEntry.getCandidateList()[this.candidateIndex]);
+        this.editor.showCandidate(this.jisyoEntry.getCandidateList()[this.candidateIndex], this.suffix);
+    }
+
+    /**
+     * Asynchronously fixates the current candidate and inserts the suffix after the fixed candidate.
+     * @param context The current Kana mode
+     * @returns Promise that resolves to true if the candidate is successfully fixated, false otherwise.
+     */
+    async fixateCandidate(context: AbstractKanaMode): Promise<boolean> {
+        let rval = await this.editor.fixateCandidate(undefined);
+        if (!rval) {
+            return false;
+        }
+        await context.insertStringAndShowRemaining(this.suffix, "", false);
+        return true;
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'l') {
             this.jisyoEntry.onCandidateSelected(this.candidateIndex);
-            this.editor.fixateCandidate(undefined).then(() => {
+            this.fixateCandidate(context).then(() => {
                 setInputMode(AsciiMode.getInstance());
             });
             return;
@@ -51,7 +67,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         if (key === 'q') {
             this.jisyoEntry.onCandidateSelected(this.candidateIndex);
-            this.editor.fixateCandidate(undefined).then(() => {
+            this.fixateCandidate(context).then(() => {
                 context.toggleKanaMode();
                 context.setHenkanMode(KakuteiMode.create(context, this.editor));
             });
@@ -59,7 +75,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.candidateIndex);
-        this.editor.fixateCandidate(undefined).then(() => {
+        this.fixateCandidate(context).then(() => {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
             context.lowerAlphabetInput(key);
         });
@@ -69,14 +85,14 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         context.setHenkanMode(this.prevMode);
         // recover orijinal midashigo
         this.editor.clearCandidate().then(() => {
-            context.insertStringAndShowRemaining("▽" + this.origMidashigo, "", false);
+            context.insertStringAndShowRemaining("▽" + this.origMidashigo + this.suffix, "", false);
         });
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'L') {
             this.jisyoEntry.onCandidateSelected(this.candidateIndex);
-            this.editor.fixateCandidate(undefined).then(() => {
+            this.fixateCandidate(context).then(() => {
                 setInputMode(ZeneiMode.getInstance());
             });
             return;
@@ -87,22 +103,23 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.candidateIndex);
-        this.editor.fixateCandidate(undefined).then(() => {
+        this.fixateCandidate(context).then(() => {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
             return context.upperAlphabetInput(key);
         });
     }
     onNumber(context: AbstractKanaMode, key: string): void {
         this.jisyoEntry.onCandidateSelected(this.candidateIndex);
-        this.editor.fixateCandidate(undefined);
+        this.fixateCandidate(context);
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
         context.numberInput(key);
     }
     onSymbol(context: AbstractKanaMode, key: string): void {
         this.jisyoEntry.onCandidateSelected(this.candidateIndex);
-        this.editor.fixateCandidate(undefined);
-        context.setHenkanMode(KakuteiMode.create(context, this.editor));
-        context.symbolInput(key);
+        this.fixateCandidate(context).then(() => {
+            context.setHenkanMode(KakuteiMode.create(context, this.editor));
+            context.symbolInput(key);
+        });
     }
     onSpace(context: AbstractKanaMode): void {
         if (this.candidateIndex + 1 >= this.jisyoEntry.getCandidateList().length) {
@@ -112,7 +129,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         const MAX_INLINE_CANDIDATES = 3;
         if (this.candidateIndex + 1 >= MAX_INLINE_CANDIDATES) {
-            context.setHenkanMode(new MenuHenkanMode(context, this.editor, this, this.jisyoEntry, this.candidateIndex + 1));
+            context.setHenkanMode(new MenuHenkanMode(context, this.editor, this, this.jisyoEntry, this.candidateIndex + 1, this.suffix));
             return;
         }
 
@@ -139,7 +156,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
     private fixateAndGoKakuteiMode(context: AbstractKanaMode): PromiseLike<boolean> {
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
-        return this.editor.fixateCandidate(undefined);
+        return this.fixateCandidate(context);
     }
 
     onCtrlG(context: AbstractKanaMode): void {
