@@ -1,8 +1,6 @@
-import { romKanaBaseRule } from "../../RomKanaRule";
 import { RomajiInput } from "../../RomajiInput";
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 import { insertOrReplaceSelection, setInputMode } from "../../extension";
-import { Candidate } from "../../jisyo/candidate";
 import { Entry } from "../../jisyo/entry";
 import { getGlobalJisyo } from "../../jisyo/jisyo";
 import { AbstractKanaMode } from "../AbstractKanaMode";
