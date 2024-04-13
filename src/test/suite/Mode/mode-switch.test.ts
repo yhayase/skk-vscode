@@ -98,7 +98,11 @@ suite('Switching between modes test', () => {
     });
 
     test('カタカナモードで q を入力すると、ひらがなモードに切り替わり、アルファベットの入力がひらがなに変換されてエディタに出力される', async () => {
-        setInputMode(KatakanaMode.getInstance());
+        // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        // ひらがなモードで q を入力してカタカナモードに切り替える
+        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "q");
+
         // カタカナモードで q を入力してひらがなモードに切り替える
         await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "q");
 
