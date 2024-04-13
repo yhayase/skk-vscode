@@ -130,6 +130,19 @@ export class RomajiInput {
     }
 
     /**
+     * Finds the exact Kana match for the current Romaji buffer.
+     * @returns The corresponding Kana for the current Romaji buffer, or undefined if no match is found.
+     */
+    public findExactKanaForRomBuffer(): string|undefined {
+        let romBufferStr = this.romBuffer.join('');
+        const rule = romKanaBaseRule.get(romBufferStr);
+        if (rule) {
+            return RomajiInput.ruleToPair(rule, this.kanaType)[0];
+        }
+        return undefined;
+    }
+
+    /**
      * Setter for romBuffer
      */
     private setRomBuffer(romaji: string) : void {
