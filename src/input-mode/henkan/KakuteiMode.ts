@@ -67,8 +67,10 @@ export class KakuteiMode extends AbstractHenkanMode {
     }
 
     onSpace(context: AbstractKanaMode): void {
+        // "n" のように，仮名にできるローマ字がバッファに残っている場合は，スペースの前に仮名を入力する
+        let kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
         this.romajiInput.reset();
-        context.insertStringAndShowRemaining(" ", "", false);
+        context.insertStringAndShowRemaining(kana + " ", "", false);
     }
 
     onEnter(context: AbstractKanaMode): void {

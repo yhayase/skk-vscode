@@ -1,3 +1,4 @@
+import { romKanaBaseRule } from "../../RomKanaRule";
 import { RomajiInput } from "../../RomajiInput";
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 import { insertOrReplaceSelection, setInputMode } from "../../extension";
@@ -168,8 +169,12 @@ export class MidashigoMode extends AbstractHenkanMode {
     }
 
     onSpace(context: AbstractKanaMode): void {
+        // "n" のように，仮名にできるローマ字がバッファに残っている場合は，仮名を入力してから変換を開始する
+        let kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
         this.romajiInput.reset();
-        this.henkan(context, "");
+        context.insertStringAndShowRemaining(kana, "", false).then(() => {
+            this.henkan(context, "");
+        });
     }
 
     onEnter(context: AbstractKanaMode): void {
