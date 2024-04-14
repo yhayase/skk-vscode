@@ -1,6 +1,5 @@
-import * as vscode from 'vscode';
 import { RomKanaRule, romKanaBaseRule } from './RomKanaRule';
-import { insertOrReplaceSelection } from './extension';
+import wanakana = require('wanakana');
 
 /**
  * Class of Romaji Input State and Conversion
@@ -175,5 +174,16 @@ export class RomajiInput {
      */
     public deleteLastChar(): void {
         this.romBuffer.pop();
+    }
+
+    public convertKanaToHiragana(s: string): string {
+        if (this.kanaType === KanaType.hiragana) {
+            return s;
+        }
+
+        // convert katakana to hiragana
+        return s.split('').map(c => {
+            return wanakana.isKatakana(c) ? wanakana.toHiragana(c) : c;
+        }).join('');
     }
 }

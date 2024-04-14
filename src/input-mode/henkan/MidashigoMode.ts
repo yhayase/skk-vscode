@@ -36,7 +36,8 @@ export class MidashigoMode extends AbstractHenkanMode {
     findCandidates(midashigo: string, okuri: string): Entry | Error {
         const okuriAlpha = okuri.length > 0 ? calcFirstAlphabetOfOkurigana(okuri) : "";
         const key = midashigo + okuriAlpha;
-        const candidates = getGlobalJisyo().get(key);
+        const keyForLookup = this.romajiInput.convertKanaToHiragana(key);
+        const candidates = getGlobalJisyo().get(keyForLookup);
         if (candidates === undefined) {
             return new Error('変換できません');
         } else {
