@@ -1,71 +1,42 @@
 # skk-vscode README
 
-This is the README for your extension "skk-vscode". After writing up a brief description, we recommend including the following sections.
+VSCode エディタ内で動作する SKK の、コンセプト実証のための実装です。
+
+[DDSKK](https://github.com/skk-dev/ddskk/) と同じ振舞いを目指していますが、 VSCode 拡張機能の制約のため、変換候補の表示などに違いがあります。
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+* 見出し語への変換ができます。送り有りと送り無しの両方に対応しています。
+* 最初の3つの見出し語まではインラインで表示され、4つ目以降の候補は、7つづつメニューで表示されます。
+* 選択された見出し語は、次の同じ単語の変換の際に、先頭に表示されます。
+* ひらがな、カタカナ、半角英数、全角英数モードの間の遷移ができます。
+* SKK-JISYO.L を自動的に取得して使用します。辞書を変更したり、2つ以上の辞書を使用することは、現時点はできません。
 
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+特に事前の準備は必要ありません。
+
+ただし、 IME やキーバインド変更ソフトウェアがキーを優先して処理する場合、本拡張のキー操作が上手く動かない場合があります。
+適宜、 IME や キーバインド変更ソフトウェアを無効化するなどして対応してください。
+
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+今のところ、設定項目はありません。
 
-For example:
 
-This extension contributes the following settings:
+## Known Issues / Limitations
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+* 辞書登録機能は実装されていません。
+* abbrev mode (英数字による見出し語検索モード) は実装されていません。
+* 変換候補のメニューは、 編集中の**行の行頭に表示**されます。
+  そのため、長い行を編集しているときなどには、候補がエディタに表示されない場合があります。
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+最小限の機能でのリリースです。
+文字の入力と、見出し語への変換が出来ます。
