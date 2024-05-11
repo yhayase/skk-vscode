@@ -19,7 +19,7 @@ suite('Switching between modes test', () => {
 
     test('初期状態のエディタは ascii モードであり、アルファベットの入力がそのままエディタに出力される', async () => {
         // ascii モードで a を入力する
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         let document = vscode.window.activeTextEditor?.document;
@@ -36,9 +36,9 @@ suite('Switching between modes test', () => {
 
     test('エディタに Ctrl+J を入力すると、ひらがなモードに切り替わり、アルファベットの入力はひらがなに変換されてエディタに出力される', async () => {
         // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        await vscode.commands.executeCommand("skk.ctrlJInput");
         // ひらがなモードで a を入力する
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         let document = vscode.window.activeTextEditor?.document;
@@ -55,12 +55,12 @@ suite('Switching between modes test', () => {
 
     test('ひらがなモードで l を入力すると、 ascii モードに切り替わり、アルファベットの入力がそのままエディタに出力される', async () => {
         // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        await vscode.commands.executeCommand("skk.ctrlJInput");
         // ひらがなモードで l を入力して ascii モードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "l");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "l");
 
         // ascii モードで a を入力する
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         let document = vscode.window.activeTextEditor?.document;
@@ -77,12 +77,12 @@ suite('Switching between modes test', () => {
 
     test('ひらがなモードで q を入力すると、カタカナモードに切り替わり、アルファベットの入力がカタカナに変換されてエディタに出力される', async () => {
         // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        await vscode.commands.executeCommand("skk.ctrlJInput");
         // ひらがなモードで q を入力してカタカナモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "q");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "q");
 
         // カタカナモードで a を入力する
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         let document = vscode.window.activeTextEditor?.document;
@@ -99,15 +99,15 @@ suite('Switching between modes test', () => {
 
     test('カタカナモードで q を入力すると、ひらがなモードに切り替わり、アルファベットの入力がひらがなに変換されてエディタに出力される', async () => {
         // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        await vscode.commands.executeCommand("skk.ctrlJInput");
         // ひらがなモードで q を入力してカタカナモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "q");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "q");
 
         // カタカナモードで q を入力してひらがなモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "q");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "q");
 
         // ひらがなモードで a を入力する
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         let document = vscode.window.activeTextEditor?.document;
@@ -124,12 +124,12 @@ suite('Switching between modes test', () => {
 
     test('ひらがなモードで L を入力すると、全英モードに切り替わり、アルファベットの入力が全角文字としてエディタに出力される', async () => {
         // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        await vscode.commands.executeCommand("skk.ctrlJInput");
         // ひらがなモードで L を入力して全英モードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.upperAlphabetInput", "L");
+        await vscode.commands.executeCommand("skk.upperAlphabetInput", "L");
 
         // 全英モードで a を入力する
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         let document = vscode.window.activeTextEditor?.document;
@@ -146,14 +146,14 @@ suite('Switching between modes test', () => {
 
     test('カタカナモードで L を入力すると、全英モードに切り替わり、アルファベットの入力が全角文字としてエディタに出力される', async () => {
         // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        await vscode.commands.executeCommand("skk.ctrlJInput");
         // ひらがなモードで q を入力してカタカナモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "q");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "q");
         // カタカナモードで L を入力して全英モードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.upperAlphabetInput", "L");
+        await vscode.commands.executeCommand("skk.upperAlphabetInput", "L");
 
         // 全英モードで a を入力する
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         let document = vscode.window.activeTextEditor?.document;
@@ -170,14 +170,14 @@ suite('Switching between modes test', () => {
 
     test('全英モードで Ctrl+J を押すとひらがなモードに切り替わり、アルファベットの入力はひらがなに変換されてエディタに出力される', async () => {
         // ascii モードで Ctrl+J を入力してひらがなモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        await vscode.commands.executeCommand("skk.ctrlJInput");
         // ひらがなモードで L を入力して全英モードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "L");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "L");
         // 全英モードで Ctrl+J を入力してひらがなモードに切り替える
-        await vscode.commands.executeCommand("skk-vscode.ctrlJInput");
+        await vscode.commands.executeCommand("skk.ctrlJInput");
 
         // ひらがなモードで a を入力する
-        await vscode.commands.executeCommand("skk-vscode.lowerAlphabetInput", "a");
+        await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         let document = vscode.window.activeTextEditor?.document;

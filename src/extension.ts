@@ -53,7 +53,7 @@ function findInputMode(): IInputMode {
 export async function activate(context: vscode.ExtensionContext) {
 	await jisyo.init(context.globalState);
 
-	// vscode.window.showInformationMessage("skk-vscode: start");
+	// vscode.window.showInformationMessage("SKK: start");
 
 	let previousTextEditor = vscode.window.activeTextEditor;
 	let previousSelections = vscode.window.activeTextEditor?.selections;
@@ -65,56 +65,56 @@ export async function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let lowerAlphaInput = vscode.commands.registerCommand('skk-vscode.lowerAlphabetInput', (key: string) => {
+	let lowerAlphaInput = vscode.commands.registerCommand('skk.lowerAlphabetInput', (key: string) => {
 		findInputMode().lowerAlphabetInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(lowerAlphaInput);
 
 
-	let upperAlphaInput = vscode.commands.registerCommand('skk-vscode.upperAlphabetInput', (key: string) => {
+	let upperAlphaInput = vscode.commands.registerCommand('skk.upperAlphabetInput', (key: string) => {
 		findInputMode().upperAlphabetInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(upperAlphaInput);
 
-	let spaceInput = vscode.commands.registerCommand('skk-vscode.spaceInput', () => {
+	let spaceInput = vscode.commands.registerCommand('skk.spaceInput', () => {
 		findInputMode().spaceInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(spaceInput);
 
-	let ctrlJInput = vscode.commands.registerCommand('skk-vscode.ctrlJInput', () => {
+	let ctrlJInput = vscode.commands.registerCommand('skk.ctrlJInput', () => {
 		findInputMode().ctrlJInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(ctrlJInput);
 
-	let ctrlGInput = vscode.commands.registerCommand('skk-vscode.ctrlGInput', () => {
+	let ctrlGInput = vscode.commands.registerCommand('skk.ctrlGInput', () => {
 		findInputMode().ctrlGInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(ctrlGInput);
 
-	let enterInput = vscode.commands.registerCommand('skk-vscode.enterInput', () => {
+	let enterInput = vscode.commands.registerCommand('skk.enterInput', () => {
 		findInputMode().enterInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(enterInput);
 
-	let backspaceInput = vscode.commands.registerCommand('skk-vscode.backspaceInput', () => {
+	let backspaceInput = vscode.commands.registerCommand('skk.backspaceInput', () => {
 		findInputMode().backspaceInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(backspaceInput);
 
-	let numberInput = vscode.commands.registerCommand('skk-vscode.numberInput', (key: string) => {
+	let numberInput = vscode.commands.registerCommand('skk.numberInput', (key: string) => {
 		findInputMode().numberInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(numberInput);
 
-	let symbolInput = vscode.commands.registerCommand('skk-vscode.symbolInput', (key: string) => {
+	let symbolInput = vscode.commands.registerCommand('skk.symbolInput', (key: string) => {
 		findInputMode().symbolInput(key);
 		updatePreviousEditorAndSelections();
 	});
@@ -131,7 +131,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}
 
-		vscode.window.showInformationMessage("skk-vscode: cursor moves");
+		vscode.window.showInformationMessage("SKK: cursor moves");
 		// clear inputMode state
 		findInputMode().reset();
 	});

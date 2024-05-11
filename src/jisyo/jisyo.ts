@@ -1,11 +1,11 @@
-import { Uri } from "vscode";
+    import { Uri } from "vscode";
 import * as vscode from 'vscode';
 import { Candidate } from "./candidate";
 import { CompositeMap } from "../lib/composite-map";
 
 type Jisyo = Map<string, Candidate[]>;
 
-const userJisyoKey = "skk-vscode.user-jisyo";
+const userJisyoKey = "skk.user-jisyo";
 
 var globalJisyo: Jisyo;
 
@@ -51,8 +51,8 @@ async function saveUserJisyo(memento: vscode.Memento, userJisyo: Jisyo): Promise
 
 
 async function loadSystemJisyoFromUri(memento: vscode.Memento, uri: Uri): Promise<Jisyo> {
-    const systemJisyoKey = "skk-vscode.jisyo";
-    const cacheExpiryKey = "skk-vscode.jisyo-expiry";
+    const systemJisyoKey = "skk.jisyo";
+    const cacheExpiryKey = "skk.jisyo-expiry";
 
     // check if local cache is available
     const cache = memento.get<Object>(systemJisyoKey);
