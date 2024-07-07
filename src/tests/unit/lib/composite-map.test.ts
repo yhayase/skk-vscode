@@ -128,7 +128,7 @@ describe('CompositeMap', () => {
         expect(compositeMap.has('key1')).to.be.true;
     });
 
-    it('has string representation of "[object MultiMap]"', () => {
-        expect(compositeMap.toString()).to.equal('[object MultiMap]');
+    it('has string representation of "[object CompositeMap]"', () => {
+        expect(compositeMap.toString()).to.equal('[object CompositeMap]');
     });
 });
