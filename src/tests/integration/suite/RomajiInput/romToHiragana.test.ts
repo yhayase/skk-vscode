@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { RomajiInput } from "../../../RomajiInput";
+import { RomajiInput } from "../../../../RomajiInput";
 
 suite('RomajiInput.romToHiragana test', () => {
 	test('空の入力に対して空の結果を返す', () => {
