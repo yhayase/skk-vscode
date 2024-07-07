@@ -132,9 +132,9 @@ export class CompositeMap<K, V> implements Map<K, V> {
     }
 
     /**
-     * Returns "[object MultiMap]".
+     * Returns "CompositeMap" as the class name.
      */
     get [Symbol.toStringTag](): string {
-        return "[object MultiMap]";
+        return "CompositeMap";
     }
 }
