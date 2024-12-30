@@ -476,7 +476,22 @@
         "when": "editorTextFocus",
         "key": "backspace"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "skk.dictUrls": {
+          "type": "array",
+          "items": "string",
+          "default": [
+            "http://openlab.jp/skk/skk/dic/SKK-JISYO.L",
+            "http://openlab.jp/skk/skk/dic/SKK-JISYO.zipcode",
+            "http://openlab.jp/skk/skk/dic/SKK-JISYO.fullname"
+          ],
+          "description": "List of SKK dictionary URLs to load"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
