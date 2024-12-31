@@ -387,6 +387,12 @@
         "args": ","
       },
       {
+        "command": "skk.symbolInput",
+        "when": "editorTextFocus",
+        "key": "/",
+        "args": "/"
+      },
+      {
         "command": "skk.numberInput",
         "when": "editorTextFocus",
         "key": "0",
@@ -484,9 +490,9 @@
           "type": "array",
           "items": "string",
           "default": [
-            "http://openlab.jp/skk/skk/dic/SKK-JISYO.L",
-            "http://openlab.jp/skk/skk/dic/SKK-JISYO.zipcode",
-            "http://openlab.jp/skk/skk/dic/SKK-JISYO.fullname"
+            "https://github.com/skk-dev/dict/raw/refs/heads/master/SKK-JISYO.L",
+            "https://github.com/skk-dev/dict/raw/refs/heads/master/zipcode/SKK-JISYO.zipcode",
+            "https://github.com/skk-dev/dict/raw/refs/heads/master/SKK-JISYO.fullname"
           ],
           "description": "List of SKK dictionary URLs to load"
         }
