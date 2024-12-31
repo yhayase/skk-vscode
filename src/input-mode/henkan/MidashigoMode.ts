@@ -24,10 +24,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         this.romajiInput = context.newRomajiInput();
 
         if (initialRomajiInput) {
-            let insertStr = "▽";
-            this.editor.setMidashigoStartToCurrentPosition();
-
-            insertStr += this.romajiInput.processInput(initialRomajiInput.toLowerCase());
+            const insertStr = "▽" + this.romajiInput.processInput(initialRomajiInput.toLowerCase());
             this.editor.setMidashigoStartToCurrentPosition();
             context.insertStringAndShowRemaining(insertStr, this.romajiInput.getRemainingRomaji(), false);
         }
@@ -46,13 +43,13 @@ export class MidashigoMode extends AbstractMidashigoMode {
     }
 
     private henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): void {
-        let midashigo = this.editor.extractMidashigo();
+        const midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
             return;
         }
 
-        let jisyoEntry = this.findCandidates(midashigo, okuri);
+        const jisyoEntry = this.findCandidates(midashigo, okuri);
         if (jisyoEntry instanceof Error) {
             context.showErrorMessage(jisyoEntry.message);
             return;
@@ -77,7 +74,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
 
         if (this.midashigoMode === MidashigoType.okurigana) {
-            let okuri = this.romajiInput.processInput(key.toLowerCase());
+            const okuri = this.romajiInput.processInput(key.toLowerCase());
             if (okuri.length === 0) {
                 this.editor.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), true, 0);
                 return;
@@ -87,7 +84,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
             this.henkan(context, okuri);
         } else {
             // in case this.midashigoMode === MidashigoType.gokan
-            let insertStr = this.romajiInput.processInput(key);
+            const insertStr = this.romajiInput.processInput(key);
             if (insertStr.length !== 0) {
                 insertOrReplaceSelection(insertStr).then((value) => {
                     this.editor.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), false, 0);
@@ -119,7 +116,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
         this.midashigoMode = MidashigoType.okurigana;
 
-        let okuri = this.romajiInput.processInput(key.toLowerCase());
+        const okuri = this.romajiInput.processInput(key.toLowerCase());
         if (okuri.length === 0) {
             this.editor.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), true, 0);
             return;
@@ -135,13 +132,13 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
     onSymbol(context: AbstractKanaMode, key: string): void {
         // まずはローマ字テーブルを見て、かなや記号に変換できるならば変換する
-        let kana = this.romajiInput.processInput(key);
+        const kana = this.romajiInput.processInput(key);
 
         // 以下の記号のいずれかが入力された場合には、その記号を入力するとともに，記号以前の部分について変換を始める
         // 。、．，」』］!！:：;；
 
         // "n," と入力された場合，kana が "ん、" となる．そのため、最後の1文字で変換を開始するかを決定する
-        let lastKana = kana[kana.length - 1];
+        const lastKana = kana[kana.length - 1];
 
         if (new Set(["。", "、", "．", "，", "」", "』", "］", "!", "！", ":", "：", ";", "；"]).has(lastKana)) {
             // 最後の1文字を除いた kana を挿入
@@ -155,7 +152,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
         // 変換できる文字があればそれを挿入して終了
         if (kana.length > 0) {
-            let remaining = this.romajiInput.getRemainingRomaji();
+            const remaining = this.romajiInput.getRemainingRomaji();
             context.insertStringAndShowRemaining(kana, remaining, false);
             return;
         }
@@ -165,7 +162,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
     onSpace(context: AbstractKanaMode): void {
         // "n" のように，仮名にできるローマ字がバッファに残っている場合は，仮名を入力してから変換を開始する
-        let kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
+        const kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
         this.romajiInput.reset();
         context.insertStringAndShowRemaining(kana, "", false).then(() => {
             this.henkan(context, "");
