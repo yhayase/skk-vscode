@@ -6,7 +6,7 @@ import { getGlobalJisyo } from "../../jisyo/jisyo";
 import { AbstractKanaMode } from "../AbstractKanaMode";
 import { AsciiMode } from "../AsciiMode";
 import { ZeneiMode } from "../ZeneiMode";
-import { AbstractHenkanMode } from "./AbstractHenkanMode";
+import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
 
@@ -15,7 +15,7 @@ export enum MidashigoType {
     okurigana // ▽あ*k
 }
 
-export class MidashigoMode extends AbstractHenkanMode {
+export class MidashigoMode extends AbstractMidashigoMode {
     private romajiInput: RomajiInput;
     midashigoMode: MidashigoType = MidashigoType.gokan;
 
@@ -45,11 +45,7 @@ export class MidashigoMode extends AbstractHenkanMode {
         }
     }
 
-    getRomajiInput(): RomajiInput {
-        return this.romajiInput;
-    }
-
-    henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): void {
+    private henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): void {
         let midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
@@ -163,7 +159,7 @@ export class MidashigoMode extends AbstractHenkanMode {
             context.insertStringAndShowRemaining(kana, remaining, false);
             return;
         }
-        
+
         throw new Error("Method not implemented.");
     }
 

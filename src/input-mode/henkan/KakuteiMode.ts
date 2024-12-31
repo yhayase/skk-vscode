@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
-import { AbstractKanaMode } from "../AbstractKanaMode";
-import { AbstractHenkanMode } from "./AbstractHenkanMode";
+import { AbstractKanaMode } from '../AbstractKanaMode';
+import { AbstractHenkanMode } from './AbstractHenkanMode';
 import { RomajiInput } from '../../RomajiInput';
 import { MidashigoMode } from './MidashigoMode';
+import { AbbrevMode } from './AbbrevMode';
 import { setInputMode } from '../../extension';
 import { AsciiMode } from '../AsciiMode';
 import { ZeneiMode } from '../ZeneiMode';
 import { IEditor } from '../../editor/IEditor';
-
 
 export class KakuteiMode extends AbstractHenkanMode {
     romajiInput: RomajiInput;
@@ -54,16 +54,21 @@ export class KakuteiMode extends AbstractHenkanMode {
         let remaining = this.romajiInput.getRemainingRomaji();
 
         // 変換できる文字があればそれを挿入する(例: "n" -> "ん")
-        if (kana.length > 0) {
-            context.insertStringAndShowRemaining(kana, remaining, false);
-            return;
-        }
+        context.insertStringAndShowRemaining(kana, remaining, false).then(() => {
+            // 「/」が入力された場合は SKK Abbrev mode に移行する
+            if (key === "/") {
+                // "/" 自体は挿入しない
+                this.romajiInput.reset();
+                context.setHenkanMode(new AbbrevMode(context, this.editor));
+                return;
+            }
 
-        // TODO: @ が単体で入力された場合などの特殊な処理を記述する
+            // TODO: @ が単体で入力された場合などの特殊な処理を記述する
 
-        // 変換できない場合は， remaining に入っている記号をそのまま挿入
-        this.romajiInput.reset();
-        context.insertStringAndShowRemaining(remaining, "", false);
+            // 変換できない場合は， remaining に入っている記号をそのまま挿入
+            this.romajiInput.reset();
+            context.insertStringAndShowRemaining(remaining, "", false);
+        });
     }
 
     onSpace(context: AbstractKanaMode): void {

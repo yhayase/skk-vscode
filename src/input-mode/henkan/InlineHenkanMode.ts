@@ -8,16 +8,16 @@ import { ZeneiMode } from "../ZeneiMode";
 import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
 import { MenuHenkanMode } from "./MenuHenkanMode";
-import { MidashigoMode } from "./MidashigoMode";
+import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 
 export class InlineHenkanMode extends AbstractHenkanMode {
-    private prevMode: MidashigoMode;
+    private prevMode: AbstractMidashigoMode;
     private origMidashigo: string;
     private jisyoEntry: Entry;
     private candidateIndex: number = 0;
     private readonly suffix: string;
 
-    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: MidashigoMode, origMidashigo: string, jisyoEntry: Entry, optionalSuffix?: string) {
+    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: AbstractMidashigoMode, origMidashigo: string, jisyoEntry: Entry, optionalSuffix?: string) {
         super("▼", editor);
         this.prevMode = prevMode;
         this.origMidashigo = origMidashigo;
