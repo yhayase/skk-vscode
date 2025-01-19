@@ -51,6 +51,7 @@ function findInputMode(): IInputMode {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
+	// Initialize jisyo asynchronusly
 	jisyo.init(context.globalState);
 
 	// vscode.window.showInformationMessage("SKK: start");
@@ -65,6 +66,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
+	const nop = vscode.commands.registerCommand('skk.nop', () => {
+		// nothing to do
+	});
+	context.subscriptions.push(nop);
+
 	const lowerAlphaInput = vscode.commands.registerCommand('skk.lowerAlphabetInput', (key: string) => {
 		findInputMode().lowerAlphabetInput(key);
 		updatePreviousEditorAndSelections();
@@ -159,7 +165,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		const newCandidateList = [{ word, annotation: '' }, ...jisyo.getGlobalJisyo().get(yomi) || []];
+		const newCandidateList = [{ word, annotation: undefined }, ...jisyo.getGlobalJisyo().get(yomi) || []];
 		// dedup
 		const deduped = newCandidateList.filter((candidate, index, self) => self.findIndex(c => c.word === candidate.word) === index);
 		jisyo.getGlobalJisyo().set(yomi, deduped);

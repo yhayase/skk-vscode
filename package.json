@@ -21,6 +21,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "skk.nop",
+        "title": "Nothing to do. Just for activating the extension."
+      },
+      {
         "command": "skk.upperAlphabetInput",
         "title": "Upper Alphabet Input"
       },

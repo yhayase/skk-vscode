@@ -29,10 +29,31 @@ class CompositeJisyo extends CompositeMap<string, Candidate[]> {
         this.memento = memento;
     }
 
+    /**
+     * Register a new Midashigo to the user dictionary.
+     * @param key 
+     * @param value 
+     * @returns 
+     */
     set(key: string, value: Candidate[]): this {
         super.set(key, value);
         saveUserJisyo(this.memento, this.maps[0]);
         return this;
+    }
+
+    /**
+     * Delete a key from the user dictionary.
+     * @param key 
+     * @returns true if the key was found and deleted, false otherwise.
+     */
+    delete(key: string): boolean {
+        if (!this.maps[0].has(key)) {
+            return false;
+        }
+
+        const result = this.maps[0].delete(key);
+        saveUserJisyo(this.memento, this.maps[0]);
+        return result;
     }
 }
 
