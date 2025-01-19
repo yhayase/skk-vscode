@@ -7,8 +7,8 @@ import { IEditor } from "../../editor/IEditor";
 import { Entry } from "../../jisyo/entry";
 
 export class MenuHenkanMode extends AbstractHenkanMode {
-    private prevMode: InlineHenkanMode;
-    private jisyoEntry: Entry;
+    private readonly prevMode: InlineHenkanMode;
+    private readonly jisyoEntry: Entry;
     private readonly candidateIndexStart: number;
     private candidateIndex: number;
     private readonly suffix: string;
@@ -96,14 +96,16 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     }
 
     onSymbol(context: AbstractKanaMode, key: string): void {
-        // In case "." is input, start touroku mode
-        // TODO: implement this
+        if (key === '.') {
+            this.openRegistrationEditor(context);
+            return;
+        }
         throw new Error("Method not implemented.");
     }
 
     onSpace(context: AbstractKanaMode): void {
         if (this.candidateIndex + this.nDisplayCandidates >= this.jisyoEntry.getCandidateList().length) {
-            vscode.window.showInformationMessage("No more candidates");
+            this.openRegistrationEditor(context);
             return;
         }
 
@@ -132,5 +134,17 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     onCtrlG(context: AbstractKanaMode): void {
         this.editor.hideCandidateList();
         this.prevMode.returnToMidashigoMode(context);
+    }
+
+    private async openRegistrationEditor(context: AbstractKanaMode): Promise<void> {
+        const yomi = this.prevMode.getMidashigo();
+        const content = `読み:${yomi}\n単語:`;
+        const doc = await vscode.workspace.openTextDocument({ content, language: "plaintext" });
+        // open the document in a new editor and set cursor just after "単語:"
+        await vscode.window.showTextDocument(doc, { preview: false }).then((editor) => {
+            const position = new vscode.Position(1, 3);
+            editor.selection = new vscode.Selection(position, position);
+        });
+        // Then instruct user to run "skk.tourokuCandidate"
     }
 }

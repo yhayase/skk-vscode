@@ -39,7 +39,7 @@ export class AbbrevMode extends AbstractMidashigoMode {
             return;
         }
 
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, jisyoEntry, optionalSuffix));
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, "", jisyoEntry, optionalSuffix));
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {

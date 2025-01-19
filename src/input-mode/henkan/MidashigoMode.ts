@@ -31,8 +31,8 @@ export class MidashigoMode extends AbstractMidashigoMode {
     }
 
     findCandidates(midashigo: string, okuri: string): Entry | Error {
-        const okuriAlpha = okuri.length > 0 ? calcFirstAlphabetOfOkurigana(okuri) : "";
-        const key = midashigo + okuriAlpha;
+        const okuriAlphabet = okuri.length > 0 ? (calcFirstAlphabetOfOkurigana(okuri) || "") : "";
+        const key = midashigo + okuriAlphabet;
         const keyForLookup = this.romajiInput.convertKanaToHiragana(key);
         const candidates = getGlobalJisyo().get(keyForLookup);
         if (candidates === undefined) {
@@ -55,7 +55,8 @@ export class MidashigoMode extends AbstractMidashigoMode {
             return;
         }
 
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, jisyoEntry, optionalSuffix));
+        const okuriAlphabet = okuri.length > 0 ? (calcFirstAlphabetOfOkurigana(okuri) || "") : "";
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, okuriAlphabet, jisyoEntry, optionalSuffix));
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {

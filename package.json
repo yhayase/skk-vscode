@@ -59,6 +59,10 @@
       {
         "command": "skk.cursorMove",
         "title": "Cursor Move"
+      },
+      {
+        "command": "skk.registerCandidate",
+        "title": "Register Candidate"
       }
     ],
     "keybindings": [
@@ -481,6 +485,11 @@
         "command": "skk.backspaceInput",
         "when": "editorTextFocus",
         "key": "backspace"
+      },
+      {
+        "command": "skk.registerCandidate",
+        "when": "editorTextFocus",
+        "key": "ctrl+alt+r"
       }
     ],
     "configuration": {
