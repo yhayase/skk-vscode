@@ -8,6 +8,9 @@ export function run(): Promise<void> {
 		ui: 'tdd',
 		color: true
 	});
+	
+	// Set a timeout to prevent test case timeout due to extension activation
+	mocha.timeout(10_000); // 10 seconds
 
 	const testsRoot = path.resolve(__dirname, '..');
 
