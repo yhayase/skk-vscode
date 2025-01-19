@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import { RomajiInput } from "../../RomajiInput";
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 import { insertOrReplaceSelection, setInputMode } from "../../extension";
@@ -30,16 +31,32 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
     }
 
-    findCandidates(midashigo: string, okuri: string): Entry | Error {
-        const okuriAlphabet = okuri.length > 0 ? (calcFirstAlphabetOfOkurigana(okuri) || "") : "";
-        const key = midashigo + okuriAlphabet;
-        const keyForLookup = this.romajiInput.convertKanaToHiragana(key);
-        const candidates = getGlobalJisyo().get(keyForLookup);
+    findCandidates(midashigo: string, okuri: string): Entry | undefined {
+        const {key, keyForLookup} = this.createJisyoKey(midashigo, okuri);
+        const candidates =   getGlobalJisyo().get(keyForLookup);
         if (candidates === undefined) {
-            return new Error('変換できません');
+            return undefined;
         } else {
             return new Entry(key, candidates, okuri);
         }
+    }
+
+    private createJisyoKey(midashigo: string, okuri: string): {key: string, keyForLookup: string} {
+        const okuriAlphabet = okuri.length > 0 ? (calcFirstAlphabetOfOkurigana(okuri) || "") : "";
+        const key = midashigo + okuriAlphabet;
+        const keyForLookup = this.romajiInput.convertKanaToHiragana(key);
+        return {key, keyForLookup};
+    }
+
+    private async openRegistrationEditor(yomi: string): Promise<void> {
+        const content = `読み:${yomi}\n単語:`;
+        const doc = await vscode.workspace.openTextDocument({ content, language: "plaintext" });
+        // open the document in a new editor and set cursor just after "単語:"
+        await vscode.window.showTextDocument(doc, { preview: false }).then((editor) => {
+            const position = new vscode.Position(1, 3);
+            editor.selection = new vscode.Selection(position, position);
+        });
+        // Then instruct user to run "skk.tourokuCandidate"
     }
 
     private henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): void {
@@ -50,8 +67,9 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
 
         const jisyoEntry = this.findCandidates(midashigo, okuri);
-        if (jisyoEntry instanceof Error) {
-            context.showErrorMessage(jisyoEntry.message);
+        if (jisyoEntry === undefined) {
+            const {keyForLookup} = this.createJisyoKey(midashigo, okuri);
+            this.openRegistrationEditor(keyForLookup);
             return;
         }
 
