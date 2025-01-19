@@ -10,13 +10,11 @@ const userJisyoKey = "skk.user-jisyo";
 var globalJisyo: Jisyo;
 
 export async function init(memento: vscode.Memento): Promise<void> {
-    vscode.window.showInformationMessage("SKK: initializing jisyo...");
     const cfg = vscode.workspace.getConfiguration("skk");
     const dictUrls = cfg.get<string[]>("dictUrls", ["https://raw.githubusercontent.com/skk-dev/dict/master/SKK-JISYO.L"]);
     const systemJisyos = await loadAllSystemJisyos(memento, dictUrls);
     const userJisyo = loadOrInitUserJisyo(memento);
     globalJisyo = new CompositeJisyo([userJisyo, ...systemJisyos], memento);
-    vscode.window.showInformationMessage("SKK: jisyo initialized!");
 }
 
 export function getGlobalJisyo(): Jisyo {
