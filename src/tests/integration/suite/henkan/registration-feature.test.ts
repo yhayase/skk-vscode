@@ -60,7 +60,7 @@ suite('Registration feature test', async () => {
 
         // 辞書登録のフォーマットでテキストを入力し， registerCandidate コマンドを実行する
         await vscode.commands.executeCommand('type', { text: `読み:${unexistYomi}\n単語:${unexistWord}` });
-        await vscode.commands.executeCommand('skk.registerCandidate');
+        await vscode.commands.executeCommand('skk.registerMidashigo');
 
         // ユーザ辞書に登録されたことを確認する
         const candidate = getGlobalJisyo()?.get(unexistYomi);

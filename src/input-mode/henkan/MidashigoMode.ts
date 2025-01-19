@@ -10,6 +10,7 @@ import { ZeneiMode } from "../ZeneiMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
+import { openRegistrationEditor } from './RegistrationEditor';
 
 export enum MidashigoType {
     gokan, // ▽あ
@@ -48,17 +49,6 @@ export class MidashigoMode extends AbstractMidashigoMode {
         return {key, keyForLookup};
     }
 
-    private async openRegistrationEditor(yomi: string): Promise<void> {
-        const content = `読み:${yomi}\n単語:`;
-        const doc = await vscode.workspace.openTextDocument({ content, language: "plaintext" });
-        // open the document in a new editor and set cursor just after "単語:"
-        await vscode.window.showTextDocument(doc, { preview: false }).then((editor) => {
-            const position = new vscode.Position(1, 3);
-            editor.selection = new vscode.Selection(position, position);
-        });
-        // Then instruct user to run "skk.tourokuCandidate"
-    }
-
     private henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): void {
         const midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
@@ -69,7 +59,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         const jisyoEntry = this.findCandidates(midashigo, okuri);
         if (jisyoEntry === undefined) {
             const {keyForLookup} = this.createJisyoKey(midashigo, okuri);
-            this.openRegistrationEditor(keyForLookup);
+            openRegistrationEditor(keyForLookup);
             return;
         }
 

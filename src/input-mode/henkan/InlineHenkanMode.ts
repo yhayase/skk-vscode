@@ -9,6 +9,7 @@ import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
 import { MenuHenkanMode } from "./MenuHenkanMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
+import { openRegistrationEditor } from './RegistrationEditor';
 
 export class InlineHenkanMode extends AbstractHenkanMode {
     private readonly prevMode: AbstractMidashigoMode;
@@ -125,7 +126,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     }
     onSpace(context: AbstractKanaMode): void {
         if (this.candidateIndex + 1 >= this.jisyoEntry.getCandidateList().length) {
-            this.openRegistrationEditor(context);
+            openRegistrationEditor(this.getMidashigo());
             return;
         }
 
@@ -167,17 +168,5 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
     getMidashigo() {
         return this.origMidashigo + this.okuriAlphabet;
-    }
-
-    private async openRegistrationEditor(context: AbstractKanaMode): Promise<void> {
-        const yomi = this.getMidashigo();
-        const content = `読み:${yomi}\n単語:`;
-        const doc = await vscode.workspace.openTextDocument({ content, language: "plaintext" });
-        // open the document in a new editor and set cursor just after "単語:"
-        await vscode.window.showTextDocument(doc, { preview: false }).then((editor) => {
-            const position = new vscode.Position(1, 3);
-            editor.selection = new vscode.Selection(position, position);
-        });
-        // Then instruct user to run "skk.tourokuCandidate"
     }
 }

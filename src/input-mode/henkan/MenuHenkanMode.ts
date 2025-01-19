@@ -5,6 +5,7 @@ import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { IEditor } from "../../editor/IEditor";
 import { Entry } from "../../jisyo/entry";
+import { openRegistrationEditor } from './RegistrationEditor';
 
 export class MenuHenkanMode extends AbstractHenkanMode {
     private readonly prevMode: InlineHenkanMode;
@@ -97,7 +98,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
 
     onSymbol(context: AbstractKanaMode, key: string): void {
         if (key === '.') {
-            this.openRegistrationEditor(context);
+            openRegistrationEditor(this.prevMode.getMidashigo());
             return;
         }
         throw new Error("Method not implemented.");
@@ -105,7 +106,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
 
     onSpace(context: AbstractKanaMode): void {
         if (this.candidateIndex + this.nDisplayCandidates >= this.jisyoEntry.getCandidateList().length) {
-            this.openRegistrationEditor(context);
+            openRegistrationEditor(this.prevMode.getMidashigo());
             return;
         }
 
@@ -137,14 +138,6 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     }
 
     private async openRegistrationEditor(context: AbstractKanaMode): Promise<void> {
-        const yomi = this.prevMode.getMidashigo();
-        const content = `読み:${yomi}\n単語:`;
-        const doc = await vscode.workspace.openTextDocument({ content, language: "plaintext" });
-        // open the document in a new editor and set cursor just after "単語:"
-        await vscode.window.showTextDocument(doc, { preview: false }).then((editor) => {
-            const position = new vscode.Position(1, 3);
-            editor.selection = new vscode.Selection(position, position);
-        });
-        // Then instruct user to run "skk.tourokuCandidate"
+        await openRegistrationEditor(this.prevMode.getMidashigo());
     }
 }

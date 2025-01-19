@@ -65,8 +65,8 @@
         "title": "Cursor Move"
       },
       {
-        "command": "skk.registerCandidate",
-        "title": "Register Candidate"
+        "command": "skk.registerMidashigo",
+        "title": "Register new Midashigo from the current editor"
       }
     ],
     "keybindings": [
