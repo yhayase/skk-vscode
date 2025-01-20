@@ -491,7 +491,7 @@
         "key": "backspace"
       },
       {
-        "command": "skk.registerCandidate",
+        "command": "skk.registerMidashigo",
         "when": "editorTextFocus",
         "key": "ctrl+alt+r"
       }
