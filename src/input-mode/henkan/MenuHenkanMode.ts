@@ -136,8 +136,4 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         this.editor.hideCandidateList();
         this.prevMode.returnToMidashigoMode(context);
     }
-
-    private async openRegistrationEditor(context: AbstractKanaMode): Promise<void> {
-        await openRegistrationEditor(this.prevMode.getMidashigo());
-    }
 }
