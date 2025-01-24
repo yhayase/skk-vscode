@@ -21,6 +21,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "skk.nop",
+        "title": "Nothing to do. Just for activating the extension."
+      },
+      {
         "command": "skk.upperAlphabetInput",
         "title": "Upper Alphabet Input"
       },
@@ -59,6 +63,10 @@
       {
         "command": "skk.cursorMove",
         "title": "Cursor Move"
+      },
+      {
+        "command": "skk.registerMidashigo",
+        "title": "Register new Midashigo from the current editor"
       }
     ],
     "keybindings": [
@@ -481,6 +489,11 @@
         "command": "skk.backspaceInput",
         "when": "editorTextFocus",
         "key": "backspace"
+      },
+      {
+        "command": "skk.registerMidashigo",
+        "when": "editorTextFocus",
+        "key": "ctrl+alt+r"
       }
     ],
     "configuration": {

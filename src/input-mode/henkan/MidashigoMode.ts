@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import { RomajiInput } from "../../RomajiInput";
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 import { insertOrReplaceSelection, setInputMode } from "../../extension";
@@ -9,6 +10,7 @@ import { ZeneiMode } from "../ZeneiMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
+import { openRegistrationEditor } from './RegistrationEditor';
 
 export enum MidashigoType {
     gokan, // ▽あ
@@ -30,16 +32,21 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
     }
 
-    findCandidates(midashigo: string, okuri: string): Entry | Error {
-        const okuriAlpha = okuri.length > 0 ? calcFirstAlphabetOfOkurigana(okuri) : "";
-        const key = midashigo + okuriAlpha;
-        const keyForLookup = this.romajiInput.convertKanaToHiragana(key);
-        const candidates = getGlobalJisyo().get(keyForLookup);
+    findCandidates(midashigo: string, okuri: string): Entry | undefined {
+        const {key, keyForLookup} = this.createJisyoKey(midashigo, okuri);
+        const candidates =   getGlobalJisyo().get(keyForLookup);
         if (candidates === undefined) {
-            return new Error('変換できません');
+            return undefined;
         } else {
             return new Entry(key, candidates, okuri);
         }
+    }
+
+    private createJisyoKey(midashigo: string, okuri: string): {key: string, keyForLookup: string} {
+        const okuriAlphabet = okuri.length > 0 ? (calcFirstAlphabetOfOkurigana(okuri) || "") : "";
+        const key = midashigo + okuriAlphabet;
+        const keyForLookup = this.romajiInput.convertKanaToHiragana(key);
+        return {key, keyForLookup};
     }
 
     private henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): void {
@@ -50,12 +57,14 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
 
         const jisyoEntry = this.findCandidates(midashigo, okuri);
-        if (jisyoEntry instanceof Error) {
-            context.showErrorMessage(jisyoEntry.message);
+        if (jisyoEntry === undefined) {
+            const {keyForLookup} = this.createJisyoKey(midashigo, okuri);
+            openRegistrationEditor(keyForLookup);
             return;
         }
 
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, jisyoEntry, optionalSuffix));
+        const okuriAlphabet = okuri.length > 0 ? (calcFirstAlphabetOfOkurigana(okuri) || "") : "";
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, okuriAlphabet, jisyoEntry, optionalSuffix));
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {

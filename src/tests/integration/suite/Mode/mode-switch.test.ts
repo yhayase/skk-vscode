@@ -1,8 +1,5 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { setInputMode } from '../../../../extension';
-import { AsciiMode } from '../../../../input-mode/AsciiMode';
-import { KatakanaMode } from '../../../../input-mode/KatakanaMode';
 
 suite('Switching between modes test', () => {
     setup('Open a new empty editor', async () => {

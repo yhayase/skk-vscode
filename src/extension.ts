@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { IInputMode } from './input-mode/IInputMode';
 import { AsciiMode } from './input-mode/AsciiMode';
 import * as jisyo from './jisyo/jisyo';
+import { registerMidashigo } from './input-mode/henkan/RegistrationEditor';
 
 var timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
 
@@ -51,7 +52,8 @@ function findInputMode(): IInputMode {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-	await jisyo.init(context.globalState);
+	// Initialize jisyo asynchronusly
+	jisyo.init(context.globalState);
 
 	// vscode.window.showInformationMessage("SKK: start");
 
@@ -65,60 +67,69 @@ export async function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let lowerAlphaInput = vscode.commands.registerCommand('skk.lowerAlphabetInput', (key: string) => {
+	const nop = vscode.commands.registerCommand('skk.nop', () => {
+		// nothing to do
+	});
+	context.subscriptions.push(nop);
+
+	const lowerAlphaInput = vscode.commands.registerCommand('skk.lowerAlphabetInput', (key: string) => {
 		findInputMode().lowerAlphabetInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(lowerAlphaInput);
 
-
-	let upperAlphaInput = vscode.commands.registerCommand('skk.upperAlphabetInput', (key: string) => {
+	const upperAlphaInput = vscode.commands.registerCommand('skk.upperAlphabetInput', (key: string) => {
 		findInputMode().upperAlphabetInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(upperAlphaInput);
 
-	let spaceInput = vscode.commands.registerCommand('skk.spaceInput', () => {
+	const spaceInput = vscode.commands.registerCommand('skk.spaceInput', () => {
 		findInputMode().spaceInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(spaceInput);
 
-	let ctrlJInput = vscode.commands.registerCommand('skk.ctrlJInput', () => {
+	const ctrlJInput = vscode.commands.registerCommand('skk.ctrlJInput', () => {
 		findInputMode().ctrlJInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(ctrlJInput);
 
-	let ctrlGInput = vscode.commands.registerCommand('skk.ctrlGInput', () => {
+	const ctrlGInput = vscode.commands.registerCommand('skk.ctrlGInput', () => {
 		findInputMode().ctrlGInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(ctrlGInput);
 
-	let enterInput = vscode.commands.registerCommand('skk.enterInput', () => {
+	const enterInput = vscode.commands.registerCommand('skk.enterInput', () => {
 		findInputMode().enterInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(enterInput);
 
-	let backspaceInput = vscode.commands.registerCommand('skk.backspaceInput', () => {
+	const backspaceInput = vscode.commands.registerCommand('skk.backspaceInput', () => {
 		findInputMode().backspaceInput();
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(backspaceInput);
 
-	let numberInput = vscode.commands.registerCommand('skk.numberInput', (key: string) => {
+	const numberInput = vscode.commands.registerCommand('skk.numberInput', (key: string) => {
 		findInputMode().numberInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(numberInput);
 
-	let symbolInput = vscode.commands.registerCommand('skk.symbolInput', (key: string) => {
+	const symbolInput = vscode.commands.registerCommand('skk.symbolInput', (key: string) => {
 		findInputMode().symbolInput(key);
 		updatePreviousEditorAndSelections();
 	});
 	context.subscriptions.push(symbolInput);
+
+	const registerCandidateCommand = vscode.commands.registerCommand('skk.registerMidashigo', async () => {
+		await registerMidashigo();
+	});
+	context.subscriptions.push(registerCandidateCommand);
 
 	vscode.window.onDidChangeTextEditorSelection(event => {
 		// On cursor moves in event.textEditor

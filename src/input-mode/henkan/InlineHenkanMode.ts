@@ -9,18 +9,22 @@ import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
 import { MenuHenkanMode } from "./MenuHenkanMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
+import { openRegistrationEditor } from './RegistrationEditor';
+import { toHiragana } from 'wanakana';
 
 export class InlineHenkanMode extends AbstractHenkanMode {
-    private prevMode: AbstractMidashigoMode;
-    private origMidashigo: string;
-    private jisyoEntry: Entry;
+    private readonly prevMode: AbstractMidashigoMode;
+    private readonly origMidashigo: string;
+    private readonly okuriAlphabet: string;
+    private readonly jisyoEntry: Entry;
     private candidateIndex: number = 0;
     private readonly suffix: string;
 
-    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: AbstractMidashigoMode, origMidashigo: string, jisyoEntry: Entry, optionalSuffix?: string) {
+    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: AbstractMidashigoMode, origMidashigo: string, okuriAlphabet: string, jisyoEntry: Entry, optionalSuffix?: string) {
         super("▼", editor);
         this.prevMode = prevMode;
         this.origMidashigo = origMidashigo;
+        this.okuriAlphabet = okuriAlphabet;
         this.jisyoEntry = jisyoEntry;
         this.suffix = optionalSuffix || "";
 
@@ -123,7 +127,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     }
     onSpace(context: AbstractKanaMode): void {
         if (this.candidateIndex + 1 >= this.jisyoEntry.getCandidateList().length) {
-            vscode.window.showInformationMessage("No more candidates");
+            openRegistrationEditor(this.getMidashigo());
             return;
         }
 
@@ -161,5 +165,9 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
     onCtrlG(context: AbstractKanaMode): void {
         this.returnToMidashigoMode(context);
+    }
+
+    getMidashigo() {
+        return toHiragana(this.origMidashigo) + this.okuriAlphabet;
     }
 }

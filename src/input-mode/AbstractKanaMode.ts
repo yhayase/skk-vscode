@@ -7,7 +7,6 @@ import { AbstractInputMode } from './AbstractInputMode';
 import { IInputMode } from './IInputMode';
 import { AbstractHenkanMode } from './henkan/AbstractHenkanMode';
 import { KakuteiMode } from './henkan/KakuteiMode';
-import { MidashigoMode, MidashigoType } from './henkan/MidashigoMode';
 
 /**
  * Parent abstract class of Hiragana and Katakana input modes.
@@ -49,7 +48,6 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
             return Promise.resolve(undefined);
         }
 
-        let success = false;
         if (candidateList instanceof Error) {
             vscode.window.showInformationMessage(candidateList.message);
 
@@ -87,49 +85,6 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
      */
     showErrorMessage(message: string) {
         vscode.window.showErrorMessage(message);
-    }
-
-    /**
-     * Whole henkan process is contained in this method.
-     * @deprecated Use extractMidashigo() and proposeCandidatesToUser() separately.
-     * @param midashigoMode callback class to call findCandidates() and showCandidate()
-     * @param okuri okuri-gana string if exists
-     * @returns success or not
-     */
-    doHenkan(midashigoMode: MidashigoMode, okuri: string): boolean {
-        let midashigo = this.editor.extractMidashigo();
-        if (!midashigo) {
-            return false;
-        }
-
-        let entry = midashigoMode.findCandidates(convertKatakanaToHiragana(midashigo), okuri);
-        if (entry instanceof Error) {
-            vscode.window.showInformationMessage(entry.message);
-
-            this.setHenkanMode(KakuteiMode.create(this, this.editor));
-            return false;
-        }
-
-        this.proposeCandidatesToUser(entry.getCandidateList()).then((selected) => {
-            if (selected) {
-                this.fixateSelectedItem(selected.label).then((value) => {
-                    this.editor.showRemainingRomaji("", false, 0);
-                    this.setHenkanMode(KakuteiMode.create(this, this.editor));
-                });
-            } else {
-                // SKK inserts okuri-gana as gokan when henkan is canceled
-                midashigoMode.midashigoMode = MidashigoType.gokan;
-
-                // but there is no okurigana on Space key
-                if (okuri) {
-                    insertOrReplaceSelection(okuri).then((value) => {
-                        this.editor.showRemainingRomaji("", false, 0);
-                    });
-                }
-            }
-        });
-
-        return true;
     }
 
     public lowerAlphabetInput(key: string): void {

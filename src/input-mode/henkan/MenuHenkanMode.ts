@@ -5,10 +5,11 @@ import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { IEditor } from "../../editor/IEditor";
 import { Entry } from "../../jisyo/entry";
+import { openRegistrationEditor } from './RegistrationEditor';
 
 export class MenuHenkanMode extends AbstractHenkanMode {
-    private prevMode: InlineHenkanMode;
-    private jisyoEntry: Entry;
+    private readonly prevMode: InlineHenkanMode;
+    private readonly jisyoEntry: Entry;
     private readonly candidateIndexStart: number;
     private candidateIndex: number;
     private readonly suffix: string;
@@ -96,14 +97,16 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     }
 
     onSymbol(context: AbstractKanaMode, key: string): void {
-        // In case "." is input, start touroku mode
-        // TODO: implement this
+        if (key === '.') {
+            openRegistrationEditor(this.prevMode.getMidashigo());
+            return;
+        }
         throw new Error("Method not implemented.");
     }
 
     onSpace(context: AbstractKanaMode): void {
         if (this.candidateIndex + this.nDisplayCandidates >= this.jisyoEntry.getCandidateList().length) {
-            vscode.window.showInformationMessage("No more candidates");
+            openRegistrationEditor(this.prevMode.getMidashigo());
             return;
         }
 

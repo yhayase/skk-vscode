@@ -13,7 +13,7 @@ export async function init(memento: vscode.Memento): Promise<void> {
     const cfg = vscode.workspace.getConfiguration("skk");
     const dictUrls = cfg.get<string[]>("dictUrls", ["https://raw.githubusercontent.com/skk-dev/dict/master/SKK-JISYO.L"]);
     const systemJisyos = await loadAllSystemJisyos(memento, dictUrls);
-    let userJisyo = loadOrInitUserJisyo(memento);
+    const userJisyo = loadOrInitUserJisyo(memento);
     globalJisyo = new CompositeJisyo([userJisyo, ...systemJisyos], memento);
 }
 
@@ -29,17 +29,37 @@ class CompositeJisyo extends CompositeMap<string, Candidate[]> {
         this.memento = memento;
     }
 
+    /**
+     * Register a new Midashigo to the user dictionary.
+     * @param key 
+     * @param value 
+     * @returns 
+     */
     set(key: string, value: Candidate[]): this {
         super.set(key, value);
         saveUserJisyo(this.memento, this.maps[0]);
         return this;
+    }
+
+    /**
+     * Delete a key from the user dictionary.
+     * @param key 
+     * @returns true if the key was found and deleted, false otherwise.
+     */
+    delete(key: string): boolean {
+        if (!this.maps[0].has(key)) {
+            return false;
+        }
+
+        const result = this.maps[0].delete(key);
+        saveUserJisyo(this.memento, this.maps[0]);
+        return result;
     }
 }
 
 function loadOrInitUserJisyo(memento: vscode.Memento): Jisyo {
     // check if local cache is available
     const cache = memento.get<Object>(userJisyoKey);
-    const now = Date.now();
     if (cache) {
         return new Map(Object.entries(cache));
     }
@@ -79,8 +99,8 @@ async function loadAllSystemJisyos(memento: vscode.Memento, urls: string[]): Pro
     });
 
     const results = await Promise.all(promises);
-    await memento.update("skk.jisyoCache", savedCache);
-    await memento.update("skk.jisyoCacheExpiries", savedExpiries);
+    memento.update("skk.jisyoCache", savedCache); // execute asynchronously
+    memento.update("skk.jisyoCacheExpiries", savedExpiries); // execute asynchronously
     return results;
 }
 
@@ -91,35 +111,6 @@ async function fetchAndDecodeDictionary(url: string): Promise<Jisyo> {
     }
     const rawJisyo = Buffer.from(await response.arrayBuffer());
     return rawSKKJisyoToJisyo(rawJisyo);
-}
-
-async function loadSystemJisyoFromUri(memento: vscode.Memento, uri: Uri): Promise<Jisyo> {
-    const systemJisyoKey = "skk.jisyo";
-    const cacheExpiryKey = "skk.jisyo-expiry";
-
-    // check if local cache is available
-    const cache = memento.get<Object>(systemJisyoKey);
-    const cacheExpiry = memento.get<number>(cacheExpiryKey);
-    const now = Date.now();
-    if (cache && cacheExpiry && now < cacheExpiry) {
-        return new Map(Object.entries(cache));
-    }
-
-    // clear cache
-    await memento.update(systemJisyoKey, undefined);
-    await memento.update(cacheExpiryKey, undefined);
-
-    // download jisyo from uri
-    const response = await fetch(uri.toString());
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const rawJisyo = Buffer.from(await response.arrayBuffer());
-
-    const jisyo = rawSKKJisyoToJisyo(rawJisyo);
-    await memento.update(systemJisyoKey, Object.fromEntries(jisyo));
-    await memento.update(cacheExpiryKey, now + 1000 * 60 * 60 * 24 * 30); // 30 days
-    return jisyo;
 }
 
 function rawSKKJisyoToJisyo(rawLines: Buffer): Jisyo {
