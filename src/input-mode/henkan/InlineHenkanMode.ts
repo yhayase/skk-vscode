@@ -10,6 +10,7 @@ import { KakuteiMode } from "./KakuteiMode";
 import { MenuHenkanMode } from "./MenuHenkanMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { openRegistrationEditor } from './RegistrationEditor';
+import { toHiragana } from 'wanakana';
 
 export class InlineHenkanMode extends AbstractHenkanMode {
     private readonly prevMode: AbstractMidashigoMode;
@@ -167,6 +168,6 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     }
 
     getMidashigo() {
-        return this.origMidashigo + this.okuriAlphabet;
+        return toHiragana(this.origMidashigo) + this.okuriAlphabet;
     }
 }
