@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { RomajiInput } from "../../../../RomajiInput";
 
-suite('RomajiInput.romToHiragana test', () => {
+suite('ローマ字変換では', () => {
 	test('空の入力に対して空の結果を返す', () => {
         assert.deepEqual(RomajiInput["romToHiragana"](""), ["", ""]);
 	});

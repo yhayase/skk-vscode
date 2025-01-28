@@ -3,11 +3,11 @@ import * as vscode from 'vscode';
 import { getGlobalJisyo } from '../../../../jisyo/jisyo';
 import { expect } from 'chai';
 
-suite('Registration feature test', async () => {
+suite('辞書登録機能において', async () => {
     const unexistYomi = 'りですごじめわゅょぼざうにろせふよふ';
     const unexistKatakanaYomi = 'リデスゴジメワュョボザウニロセフヨフ';
-    const okuriganaAlphabet = 'Sa';
-    const okuriganaAlphabetPrefix = 's';
+    const okuriganaAlphabetConsonant = 's';
+    const okuriganaAlphabetVowel = 'a';
 
     setup('新しい空のエディタを開き、見出し語が登録されていない状態にする', async () => {
         await vscode.commands.executeCommand('workbench.action.files.newUntitledFile');
@@ -15,7 +15,7 @@ suite('Registration feature test', async () => {
 
         const globalJisyo = getGlobalJisyo();
         globalJisyo?.delete(unexistYomi);
-        globalJisyo?.delete(unexistYomi + okuriganaAlphabetPrefix);
+        globalJisyo?.delete(unexistYomi + okuriganaAlphabetConsonant);
     });
 
     teardown('エディタを閉じ、登録された不要な見出し語を削除する', async () => {
@@ -24,7 +24,7 @@ suite('Registration feature test', async () => {
 
         const globalJisyo = getGlobalJisyo();
         globalJisyo?.delete(unexistYomi);
-        globalJisyo?.delete(unexistYomi + okuriganaAlphabetPrefix);
+        globalJisyo?.delete(unexistYomi + okuriganaAlphabetConsonant);
     });
 
     test('存在しない送りなし見出し語を変換しようとすると、辞書登録エディタが開く', async () => {
@@ -72,32 +72,29 @@ suite('Registration feature test', async () => {
         // エディタに，辞書に存在しない語の読みの語感を入力する
         await vscode.commands.executeCommand('type', { text: unexistYomi });
 
-        // エディタに，辞書に存在しない語の読みの送り仮名を入力し、変換を試みる
-        for (const c of okuriganaAlphabet) {
-            if (c === c.toUpperCase()) {
-                await vscode.commands.executeCommand('skk.upperAlphabetInput', c);
-            } else {
-                await vscode.commands.executeCommand('skk.lowerAlphabetInput', c);
-            }
-        }
+        // 子音の大文字を入力し、送りがなの区切りとする
+        await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
+        const disposable2 = vscode.workspace.onDidChangeTextDocument(e => {
+            disposable2.dispose();
+            // 1つ目の候補が出ている状態で、さらにスペースキーを入力する
+            vscode.commands.executeCommand('skk.spaceInput');
+        });
 
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise((resolve, reject) => {
-            const disposable = vscode.workspace.onDidOpenTextDocument(async newDocument => {
-                disposable.dispose();
+            const disposable1 = vscode.workspace.onDidOpenTextDocument(async newDocument => {
+                disposable1.dispose();
                 try {
-                    expect(newDocument.getText()).equal(`読み:${unexistYomi + okuriganaAlphabetPrefix}\n単語:`);
-                    vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+                    expect(newDocument.getText()).equal(`読み:${unexistYomi + okuriganaAlphabetConsonant}\n単語:`);
+                    // vscode.commands.executeCommand('workbench.action.closeActiveEditor');
                     resolve();
                 } catch (e) {
                     reject(e);
                 }
             });
 
-            // FIXME: 非同期処理によって確率的に失敗する．本来は最後のアルファベットを入力する前に設定する onDidChangeTextDocument で実行すべき
-            // スペースキーを入力して、見出し語の変換を試みる
-            vscode.commands.executeCommand('skk.spaceInput');
-            // onDidOpenTextDocument が発火するはず
+            // 送り仮名の母音を入力して、変換を開始する
+            vscode.commands.executeCommand('skk.lowerAlphabetInput', okuriganaAlphabetVowel);
         });
     });
 
@@ -204,7 +201,7 @@ suite('Registration feature test', async () => {
 
         // 存在しない送りなし見出し語の候補を1つ登録する
         const existWord = '候補1';
-        getGlobalJisyo().set(unexistYomi + okuriganaAlphabetPrefix, [{ word: existWord, annotation: undefined }]);
+        getGlobalJisyo().set(unexistYomi + okuriganaAlphabetConsonant, [{ word: existWord, annotation: undefined }]);
 
         // ひらがなモードに切り替える
         await vscode.commands.executeCommand('skk.ctrlJInput');
@@ -216,30 +213,28 @@ suite('Registration feature test', async () => {
         await vscode.commands.executeCommand('type', { text: unexistYomi });
 
         // エディタに，辞書に存在しない語の読みの送り仮名を入力し、変換を開始する
-        for (const c of okuriganaAlphabet) {
-            if (c === c.toUpperCase()) {
-                await vscode.commands.executeCommand('skk.upperAlphabetInput', c);
-            } else {
-                await vscode.commands.executeCommand('skk.lowerAlphabetInput', c);
-            }
-        }
-
-        const disposable1 = await vscode.workspace.onDidChangeTextDocument(async e => {
-            disposable1.dispose();
-            // 1つ目の候補が出ている状態で、さらにスペースキーを入力する
-            await vscode.commands.executeCommand('skk.spaceInput');
-        });
-
+        await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
-        return new Promise(resolve => {
-            const disposable = vscode.workspace.onDidChangeTextDocument(async e => {
-                if (e.document !== document) {
-                    disposable.dispose();
-                    assert.equal(e.document.getText(), `読み:${unexistYomi + okuriganaAlphabetPrefix}\n単語:`);
+        return new Promise(async (resolve, reject) => {
+            const disposable1 = vscode.workspace.onDidOpenTextDocument(async document => {
+                disposable1.dispose();
+                try {
+                    expect(document.getText()).equal(`読み:${unexistYomi + okuriganaAlphabetConsonant}\n単語:`);
                     await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
                     resolve();
+                } catch (e) {
+                    reject(e);
                 }
             });
+
+            const disposable2 = await vscode.workspace.onDidChangeTextDocument(async e => {
+                disposable2.dispose();
+                // 1つ目の候補が出ている状態で、さらにスペースキーを入力する
+                await vscode.commands.executeCommand('skk.spaceInput');
+            });
+
+            // 送り仮名の母音を入力して、変換を開始する
+            await vscode.commands.executeCommand('skk.lowerAlphabetInput', okuriganaAlphabetVowel);
         });
     });
 

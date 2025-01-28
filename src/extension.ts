@@ -5,8 +5,9 @@ import { IInputMode } from './input-mode/IInputMode';
 import { AsciiMode } from './input-mode/AsciiMode';
 import * as jisyo from './jisyo/jisyo';
 import { registerMidashigo } from './input-mode/henkan/RegistrationEditor';
+import * as AsyncLock from 'async-lock';
 
-var timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
+let timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
 
 /**
  * Map to hold input mode corresponding to each text editor.
@@ -16,7 +17,12 @@ var timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
  * Note that WeakMap is used to avoid memory leak.
  * (TextEditor is a disposable object, so it is not appropriate to use it as a key of a Map.)
  */
-let inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
+const inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
+
+/**
+ * Mutex to avoid executing multiple commands at the same time.
+ */
+const commandLock = new AsyncLock();
 
 /**
  * Set input mode to the current active text editor.
@@ -73,61 +79,81 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(nop);
 
 	const lowerAlphaInput = vscode.commands.registerCommand('skk.lowerAlphabetInput', (key: string) => {
-		findInputMode().lowerAlphabetInput(key);
-		updatePreviousEditorAndSelections();
+		commandLock.acquire('skk', async () => {
+			findInputMode().lowerAlphabetInput(key);
+			updatePreviousEditorAndSelections();
+		});
 	});
 	context.subscriptions.push(lowerAlphaInput);
 
 	const upperAlphaInput = vscode.commands.registerCommand('skk.upperAlphabetInput', (key: string) => {
-		findInputMode().upperAlphabetInput(key);
-		updatePreviousEditorAndSelections();
+		commandLock.acquire('skk', async () => {
+			findInputMode().upperAlphabetInput(key);
+			updatePreviousEditorAndSelections();
+		});
 	});
 	context.subscriptions.push(upperAlphaInput);
 
 	const spaceInput = vscode.commands.registerCommand('skk.spaceInput', () => {
-		findInputMode().spaceInput();
-		updatePreviousEditorAndSelections();
+		commandLock.acquire('skk', async () => {
+			findInputMode().spaceInput();
+			updatePreviousEditorAndSelections();
+		});
 	});
 	context.subscriptions.push(spaceInput);
 
 	const ctrlJInput = vscode.commands.registerCommand('skk.ctrlJInput', () => {
-		findInputMode().ctrlJInput();
-		updatePreviousEditorAndSelections();
+		commandLock.acquire('skk', async () => {
+			findInputMode().ctrlJInput();
+			updatePreviousEditorAndSelections();
+		});
 	});
 	context.subscriptions.push(ctrlJInput);
 
 	const ctrlGInput = vscode.commands.registerCommand('skk.ctrlGInput', () => {
-		findInputMode().ctrlGInput();
-		updatePreviousEditorAndSelections();
+		commandLock.acquire('skk', async () => {
+			findInputMode().ctrlGInput();
+			updatePreviousEditorAndSelections();
+		});
 	});
 	context.subscriptions.push(ctrlGInput);
 
 	const enterInput = vscode.commands.registerCommand('skk.enterInput', () => {
-		findInputMode().enterInput();
-		updatePreviousEditorAndSelections();
+		commandLock.acquire('skk', async () => {
+			findInputMode().enterInput();
+			updatePreviousEditorAndSelections();
+		});
 	});
 	context.subscriptions.push(enterInput);
 
 	const backspaceInput = vscode.commands.registerCommand('skk.backspaceInput', () => {
-		findInputMode().backspaceInput();
-		updatePreviousEditorAndSelections();
+		commandLock.acquire('skk', async () => {
+			findInputMode().backspaceInput();
+			updatePreviousEditorAndSelections();
+		});
 	});
 	context.subscriptions.push(backspaceInput);
 
 	const numberInput = vscode.commands.registerCommand('skk.numberInput', (key: string) => {
-		findInputMode().numberInput(key);
-		updatePreviousEditorAndSelections();
+		commandLock.acquire('skk', async () => {
+			findInputMode().numberInput(key);
+			updatePreviousEditorAndSelections();
+		});
 	});
 	context.subscriptions.push(numberInput);
 
 	const symbolInput = vscode.commands.registerCommand('skk.symbolInput', (key: string) => {
-		findInputMode().symbolInput(key);
-		updatePreviousEditorAndSelections();
+		commandLock.acquire('skk', async () => {
+			findInputMode().symbolInput(key);
+			updatePreviousEditorAndSelections();
+		});
 	});
 	context.subscriptions.push(symbolInput);
 
 	const registerCandidateCommand = vscode.commands.registerCommand('skk.registerMidashigo', async () => {
-		await registerMidashigo();
+		commandLock.acquire('skk', async () => {
+			await registerMidashigo();
+		});
 	});
 	context.subscriptions.push(registerCandidateCommand);
 
