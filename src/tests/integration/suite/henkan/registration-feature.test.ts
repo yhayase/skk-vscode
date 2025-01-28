@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { getGlobalJisyo } from '../../../../jisyo/jisyo';
 import { expect } from 'chai';
 
-suite('Registration feature test', async () => {
+suite('辞書登録機能において', async () => {
     const unexistYomi = 'りですごじめわゅょぼざうにろせふよふ';
     const unexistKatakanaYomi = 'リデスゴジメワュョボザウニロセフヨフ';
     const okuriganaAlphabetConsonant = 's';

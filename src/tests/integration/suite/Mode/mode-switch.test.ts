@@ -2,12 +2,12 @@ import * as assert from 'assert';
 import { expect } from 'chai';
 import * as vscode from 'vscode';
 
-suite('Switching between modes test', () => {
-    setup('Open a new empty editor', async () => {
+suite('入力モード切り替えにおいて', () => {
+    setup('新しい空のエディタを開く', async () => {
         await vscode.commands.executeCommand('workbench.action.files.newUntitledFile');
     });
 
-    teardown('Close the opened editor', async () => {
+    teardown('エディタを全て閉じる', async () => {
         await vscode.commands.executeCommand('workbench.action.closeAllEditors');
     });
 
