@@ -11,6 +11,7 @@ import { MenuHenkanMode } from "./MenuHenkanMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { openRegistrationEditor } from './RegistrationEditor';
 import { toHiragana } from 'wanakana';
+import { getGlobalJisyo } from '../../jisyo/jisyo';
 
 export class InlineHenkanMode extends AbstractHenkanMode {
     private readonly prevMode: AbstractMidashigoMode;
@@ -93,6 +94,13 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         });
     }
 
+    clearMidashigoAndReturnToKakuteiMode(context: AbstractKanaMode) {
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        this.editor.clearCandidate().then(() => {
+            context.insertStringAndShowRemaining("", "", false);
+        });
+    }
+
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'L') {
             this.jisyoEntry.onCandidateSelected(this.candidateIndex);
@@ -103,7 +111,22 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         }
 
         // in case "X" is input, the current candidate is asked to be deleted from the jisyo
-        // TODO: implement this
+        if (key === 'X') {
+            const midashigoToBeDeleted = this.getMidashigo();
+            const candidateToBeDeleted = this.jisyoEntry.getRawCandidateList()[this.candidateIndex];
+
+            // confirm to delete the candidate
+            const result = vscode.window.showInformationMessage(`Delete "${midashigoToBeDeleted} ${candidateToBeDeleted.word}" from the user dictionary?`, "Yes", "No");
+            result.then((value) => {
+                if (value === "Yes") {
+                    getGlobalJisyo().deleteCandidate(midashigoToBeDeleted, candidateToBeDeleted);
+                    this.clearMidashigoAndReturnToKakuteiMode(context);
+                    return;
+                }
+            });
+            return;
+        }
+
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.candidateIndex);

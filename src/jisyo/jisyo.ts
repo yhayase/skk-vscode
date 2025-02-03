@@ -7,7 +7,7 @@ type Jisyo = Map<string, Candidate[]>;
 
 const userJisyoKey = "skk.user-jisyo";
 
-var globalJisyo: Jisyo;
+var globalJisyo: CompositeJisyo;
 
 export async function init(memento: vscode.Memento): Promise<void> {
     const cfg = vscode.workspace.getConfiguration("skk");
@@ -17,7 +17,7 @@ export async function init(memento: vscode.Memento): Promise<void> {
     globalJisyo = new CompositeJisyo([userJisyo, ...systemJisyos], memento);
 }
 
-export function getGlobalJisyo(): Jisyo {
+export function getGlobalJisyo(): CompositeJisyo {
     return globalJisyo;
 }
 
@@ -54,6 +54,32 @@ class CompositeJisyo extends CompositeMap<string, Candidate[]> {
         const result = this.maps[0].delete(key);
         saveUserJisyo(this.memento, this.maps[0]);
         return result;
+    }
+
+    /**
+     * Delete a specified candidate from the user dictionary.
+     * @param key 
+     * @param candidate 
+     * @returns 
+     */
+    deleteCandidate(key: string, candidate: Candidate): boolean {
+        if (!this.maps[0].has(key)) {
+            return false;
+        }
+
+        const candidateList = this.maps[0].get(key);
+        if (!candidateList) {
+            return false;
+        }
+
+        const newCandidateList = candidateList.filter((c) => c.word !== candidate.word);
+        if (newCandidateList.length === 0) {
+            this.maps[0].delete(key);
+        } else {
+            this.maps[0].set(key, newCandidateList);
+        }
+        saveUserJisyo(this.memento, this.maps[0]);
+        return true;
     }
 }
 
