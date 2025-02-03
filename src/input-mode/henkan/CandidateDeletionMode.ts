@@ -25,18 +25,9 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
-        if (key === 'y') {
-            getGlobalJisyo().deleteCandidate(this.midashigo, this.candidate);
-            this.clearInlineDialogAndReturnToKakuteiMode(context);
-            return;
+        if (key === 'y' || key === 'n') {
+            throw new Error('Type Y or N in upper case');
         }
-
-        if (key === 'n') {
-            context.setHenkanMode(this.prevMode);
-            this.prevMode.showCandidate(context);
-            return;
-        }
-
         throw new Error('Type Y or N');
     }
 
@@ -48,7 +39,19 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
-        this.onLowerAlphabet(context, key.toLowerCase());
+        if (key === 'Y') {
+            getGlobalJisyo().deleteCandidate(this.midashigo, this.candidate);
+            this.clearInlineDialogAndReturnToKakuteiMode(context);
+            return;
+        }
+
+        if (key === 'N') {
+            context.setHenkanMode(this.prevMode);
+            this.prevMode.showCandidate(context);
+            return;
+        }
+
+        throw new Error('Type Y or N');
     }
 
     onCtrlG(context: AbstractKanaMode): void {

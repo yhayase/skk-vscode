@@ -12,6 +12,7 @@ import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { openRegistrationEditor } from './RegistrationEditor';
 import { toHiragana } from 'wanakana';
 import { CandidateDeletionMode } from './CandidateDeletionMode';
+import { getGlobalJisyo } from '../../jisyo/jisyo';
 
 export class InlineHenkanMode extends AbstractHenkanMode {
     private readonly prevMode: AbstractMidashigoMode;
@@ -111,7 +112,15 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         }
 
         if (key === 'X') {
-            context.setHenkanMode(new CandidateDeletionMode(context, this.editor, this, this.jisyoEntry.getMidashigo(), this.jisyoEntry.getCandidateList()[this.candidateIndex]));
+            const rawMidashigo = this.getMidashigo();
+
+            // lookup the raw candidates again because entries in this.candidateList may be cooked and have okurigana.
+            const rawCandidateList = getGlobalJisyo().get(rawMidashigo);
+            if (rawCandidateList === undefined) {
+                throw new Error("Unconsistent state: Candidate list is not found in the global jisyo.");
+            }
+
+            context.setHenkanMode(new CandidateDeletionMode(context, this.editor, this, rawMidashigo, rawCandidateList[this.candidateIndex]));
             return;
         }
 
