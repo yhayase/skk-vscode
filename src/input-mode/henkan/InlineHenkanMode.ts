@@ -11,6 +11,8 @@ import { MenuHenkanMode } from "./MenuHenkanMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { openRegistrationEditor } from './RegistrationEditor';
 import { toHiragana } from 'wanakana';
+import { CandidateDeletionMode } from './CandidateDeletionMode';
+import { getGlobalJisyo } from '../../jisyo/jisyo';
 
 export class InlineHenkanMode extends AbstractHenkanMode {
     private readonly prevMode: AbstractMidashigoMode;
@@ -93,6 +95,13 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         });
     }
 
+    clearMidashigoAndReturnToKakuteiMode(context: AbstractKanaMode) {
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        this.editor.clearCandidate().then(() => {
+            context.insertStringAndShowRemaining("", "", false);
+        });
+    }
+
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'L') {
             this.jisyoEntry.onCandidateSelected(this.candidateIndex);
@@ -102,8 +111,18 @@ export class InlineHenkanMode extends AbstractHenkanMode {
             return;
         }
 
-        // in case "X" is input, the current candidate is asked to be deleted from the jisyo
-        // TODO: implement this
+        if (key === 'X') {
+            const rawMidashigo = this.getMidashigo();
+
+            // lookup the raw candidates again because entries in this.candidateList may be cooked and have okurigana.
+            const rawCandidateList = getGlobalJisyo().get(rawMidashigo);
+            if (rawCandidateList === undefined) {
+                throw new Error("Unconsistent state: Candidate list is not found in the global jisyo.");
+            }
+
+            context.setHenkanMode(new CandidateDeletionMode(context, this.editor, this, rawMidashigo, rawCandidateList[this.candidateIndex]));
+            return;
+        }
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.candidateIndex);

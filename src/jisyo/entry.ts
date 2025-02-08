@@ -23,7 +23,7 @@ export class Entry {
         return this.midashigo;
     }
 
-    getCandidateList(): Candidate[] {
+    getCandidateList(): ReadonlyArray<Candidate> {
         return this.cookedCandidateList;
     }
 
@@ -36,5 +36,9 @@ export class Entry {
         // Register reordered candidate list to the jisyo.
         const newCandidateList = [this.rawCandidateList[index]].concat(this.rawCandidateList.filter((_, i) => i !== index));
         getGlobalJisyo().set(this.midashigo, newCandidateList);
+    }
+
+    getRawCandidateList(): ReadonlyArray<Candidate> {
+        return this.rawCandidateList;
     }
 }
