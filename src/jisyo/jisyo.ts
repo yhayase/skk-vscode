@@ -37,8 +37,29 @@ class CompositeJisyo extends CompositeMap<string, Candidate[]> {
      */
     set(key: string, value: Candidate[]): this {
         super.set(key, value);
-        saveUserJisyo(this.memento, this.maps[0]);
+        this.saveUserJisyo();
         return this;
+    }
+
+    /**
+     * Retrieve a list of candidates for the given key.
+     * This method searches through all Jisyos, combines the results, and removes any duplicates.
+     * @param key The key to search for.
+     * @returns A list of candidates, or undefined if no candidates are found.
+     */
+    get(key: string): Candidate[] | undefined {
+        const candidateList = this.maps.map((jisyo) => jisyo.get(key) || []).flat(1);
+        if (candidateList.length === 0) {
+            return undefined;
+        }
+
+        // Remove duplicate candidates
+        const seenWords = new Set<string>();
+        return candidateList.filter((c) => {
+            const duplicate = seenWords.has(c.word);
+            seenWords.add(c.word);
+            return !duplicate;
+        });
     }
 
     /**
@@ -52,7 +73,7 @@ class CompositeJisyo extends CompositeMap<string, Candidate[]> {
         }
 
         const result = this.maps[0].delete(key);
-        saveUserJisyo(this.memento, this.maps[0]);
+        this.saveUserJisyo();
         return result;
     }
 
@@ -78,8 +99,32 @@ class CompositeJisyo extends CompositeMap<string, Candidate[]> {
         } else {
             this.maps[0].set(key, newCandidateList);
         }
-        saveUserJisyo(this.memento, this.maps[0]);
+        this.saveUserJisyo();
         return true;
+    }
+
+    /**
+     * Add a new candidate to the beginning of the user dictionary.
+     * @param key 
+     * @param candidate 
+     * @returns 
+     */
+    registerCandidate(key: string, candidate: Candidate, save: boolean): boolean {
+        const candidateList = this.maps[0].get(key) || [];
+        const newCandidateList = [candidate, ...candidateList.filter((c) => c.word !== candidate.word)];
+        this.maps[0].set(key, newCandidateList);
+        if (save) {
+            this.saveUserJisyo();
+        }
+        return true;
+    }
+
+    /**
+     * Save the user dictionary to the Memento.
+     */
+    async saveUserJisyo(): Promise<void> {
+        vscode.window.showInformationMessage("SKK: Saving user dictionary...");
+        return this.memento.update(userJisyoKey, Object.fromEntries(this.maps[0]));
     }
 }
 
@@ -89,12 +134,8 @@ function loadOrInitUserJisyo(memento: vscode.Memento): Jisyo {
     if (cache) {
         return new Map(Object.entries(cache));
     }
-    
-    return new Map();
-}
 
-async function saveUserJisyo(memento: vscode.Memento, userJisyo: Jisyo): Promise<void> {
-    await memento.update(userJisyoKey, Object.fromEntries(userJisyo));
+    return new Map();
 }
 
 async function loadAllSystemJisyos(memento: vscode.Memento, urls: string[]): Promise<Jisyo[]> {
@@ -116,7 +157,7 @@ async function loadAllSystemJisyos(memento: vscode.Memento, urls: string[]): Pro
         if (cached) {
             return new Map(Object.entries(cached));
         }
-        
+
         // Cache not found, fetch from the internet
         const jisyo = await fetchAndDecodeDictionary(url);
         savedCache[url] = Object.fromEntries(jisyo);
@@ -173,4 +214,8 @@ function rawSKKJisyoToJisyo(rawLines: Buffer): Jisyo {
         }
     }
     return jisyo;
+}
+
+export function deactivate() {
+    return globalJisyo.saveUserJisyo();
 }

@@ -34,8 +34,7 @@ export class Entry {
         }
 
         // Register reordered candidate list to the jisyo.
-        const newCandidateList = [this.rawCandidateList[index]].concat(this.rawCandidateList.filter((_, i) => i !== index));
-        getGlobalJisyo().set(this.midashigo, newCandidateList);
+        getGlobalJisyo().registerCandidate(this.midashigo, this.rawCandidateList[index], true);
     }
 
     getRawCandidateList(): ReadonlyArray<Candidate> {

@@ -168,10 +168,11 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}
 
-		vscode.window.showInformationMessage("SKK: cursor moves");
 		// clear inputMode state
 		findInputMode().reset();
 	});
+
+	vscode.window.showInformationMessage("SKK: initialization completed");
 }
 
 export function insertOrReplaceSelection(str: string): Thenable<boolean> {
