@@ -1,20 +1,37 @@
-import { Uri } from "vscode";
 import * as vscode from 'vscode';
+import * as path from 'path';
+import { brotliCompress, brotliDecompress } from 'zlib';
+import { promisify } from 'util';
 import { Candidate } from "./candidate";
 import { CompositeMap } from "../lib/composite-map";
 
-type Jisyo = Map<string, Candidate[]>;
+const compress = promisify(brotliCompress);
+const decompress = promisify(brotliDecompress);
 
-const userJisyoKey = "skk.user-jisyo";
+type Jisyo = Map<string, Candidate[]>;
+type CacheMetadata = { expiry: number };
+
+const USER_JISYO_KEY = "skk.user-jisyo";
+const CACHE_EXPIRY_DAYS = 30;
+const CACHE_DIRECTORY = ["cache", "jisyo"];
 
 var globalJisyo: CompositeJisyo;
 
-export async function init(memento: vscode.Memento): Promise<void> {
+export async function init(memento: vscode.Memento, storageUri: vscode.Uri): Promise<void> {
     const cfg = vscode.workspace.getConfiguration("skk");
     const dictUrls = cfg.get<string[]>("dictUrls", ["https://raw.githubusercontent.com/skk-dev/dict/master/SKK-JISYO.L"]);
-    const systemJisyos = await loadAllSystemJisyos(memento, dictUrls);
+    const systemJisyos = await loadAllSystemJisyos(memento, storageUri, dictUrls);
     const userJisyo = loadOrInitUserJisyo(memento);
     globalJisyo = new CompositeJisyo([userJisyo, ...systemJisyos], memento);
+    cleanUpOldMementoKeys(memento);
+}
+
+// Remove old memento keys such like skk.jisyoCache and skk.jisyoCacheExpiries
+async function cleanUpOldMementoKeys(memento: vscode.Memento) {
+    const activeMementoKeys = [USER_JISYO_KEY];
+    memento.keys().filter((key) => !activeMementoKeys.includes(key)).forEach((key) => {
+        memento.update(key, undefined);
+    });
 }
 
 export function getGlobalJisyo(): CompositeJisyo {
@@ -37,8 +54,29 @@ class CompositeJisyo extends CompositeMap<string, Candidate[]> {
      */
     set(key: string, value: Candidate[]): this {
         super.set(key, value);
-        saveUserJisyo(this.memento, this.maps[0]);
+        this.saveUserJisyo();
         return this;
+    }
+
+    /**
+     * Retrieve a list of candidates for the given key.
+     * This method searches through all Jisyos, combines the results, and removes any duplicates.
+     * @param key The key to search for.
+     * @returns A list of candidates, or undefined if no candidates are found.
+     */
+    get(key: string): Candidate[] | undefined {
+        const candidateList = this.maps.map((jisyo) => jisyo.get(key) || []).flat(1);
+        if (candidateList.length === 0) {
+            return undefined;
+        }
+
+        // Remove duplicate candidates
+        const seenWords = new Set<string>();
+        return candidateList.filter((c) => {
+            const duplicate = seenWords.has(c.word);
+            seenWords.add(c.word);
+            return !duplicate;
+        });
     }
 
     /**
@@ -52,7 +90,7 @@ class CompositeJisyo extends CompositeMap<string, Candidate[]> {
         }
 
         const result = this.maps[0].delete(key);
-        saveUserJisyo(this.memento, this.maps[0]);
+        this.saveUserJisyo();
         return result;
     }
 
@@ -78,65 +116,132 @@ class CompositeJisyo extends CompositeMap<string, Candidate[]> {
         } else {
             this.maps[0].set(key, newCandidateList);
         }
-        saveUserJisyo(this.memento, this.maps[0]);
+        this.saveUserJisyo();
         return true;
+    }
+
+    /**
+     * Add a new candidate to the beginning of the user dictionary.
+     * @param key 
+     * @param candidate 
+     * @returns 
+     */
+    registerCandidate(key: string, candidate: Candidate, save: boolean): boolean {
+        const candidateList = this.maps[0].get(key) || [];
+        const newCandidateList = [candidate, ...candidateList.filter((c) => c.word !== candidate.word)];
+        this.maps[0].set(key, newCandidateList);
+        if (save) {
+            this.saveUserJisyo();
+        }
+        return true;
+    }
+
+    /**
+     * Save the user dictionary to the Memento.
+     */
+    async saveUserJisyo(): Promise<void> {
+        vscode.window.showInformationMessage("SKK: Saving user dictionary...");
+        return this.memento.update(USER_JISYO_KEY, Object.fromEntries(this.maps[0]));
     }
 }
 
 function loadOrInitUserJisyo(memento: vscode.Memento): Jisyo {
     // check if local cache is available
-    const cache = memento.get<Object>(userJisyoKey);
+    const cache = memento.get<Object>(USER_JISYO_KEY);
     if (cache) {
         return new Map(Object.entries(cache));
     }
-    
+
     return new Map();
 }
 
-async function saveUserJisyo(memento: vscode.Memento, userJisyo: Jisyo): Promise<void> {
-    await memento.update(userJisyoKey, Object.fromEntries(userJisyo));
-}
+async function loadAllSystemJisyos(memento: vscode.Memento, storageUri: vscode.Uri, jisyoUrls: string[]): Promise<Jisyo[]> {
+    const cacheUri = vscode.Uri.joinPath(storageUri, ...CACHE_DIRECTORY);
 
-async function loadAllSystemJisyos(memento: vscode.Memento, urls: string[]): Promise<Jisyo[]> {
-    const savedCache = memento.get<Record<string, object>>("skk.jisyoCache") || {};
-    const savedExpiries = memento.get<Record<string, number>>("skk.jisyoCacheExpiries") || {};
-    const now = Date.now();
-
-    // Expire old or unused caches from savedCache and savedExpiries to prevent memory leak
-    for (const url in savedExpiries) {
-        if (savedExpiries[url] < now || !urls.includes(url)) {
-            delete savedCache[url];
-            delete savedExpiries[url];
+    // Ensure cache directory exists
+    const fs = vscode.workspace.fs;
+    // check if cache directory exists
+    try {
+        await fs.stat(cacheUri);
+    } catch (e) {
+        for (let i = 0; i <= CACHE_DIRECTORY.length; i++) {
+            const slice = CACHE_DIRECTORY.slice(0, i);
+            const dir = vscode.Uri.joinPath(storageUri, ...slice);
+            try {
+                await fs.createDirectory(dir);
+            } catch (e) {
+                // Directory might already exist, that's fine
+            }
         }
     }
-    // the remaining caches are valid
 
-    const promises = urls.map(async (url) => {
-        const cached = savedCache[url];
-        if (cached) {
-            return new Map(Object.entries(cached));
+    // Delete unused cache files, which are not in the urls list
+    const cacheFiles = await fs.readDirectory(cacheUri);
+    cacheFiles.forEach(async ([file, type]) => {
+        if (type === vscode.FileType.File) {
+            const cacheFileName = path.basename(file);
+            const acceptableSuffixes = [".dict.br", ".meta.json"];
+
+            // remove file if file name does not match *.dict.br or *.meta.json
+            if (!acceptableSuffixes.some(ext => cacheFileName.endsWith(ext))) {
+                await fs.delete(vscode.Uri.joinPath(cacheUri, file));
+                return;
+            }
+
+            const cacheKey = acceptableSuffixes.reduce((key, ext) => key.replace(ext, ''), cacheFileName);
+            const url = Buffer.from(cacheKey, 'base64url').toString();
+            if (!jisyoUrls.includes(url)) {
+                await fs.delete(vscode.Uri.joinPath(cacheUri, file));
+            }
         }
-        
-        // Cache not found, fetch from the internet
-        const jisyo = await fetchAndDecodeDictionary(url);
-        savedCache[url] = Object.fromEntries(jisyo);
-        savedExpiries[url] = now + 1000 * 60 * 60 * 24 * 30; // 30 days
-        return jisyo;
     });
 
-    const results = await Promise.all(promises);
-    memento.update("skk.jisyoCache", savedCache); // execute asynchronously
-    memento.update("skk.jisyoCacheExpiries", savedExpiries); // execute asynchronously
-    return results;
-}
+    const promises = jisyoUrls.map(async (url) => {
+        const cacheFileName = Buffer.from(url).toString('base64url');
+        const cachePath = vscode.Uri.joinPath(cacheUri, `${cacheFileName}.dict.br`);
+        const metadataPath = vscode.Uri.joinPath(cacheUri, `${cacheFileName}.meta.json`);
 
-async function fetchAndDecodeDictionary(url: string): Promise<Jisyo> {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const rawJisyo = Buffer.from(await response.arrayBuffer());
-    return rawSKKJisyoToJisyo(rawJisyo);
+        try {
+            // Try to read metadata
+            const metadataBytes = await fs.readFile(metadataPath);
+            const metadata: CacheMetadata = JSON.parse(new TextDecoder().decode(metadataBytes));
+
+            // Check if cache is still valid
+            if (metadata.expiry > Date.now()) {
+                // Read and decompress cached dictionary
+                const compressedData = await fs.readFile(cachePath);
+                const rawJisyo = await decompress(compressedData);
+                return rawSKKJisyoToJisyo(rawJisyo);
+            }
+
+            // Delete expired cache files
+            await fs.delete(cachePath);
+            await fs.delete(metadataPath);
+        } catch (e) {
+            // If any error occurs (file not found, invalid format, etc.), we'll fetch fresh data
+        }
+
+        // Cache not found or expired, fetch from the internet
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const rawJisyo = Buffer.from(await response.arrayBuffer());
+
+        // Save the compressed dictionary and metadata
+        const compressedData = await compress(rawJisyo);
+        const metadata: CacheMetadata = {
+            expiry: Date.now() + CACHE_EXPIRY_DAYS * (1000 * 60 * 60 * 24) // in milliseconds 
+        };
+
+        // Write files asynchronously - don't await as we don't need to block on this
+        fs.writeFile(cachePath, compressedData);
+        fs.writeFile(metadataPath, Buffer.from(JSON.stringify(metadata)));
+
+        return rawSKKJisyoToJisyo(rawJisyo);
+    });
+
+    return Promise.all(promises);
 }
 
 function rawSKKJisyoToJisyo(rawLines: Buffer): Jisyo {
@@ -173,4 +278,8 @@ function rawSKKJisyoToJisyo(rawLines: Buffer): Jisyo {
         }
     }
     return jisyo;
+}
+
+export function deactivate() {
+    return globalJisyo.saveUserJisyo();
 }

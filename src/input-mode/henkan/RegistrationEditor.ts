@@ -54,10 +54,8 @@ export async function registerMidashigo(): Promise<void> {
         return;
     }
 
-    const newCandidateList = [{ word, annotation: undefined }, ...getGlobalJisyo().get(yomi) || []];
-    // dedup
-    const deduped = newCandidateList.filter((candidate, index, self) => self.findIndex(c => c.word === candidate.word) === index);
-    getGlobalJisyo().set(yomi, deduped);
+    // ユーザ辞書に登録し、 Memento に保存する
+    getGlobalJisyo().registerCandidate(yomi, {word, annotation: undefined }, true);
 
     // clear all text in the editor
     await editor.edit(editBuilder => {

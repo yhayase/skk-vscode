@@ -503,9 +503,9 @@
           "type": "array",
           "items": "string",
           "default": [
-            "https://github.com/skk-dev/dict/raw/refs/heads/master/SKK-JISYO.L",
-            "https://github.com/skk-dev/dict/raw/refs/heads/master/zipcode/SKK-JISYO.zipcode",
-            "https://github.com/skk-dev/dict/raw/refs/heads/master/SKK-JISYO.fullname"
+            "https://raw.githubusercontent.com/skk-dev/dict/refs/heads/master/SKK-JISYO.L",
+            "https://raw.githubusercontent.com/skk-dev/dict/refs/heads/master/zipcode/SKK-JISYO.zipcode",
+            "https://raw.githubusercontent.com/skk-dev/dict/refs/heads/master/SKK-JISYO.fullname"
           ],
           "description": "List of SKK dictionary URLs to load"
         }
