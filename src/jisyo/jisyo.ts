@@ -155,8 +155,8 @@ function loadOrInitUserJisyo(memento: vscode.Memento): Jisyo {
     return new Map();
 }
 
-async function loadAllSystemJisyos(memento: vscode.Memento, globalStorageUri: vscode.Uri, jisyoUrls: string[]): Promise<Jisyo[]> {
-    const cacheUri = vscode.Uri.joinPath(globalStorageUri, ...CACHE_DIRECTORY);
+async function loadAllSystemJisyos(memento: vscode.Memento, storageUri: vscode.Uri, jisyoUrls: string[]): Promise<Jisyo[]> {
+    const cacheUri = vscode.Uri.joinPath(storageUri, ...CACHE_DIRECTORY);
 
     // Ensure cache directory exists
     const fs = vscode.workspace.fs;
@@ -166,7 +166,7 @@ async function loadAllSystemJisyos(memento: vscode.Memento, globalStorageUri: vs
     } catch (e) {
         for (let i = 0; i <= CACHE_DIRECTORY.length; i++) {
             const slice = CACHE_DIRECTORY.slice(0, i);
-            const dir = vscode.Uri.joinPath(globalStorageUri, ...slice);
+            const dir = vscode.Uri.joinPath(storageUri, ...slice);
             try {
                 await fs.createDirectory(dir);
             } catch (e) {
@@ -243,17 +243,6 @@ async function loadAllSystemJisyos(memento: vscode.Memento, globalStorageUri: vs
 
     return Promise.all(promises);
 }
-
-/*
-async function fetchAndDecodeDictionary(url: string): Promise<Jisyo> {
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const rawJisyo = Buffer.from(await response.arrayBuffer());
-    return rawSKKJisyoToJisyo(rawJisyo);
-}
-*/
 
 function rawSKKJisyoToJisyo(rawLines: Buffer): Jisyo {
     const jisyo: Jisyo = new Map();
