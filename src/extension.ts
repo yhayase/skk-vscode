@@ -58,8 +58,8 @@ function findInputMode(): IInputMode {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-	// Initialize jisyo asynchronusly
-	jisyo.init(context.globalState);
+	// Initialize jisyo
+	await jisyo.init(context.globalState, context.globalStorageUri);
 
 	// vscode.window.showInformationMessage("SKK: start");
 
