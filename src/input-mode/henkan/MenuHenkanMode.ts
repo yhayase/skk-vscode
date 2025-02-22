@@ -1,6 +1,5 @@
 import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { AbstractKanaMode } from "../AbstractKanaMode";
-import * as vscode from 'vscode';
 import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { IEditor } from "../../editor/IEditor";

@@ -1,4 +1,3 @@
-import * as vscode from "vscode";
 import { RomajiInput } from "../../RomajiInput";
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 import { insertOrReplaceSelection, setInputMode } from "../../extension";

@@ -1,4 +1,3 @@
-
 import * as vscode from 'vscode';
 import { getGlobalJisyo } from '../../jisyo/jisyo';
 
@@ -54,8 +53,8 @@ export async function registerMidashigo(): Promise<void> {
         return;
     }
 
-    // ユーザ辞書に登録し、 Memento に保存する
-    getGlobalJisyo().registerCandidate(yomi, {word, annotation: undefined }, true);
+    // ユーザ辞書に登録して、保存する
+    getGlobalJisyo().registerCandidate(yomi, {word: word, annotation: undefined }, true);
 
     // clear all text in the editor
     await editor.edit(editBuilder => {
