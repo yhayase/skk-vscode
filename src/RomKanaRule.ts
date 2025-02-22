@@ -4,7 +4,7 @@ export interface RomKanaRule {
     katakana?: string;
 }
 
-export let romKanaBaseRule = new Map<string, RomKanaRule>([
+export const romKanaBaseRule = new Map<string, RomKanaRule>([
     ["a", { "remain": "", "katakana": "ア", "hiragana": "あ" }],
     ["bb", { "remain": "b", "katakana": "ッ", "hiragana": "っ" }],
     ["ba", { "remain": "", "katakana": "バ", "hiragana": "ば" }],
