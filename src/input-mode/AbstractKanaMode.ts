@@ -128,7 +128,3 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
         this.henkanMode.onSymbol(this, key);
     }
 }
-
-function convertKatakanaToHiragana(src: string): string {
-    return src.split('').map((c) => wanakana.isKatakana(c) ? wanakana.toHiragana(c) : c).join('');
-}
