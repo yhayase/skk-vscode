@@ -17,8 +17,8 @@ export enum MidashigoType {
 }
 
 export class MidashigoMode extends AbstractMidashigoMode {
-    private romajiInput: RomajiInput;
-    midashigoMode: MidashigoType = MidashigoType.gokan;
+    private readonly romajiInput: RomajiInput;
+    private midashigoMode: MidashigoType = MidashigoType.gokan;
 
     constructor(context: AbstractKanaMode, editor: IEditor, initialRomajiInput: string | undefined = undefined) {
         super("▽", editor);
