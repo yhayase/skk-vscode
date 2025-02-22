@@ -33,53 +33,6 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
     }
 
     /**
-     * Show henkan candidates to the user and let the user select one.
-     * @param candidateList The list of candidates to show
-     * @returns Thenable that resolves to the selected candidate
-     */
-    proposeCandidatesToUser(candidateList: Candidate[]): Thenable<{ label: string, description: string | undefined } | undefined> {
-        const editor = vscode.window.activeTextEditor;
-        if (editor === undefined) {
-            return Promise.resolve(undefined);
-        }
-
-        const midashigoRange = this.editor.calcMidashigoRange();
-        if (midashigoRange === undefined) {
-            return Promise.resolve(undefined);
-        }
-
-        if (candidateList instanceof Error) {
-            vscode.window.showInformationMessage(candidateList.message);
-
-            this.setHenkanMode(KakuteiMode.create(this, this.editor));
-            // this.romajiInput.reset();
-            return Promise.resolve(undefined);
-        }
-        return vscode.window.showQuickPick(
-            candidateList.map((cand) => ({ label: cand.word, description: cand.annotation }))
-        );
-    }
-
-    /**
-     * Fixate the selected candidate.
-     * @param henkanResult The candidate to fixate
-     * @returns Promise that resolves to true if the candidate is fixated, false otherwise
-     */
-    fixateSelectedItem(henkanResult: string): Thenable<boolean | void> {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            return Promise.resolve(false);
-        }
-        const midashigoRange = this.editor.calcMidashigoRange();
-        if (!midashigoRange) {
-            return Promise.resolve(false);
-        }
-        return replaceRange(midashigoRange, henkanResult).then((value) => {
-            this.editor.showRemainingRomaji("", false, 0);
-        });
-    }
-
-    /**
      * Show error message using standard message box of vscode.
      * @param message string to show
      */
