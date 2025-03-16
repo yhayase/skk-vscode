@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
-import { replaceRange } from '../extension';
 import { Candidate } from '../jisyo/candidate';
-import { DeleteLeftResult, IEditor } from "./IEditor";
+import { DeleteLeftResult, IEditor, IPosition, IRange } from "./IEditor";
 import wanakana = require('wanakana');
+import { getGlobalJisyo } from '../jisyo/jisyo';
+import { updateCursorMoveTimestamp } from '../extension';
 
 export class VSCodeEditor implements IEditor {
     private midashigoStart: vscode.Position | undefined = undefined;
@@ -163,7 +164,7 @@ export class VSCodeEditor implements IEditor {
                 return convFunc(c);
             }).join('');
 
-            replaceRange(midashigoRange, converted);
+            this.replaceRange(this.convertToIRange(midashigoRange), converted);
         }
     }
 
@@ -178,7 +179,7 @@ export class VSCodeEditor implements IEditor {
             let midashigo = editor.document.getText(midashigoRange);
             if (midashigo[0] === '▽') {
                 this.midashigoStart = undefined;
-                return replaceRange(midashigoRange, midashigo.slice(1));
+                return this.replaceRange(this.convertToIRange(midashigoRange), midashigo.slice(1));
             }
             vscode.window.showInformationMessage('It seems that you have deleted ▽');
             this.midashigoStart = undefined;
@@ -188,12 +189,11 @@ export class VSCodeEditor implements IEditor {
 
     /**
      * Calculate the range of the midashigo, which is started by "▽" and ended by the cursor position.
-     * @param editor active text editor
      * @returns Range of the midashigo.  If any inconsistency found, returns undefined.
      */
-    public calcMidashigoRange(): vscode.Range | undefined {
+    public calcMidashigoRange(): IRange | undefined {
         if (this.midashigoStart === undefined) {
-            vscode.window.showInformationMessage('変換開始位置が不明です');
+            vscode.window.showInformationMessage('開始開始位置が不明です');
             return undefined;
         }
 
@@ -213,7 +213,7 @@ export class VSCodeEditor implements IEditor {
             return undefined;
         }
 
-        return new vscode.Range(this.midashigoStart, editor.selection.end);
+        return this.convertToIRange(new vscode.Range(this.midashigoStart, editor.selection.end));
     }
 
     /**
@@ -227,7 +227,11 @@ export class VSCodeEditor implements IEditor {
         }
 
         const midashigoRange = this.calcMidashigoRange();
-        const midashigo = editor.document.getText(midashigoRange);
+        if (!midashigoRange) {
+            return undefined;
+        }
+        const vscodeRange = this.convertFromIRange(midashigoRange);
+        const midashigo = editor.document.getText(vscodeRange);
 
         if (midashigo[0] !== '▽') {
             // In case of the begginning ▽ is deleted by the user or other causes
@@ -249,14 +253,14 @@ export class VSCodeEditor implements IEditor {
             let midashigo = editor.document.getText(midashigoRange);
             if (midashigo[0] === '▽') {
                 this.midashigoStart = undefined;
-                return replaceRange(midashigoRange, "");
+                return this.replaceRange(this.convertToIRange(midashigoRange), "");
             }
             vscode.window.showInformationMessage('It seems that you have deleted ▽');
             this.midashigoStart = undefined;
         }
         return Promise.resolve(false);
     }
-    
+
     /**
      * Show henkan candidates over the midashigo.
      * @param candidate The candidate to show
@@ -266,14 +270,15 @@ export class VSCodeEditor implements IEditor {
     showCandidate(candidate: Candidate | undefined, suffix: string): PromiseLike<boolean | void> {
         if (this.midashigoStart && vscode.window.activeTextEditor) {
             const midashigoRange = new vscode.Range(this.midashigoStart, vscode.window.activeTextEditor?.selection.end);
+            const iMidashigoRange = this.convertToIRange(midashigoRange);
 
             if (!candidate) {
-                return replaceRange(midashigoRange, "▼").then((value) => {
+                return this.replaceRange(iMidashigoRange, "▼").then((value) => {
                     this.showRemainingRomaji(suffix, false);
                 });
             }
 
-            return replaceRange(midashigoRange, "▼" + candidate.word).then((value) => {
+            return this.replaceRange(iMidashigoRange, "▼" + candidate.word).then((value) => {
                 if (candidate.annotation) {
                     this.showRemainingRomaji("; " + candidate.annotation + suffix, false);
                 } else {
@@ -290,15 +295,19 @@ export class VSCodeEditor implements IEditor {
         this.showRemainingRomaji("", false);
         if (this.midashigoStart && vscode.window.activeTextEditor) {
             const candidateRange = new vscode.Range(this.midashigoStart, vscode.window.activeTextEditor?.selection.end);
+            const iCandidateRange = this.convertToIRange(candidateRange);
             // extract string in candidateRange
-            let candidate = vscode.window.activeTextEditor.document.getText(candidateRange);
+            let candidate = this.getTextInRange(iCandidateRange);
             // head of candidate must be "▼"
             if (candidate[0] !== '▼') {
                 vscode.window.showInformationMessage('It seems start marker "▼" is gone');
                 return Promise.resolve(false);
             }
+            // clear midashigoStart
+            this.midashigoStart = undefined;
+
             // erase candidate
-            return replaceRange(candidateRange, '');
+            return this.replaceRange(iCandidateRange, '');
         }
         return Promise.resolve(false);
     }
@@ -318,7 +327,8 @@ export class VSCodeEditor implements IEditor {
             return Promise.resolve(false);
         }
         const firstCharRange = new vscode.Range(this.midashigoStart, this.midashigoStart.translate(0, 1));
-        let firstChar = editor.document.getText(firstCharRange);
+        const iFirstCharRange = this.convertToIRange(firstCharRange);
+        let firstChar = this.getTextInRange(iFirstCharRange);
         if (firstChar !== '▼') {
             vscode.window.showInformationMessage('It seems start marker "▼" is gone');
             return Promise.resolve(false);
@@ -327,8 +337,11 @@ export class VSCodeEditor implements IEditor {
         // hide the annotation
         this.showRemainingRomaji("", false);
 
+        // clear midashigoStart
+        this.midashigoStart = undefined;
+
         // Delete heading marker "▼"
-        return replaceRange(firstCharRange, candStr ? candStr : '');
+        return this.replaceRange(iFirstCharRange, candStr ? candStr : '');
     }
 
 
@@ -341,23 +354,194 @@ export class VSCodeEditor implements IEditor {
      */
     deleteLeft(): DeleteLeftResult {
         const editor = vscode.window.activeTextEditor;
-        if (editor && this.midashigoStart) {
-            // Check if the cursor is at the position just after the midashigo start marker, and the character is "▽"
-            if (editor.selection.start.character === this.midashigoStart.character + 1) {
-                if (editor.document.getText(new vscode.Range(this.midashigoStart, editor.selection.start)) === '▽') {
-                    vscode.commands.executeCommand('deleteLeft');
-                    return DeleteLeftResult.markerDeleted;
-                    // No need to reset romajiInput because it is empty
-                } else {
-                    vscode.window.showInformationMessage('It seems start marker "▽" is gone');
-                    vscode.commands.executeCommand('deleteLeft');
-                    return DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted;
-                }
-            } else {
-                vscode.commands.executeCommand('deleteLeft');
-                return DeleteLeftResult.otherCharacterDeleted;
-            }
+        if (!editor) {
+            return DeleteLeftResult.noEditor;
         }
-        return DeleteLeftResult.noEditor;
+        if (!this.midashigoStart) {
+            // If midashigoStart is not set, just delete the character before the cursor
+            vscode.commands.executeCommand('deleteLeft');
+            return DeleteLeftResult.otherCharacterDeleted;
+        }
+        // Check if the cursor is at the position just after the midashigo start marker, and the character is "▽"
+        if (editor.selection.start.character === this.midashigoStart.character + 1) {
+            const charBeforeCursor = editor.document.getText(new vscode.Range(this.midashigoStart, editor.selection.start));
+            if (charBeforeCursor === '▽') {
+                vscode.commands.executeCommand('deleteLeft');
+                return DeleteLeftResult.markerDeleted;
+                // No need to reset romajiInput because it is empty
+            } else {
+                vscode.window.showInformationMessage('It seems start marker "▽" is gone');
+                vscode.commands.executeCommand('deleteLeft');
+                return DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted;
+            }
+        } else {
+            vscode.commands.executeCommand('deleteLeft');
+            return DeleteLeftResult.otherCharacterDeleted;
+        }
     }
+
+    // New methods to implement the abstracted interface:
+
+    /**
+     * Insert text at current cursor position or replace selected text.
+     * @param str Text to insert or replace with
+     * @returns Promise that resolves to true if the operation succeeded
+     */
+    insertOrReplaceSelection(str: string): PromiseLike<boolean> {
+        const editor = vscode.window.activeTextEditor;
+        let rval: Thenable<boolean> = Promise.resolve(false);
+        if (editor) {
+            rval = editor.edit(editBuilder => {
+                if (editor.selection.isEmpty) {
+                    editBuilder.insert(editor.selection.active, str);
+                    return;
+                } else {
+                    editBuilder.replace(editor.selection, str);
+                    // clear selection and move cursor to the end of the inserted text
+                    editor.selection = new vscode.Selection(editor.selection.active, editor.selection.active);
+                }
+            });
+        }
+        updateCursorMoveTimestamp();
+        return rval;
+    }
+
+    /**
+     * Replace text in a specific range.
+     * @param range The range to replace
+     * @param str The text to replace with
+     * @returns Promise that resolves to true if the operation succeeded
+     */
+    replaceRange(range: IRange, str: string): PromiseLike<boolean> {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            const vscodeRange = this.convertFromIRange(range);
+            return editor.edit(editBuilder => {
+                editBuilder.replace(vscodeRange, str);
+            });
+        }
+        return Promise.resolve(false);
+    }
+
+    // /**
+    //  * Creates a Range object from positions
+    //  */
+    // createRange(startLine: number, startCharacter: number, endLine: number, endCharacter: number): IRange {
+    //     return {
+    //         start: { line: startLine, character: startCharacter },
+    //         end: { line: endLine, character: endCharacter }
+    //     };
+    // }
+
+    /**
+     * Gets the text from a specific range in the document
+     */
+    getTextInRange(range: IRange): string {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            const vscodeRange = this.convertFromIRange(range);
+            return editor.document.getText(vscodeRange);
+        }
+        return "";
+    }
+
+    // // Helper methods for converting between VS Code types and our abstraction
+
+    /**
+     * Convert a VSCode Range to our IRange
+     */
+    private convertToIRange(range: vscode.Range): IRange {
+        return {
+            start: { line: range.start.line, character: range.start.character },
+            end: { line: range.end.line, character: range.end.character }
+        };
+    }
+
+    /**
+     * Convert our IRange to a VSCode Range
+     */
+    private convertFromIRange(range: IRange): vscode.Range {
+        return new vscode.Range(
+            range.start.line,
+            range.start.character,
+            range.end.line,
+            range.end.character
+        );
+    }
+
+    // /**
+    //  * Convert a VSCode Position to our IPosition
+    //  */
+    // private convertToIPosition(position: vscode.Position): IPosition {
+    //     return {
+    //         line: position.line,
+    //         character: position.character
+    //     };
+    // }
+
+    // /**
+    //  * Convert our IPosition to a VSCode Position
+    //  */
+    // private convertFromIPosition(position: IPosition): vscode.Position {
+    //     return new vscode.Position(position.line, position.character);
+    // }
+
+    // showErrorMessage(message: string): void {
+    //     vscode.window.showErrorMessage(message);
+    // }
+
+    // async openRegistrationEditor(yomi: string): Promise<void> {
+    //     const content = `読み:${yomi}\n単語:`;
+    //     const doc = await vscode.workspace.openTextDocument({ content, language: 'plaintext' });
+    //     await vscode.window.showTextDocument(doc, { preview: false }).then(async (editor) => {
+    //         // move cursor to the end of the document
+    //         await vscode.commands.executeCommand('cursorBottom');
+    //     });
+    // }
+
+    // async registerMidashigo(): Promise<void> {
+    //     const editor = vscode.window.activeTextEditor;
+    //     if (!editor) {
+    //         return;
+    //     }
+
+    //     const document = editor.document;
+    //     const content = document.getText();
+    //     const lines = content.split('\n');
+
+    //     // Format validation
+    //     if (lines.length < 2 ||
+    //         lines[0].slice(0, 3) !== "読み:" ||
+    //         lines[1].slice(0, 3) !== "単語:" ||
+    //         lines.slice(2).some(line => line.trim() !== '')) {
+    //         this.showErrorMessage("SKK: 辞書登録できません。フォーマットが不正です。");
+    //         return;
+    //     }
+
+    //     const yomi = lines[0].slice(3);
+    //     const word = lines[1].slice(3);
+
+    //     if (yomi === '') {
+    //         this.showErrorMessage("SKK: 辞書登録できません。読みが空です。");
+    //         return;
+    //     }
+
+    //     if (word === '') {
+    //         this.showErrorMessage("SKK: 辞書登録できません。単語が空です。");
+    //         return;
+    //     }
+
+    //     // Register in user dictionary and save
+    //     getGlobalJisyo().registerCandidate(yomi, { word: word, annotation: undefined }, true);
+
+    //     // Clear editor content
+    //     await editor.edit(editBuilder => {
+    //         const lastLine = document.lineCount - 1;
+    //         const lastChar = document.lineAt(lastLine).text.length;
+    //         editBuilder.delete(new vscode.Range(0, 0, lastLine, lastChar));
+    //     });
+
+    //     // Close editor
+    //     await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    // }
 }

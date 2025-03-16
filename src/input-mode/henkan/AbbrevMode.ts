@@ -1,5 +1,4 @@
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
-import { insertOrReplaceSelection } from "../../extension";
 import { Entry } from "../../jisyo/entry";
 import { getGlobalJisyo } from "../../jisyo/jisyo";
 import { AbstractKanaMode } from "../AbstractKanaMode";
@@ -43,25 +42,25 @@ export class AbbrevMode extends AbstractMidashigoMode {
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
-        insertOrReplaceSelection(key).then((value) => {
+        this.editor.insertOrReplaceSelection(key).then((value) => {
             this.editor.showRemainingRomaji("", false, 0);
         });
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
-        insertOrReplaceSelection(key).then((value) => {
+        this.editor.insertOrReplaceSelection(key).then((value) => {
             this.editor.showRemainingRomaji("", false, 0);
         });
     }
 
     onNumber(context: AbstractKanaMode, key: string): void {
-        insertOrReplaceSelection(key).then((value) => {
+        this.editor.insertOrReplaceSelection(key).then((value) => {
             this.editor.showRemainingRomaji("", false, 0);
         });
     }
 
     onSymbol(context: AbstractKanaMode, key: string): void {
-        insertOrReplaceSelection(key).then((value) => {
+        this.editor.insertOrReplaceSelection(key).then((value) => {
             this.editor.showRemainingRomaji("", false, 0);
         });
     }

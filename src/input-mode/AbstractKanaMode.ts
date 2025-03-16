@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { RomajiInput } from '../lib/romaji/RomajiInput';
-import { insertOrReplaceSelection, setInputMode } from '../extension';
+import { setInputMode } from '../extension';
 import { AbstractInputMode } from './AbstractInputMode';
 import { IInputMode } from './IInputMode';
 import { AbstractHenkanMode } from './henkan/AbstractHenkanMode';
@@ -21,7 +21,7 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
     }
 
     async insertStringAndShowRemaining(str: string, remaining: string, isOkuri: boolean): Promise<void> {
-        await insertOrReplaceSelection(str);
+        await this.editor.insertOrReplaceSelection(str);
         this.editor.showRemainingRomaji(remaining, isOkuri, 0);
         return Promise.resolve();
     }

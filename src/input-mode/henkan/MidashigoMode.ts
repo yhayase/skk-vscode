@@ -1,6 +1,6 @@
 import { RomajiInput } from "../../lib/romaji/RomajiInput";
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
-import { insertOrReplaceSelection, setInputMode } from "../../extension";
+import { setInputMode } from "../../extension";
 import { Entry } from "../../jisyo/entry";
 import { getGlobalJisyo } from "../../jisyo/jisyo";
 import { AbstractKanaMode } from "../AbstractKanaMode";
@@ -95,7 +95,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
             // in case this.midashigoMode === MidashigoType.gokan
             const insertStr = this.romajiInput.processInput(key);
             if (insertStr.length !== 0) {
-                insertOrReplaceSelection(insertStr).then((value) => {
+                this.editor.insertOrReplaceSelection(insertStr).then((value) => {
                     this.editor.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), false, 0);
                 });
             } else {

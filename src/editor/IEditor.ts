@@ -7,6 +7,18 @@ export enum DeleteLeftResult {
     noEditor
 }
 
+// Define Range interface to avoid direct VSCode dependency
+export interface IRange {
+    start: IPosition;
+    end: IPosition;
+}
+
+// Define Position interface to avoid direct VSCode dependency
+export interface IPosition {
+    line: number;
+    character: number;
+}
+
 export interface IEditor {
     /**
      * Basically, delete the character just before the cursor.
@@ -57,7 +69,7 @@ export interface IEditor {
      * @param editor active text editor
      * @returns Range of the midashigo.  If any inconsistency found, returns undefined.
      */
-    calcMidashigoRange(): any | undefined;
+    calcMidashigoRange(): IRange | undefined;
 
     /**
      * Fixate the unconversioned midashigo.
@@ -68,4 +80,39 @@ export interface IEditor {
     showCandidateList(candidateList: Candidate[], alphabetList: string[]): void;
     showRemainingRomaji(remainingRomaji: string, isOkuri: boolean, offset: number): void;
 
+    /**
+     * Insert text at current cursor position or replace selected text.
+     * @param str Text to insert or replace with
+     * @returns Promise that resolves to true if the operation succeeded
+     */
+    insertOrReplaceSelection(str: string): PromiseLike<boolean>;
+
+    /**
+     * Replace text in a specific range.
+     * @param range The range to replace
+     * @param str The text to replace with
+     * @returns Promise that resolves to true if the operation succeeded
+     */
+    replaceRange(range: IRange, str: string): PromiseLike<boolean>;
+
+    /**
+     * Creates a Range object from positions
+     * @param startLine Start line
+     * @param startCharacter Start character
+     * @param endLine End line
+     * @param endCharacter End character
+     */
+    // createRange(startLine: number, startCharacter: number, endLine: number, endCharacter: number): IRange;
+
+    /**
+     * Gets the text from a specific range in the document
+     * @param range The range to get text from
+     * @returns The text in the specified range
+     */
+    getTextInRange(range: IRange): string;
+
+    // New registration editor operations
+    // openRegistrationEditor(yomi: string): Promise<void>;
+    // registerMidashigo(): Promise<void>;
+    // showErrorMessage(message: string): void;
 }

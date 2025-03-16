@@ -175,36 +175,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.showInformationMessage("SKK: initialization completed");
 }
 
-export function insertOrReplaceSelection(str: string): Thenable<boolean> {
-	const editor = vscode.window.activeTextEditor;
-	let rval: Thenable<boolean> = Promise.resolve(false);
-	if (editor) {
-		rval = editor.edit(editBuilder => {
-			if (editor.selection.isEmpty) {
-				editBuilder.insert(editor.selection.active, str);
-				return;
-			} else {
-				editBuilder.replace(editor.selection, str);
-				// clear selection and move cursor to the end of the inserted text
-				editor.selection = new vscode.Selection(editor.selection.active, editor.selection.active);
-			}
-		});
-	}
-	timestampOfCursorMoveCausedByKeyInput = Date.now();
-	return rval;
-}
-
-export function replaceRange(range: vscode.Range, str: string): PromiseLike<boolean> {
-	const editor = vscode.window.activeTextEditor;
-	if (editor) {
-		return editor.edit(editBuilder => {
-			editBuilder.replace(range, str);
-		}).then((value) => {
-			timestampOfCursorMoveCausedByKeyInput = Date.now();
-			return value;
-		});
-	}
-	return Promise.resolve(false);
+export function updateCursorMoveTimestamp() {
+    timestampOfCursorMoveCausedByKeyInput = Date.now();
 }
 
 // This method is called when your extension is deactivated

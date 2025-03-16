@@ -1,7 +1,9 @@
-import { insertOrReplaceSelection, setInputMode} from "../extension";
+import { setInputMode} from "../extension";
 import * as vscode from 'vscode';
 import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
+import { VSCodeEditor } from "../editor/VSCodeEditor";
+import { IEditor } from "../editor/IEditor";
 
 export class ZeneiMode implements IInputMode {
     private static zenkakuEisuuList: string[] = [
@@ -40,20 +42,22 @@ export class ZeneiMode implements IInputMode {
         return this.instance;
     }
 
+    editor: IEditor = new VSCodeEditor();
+
     public reset(): void {
         // Do nothing
     }
 
     public lowerAlphabetInput(key: string): void {
-        insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
+        this.editor.insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
     }
 
     public upperAlphabetInput(key: string): void {
-        insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
+        this.editor.insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
     }
 
     public spaceInput(): void {
-        insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(" "));
+        this.editor.insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(" "));
     }
 
     public ctrlJInput(): void {
@@ -65,7 +69,7 @@ export class ZeneiMode implements IInputMode {
     }
 
     public enterInput(): void {
-        insertOrReplaceSelection("\n");
+        this.editor.insertOrReplaceSelection("\n");
     }
 
     public backspaceInput(): void {
@@ -76,10 +80,10 @@ export class ZeneiMode implements IInputMode {
     }
 
     public numberInput(key: string): void {
-        insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
+        this.editor.insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
     }
 
     public symbolInput(key: string): void {
-        insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
+        this.editor.insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
     }
 }
