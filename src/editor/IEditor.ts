@@ -96,15 +96,6 @@ export interface IEditor {
     replaceRange(range: IRange, str: string): PromiseLike<boolean>;
 
     /**
-     * Creates a Range object from positions
-     * @param startLine Start line
-     * @param startCharacter Start character
-     * @param endLine End line
-     * @param endCharacter End character
-     */
-    // createRange(startLine: number, startCharacter: number, endLine: number, endCharacter: number): IRange;
-
-    /**
      * Gets the text from a specific range in the document
      * @param range The range to get text from
      * @returns The text in the specified range

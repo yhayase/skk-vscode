@@ -423,16 +423,6 @@ export class VSCodeEditor implements IEditor {
         return Promise.resolve(false);
     }
 
-    // /**
-    //  * Creates a Range object from positions
-    //  */
-    // createRange(startLine: number, startCharacter: number, endLine: number, endCharacter: number): IRange {
-    //     return {
-    //         start: { line: startLine, character: startCharacter },
-    //         end: { line: endLine, character: endCharacter }
-    //     };
-    // }
-
     /**
      * Gets the text from a specific range in the document
      */
@@ -445,7 +435,7 @@ export class VSCodeEditor implements IEditor {
         return "";
     }
 
-    // // Helper methods for converting between VS Code types and our abstraction
+    // Helper methods for converting between VS Code types and our abstraction
 
     /**
      * Convert a VSCode Range to our IRange
@@ -468,23 +458,6 @@ export class VSCodeEditor implements IEditor {
             range.end.character
         );
     }
-
-    // /**
-    //  * Convert a VSCode Position to our IPosition
-    //  */
-    // private convertToIPosition(position: vscode.Position): IPosition {
-    //     return {
-    //         line: position.line,
-    //         character: position.character
-    //     };
-    // }
-
-    // /**
-    //  * Convert our IPosition to a VSCode Position
-    //  */
-    // private convertFromIPosition(position: IPosition): vscode.Position {
-    //     return new vscode.Position(position.line, position.character);
-    // }
 
     showErrorMessage(message: string): void {
         vscode.window.showErrorMessage(message);
