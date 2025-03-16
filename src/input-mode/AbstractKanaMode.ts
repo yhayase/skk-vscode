@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
-import * as wanakana from 'wanakana';
 import { RomajiInput } from '../lib/romaji/RomajiInput';
-import { insertOrReplaceSelection, replaceRange, setInputMode } from '../extension';
-import { Candidate } from '../jisyo/candidate';
+import { insertOrReplaceSelection, setInputMode } from '../extension';
 import { AbstractInputMode } from './AbstractInputMode';
 import { IInputMode } from './IInputMode';
 import { AbstractHenkanMode } from './henkan/AbstractHenkanMode';
