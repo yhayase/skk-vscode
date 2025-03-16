@@ -9,7 +9,7 @@ export class AsciiMode implements IInputMode {
     private static instance: AsciiMode = new AsciiMode();
     private editor: IEditor = new VSCodeEditor();
     public static getInstance(): AsciiMode {
-        return AsciiMode.instance;
+        return new AsciiMode();
     }
 
     public reset(): void {

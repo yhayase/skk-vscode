@@ -1,12 +1,11 @@
 import { IInputMode } from "./IInputMode";
 import { IEditor } from "../editor/IEditor";
-import { VSCodeEditor } from "../editor/VSCodeEditor";
+import { EditorFactory } from "../editor/EditorFactory";
 
 export abstract class AbstractInputMode implements IInputMode {
     protected editor: IEditor;
     constructor() {
-        this.editor = new VSCodeEditor(); // TODO: inject
-        return;
+        this.editor = EditorFactory.getInstance().getEditor();
     }
     abstract reset(): void;
     abstract lowerAlphabetInput(key: string): void;
