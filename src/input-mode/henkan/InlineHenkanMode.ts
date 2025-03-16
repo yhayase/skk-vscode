@@ -1,5 +1,4 @@
 import { IEditor } from "../../editor/IEditor";
-import { setInputMode } from "../../extension";
 import { Entry } from "../../jisyo/entry";
 import { AbstractKanaMode } from "../AbstractKanaMode";
 import { AsciiMode } from "../AsciiMode";
@@ -53,7 +52,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         if (key === 'l') {
             this.jisyoEntry.onCandidateSelected(this.candidateIndex);
             this.fixateCandidate(context).then(() => {
-                setInputMode(AsciiMode.getInstance());
+                this.editor.setInputMode(AsciiMode.getInstance());
             });
             return;
         }
@@ -104,7 +103,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         if (key === 'L') {
             this.jisyoEntry.onCandidateSelected(this.candidateIndex);
             this.fixateCandidate(context).then(() => {
-                setInputMode(ZeneiMode.getInstance());
+                this.editor.setInputMode(ZeneiMode.getInstance());
             });
             return;
         }

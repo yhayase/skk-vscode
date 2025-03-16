@@ -11,16 +11,6 @@ import { EditorFactory } from './editor/EditorFactory';
 let timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
 
 /**
- * Map to hold input mode corresponding to each text editor.
- * The key is a text editor and the value is an input mode.
- * The value is undefined if no input mode is set to the text editor.
- * 
- * Note that WeakMap is used to avoid memory leak.
- * (TextEditor is a disposable object, so it is not appropriate to use it as a key of a Map.)
- */
-const inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
-
-/**
  * Mutex to avoid executing multiple commands at the same time.
  */
 const commandLock = new AsyncLock();
@@ -31,11 +21,7 @@ const commandLock = new AsyncLock();
  * @throws Error if no active text editor is found.
  */
 export function setInputMode(mode: IInputMode) {
-	mode.reset();
-	if (!vscode.window.activeTextEditor) {
-		throw Error("No active text editor");
-	}
-	inputModeMap.set(vscode.window.activeTextEditor.document, mode);
+	EditorFactory.getInstance().getEditor().setInputMode(mode);
 }
 
 /**
@@ -45,15 +31,7 @@ export function setInputMode(mode: IInputMode) {
   * @throws Error if no active text editor is found.
  */
 function findInputMode(): IInputMode {
-	if (!vscode.window.activeTextEditor) {
-		throw Error("No active text editor");
-	}
-	let mode = inputModeMap.get(vscode.window.activeTextEditor.document);
-	if (mode === undefined) {
-		mode = AsciiMode.getInstance();
-		inputModeMap.set(vscode.window.activeTextEditor.document, mode);
-	}
-	return mode;
+	return EditorFactory.getInstance().getEditor().getCurrentInputMode();
 }
 
 // This method is called when your extension is activated

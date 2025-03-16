@@ -1,6 +1,5 @@
 import { RomajiInput } from "../../lib/romaji/RomajiInput";
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
-import { setInputMode } from "../../extension";
 import { Entry } from "../../jisyo/entry";
 import { getGlobalJisyo } from "../../jisyo/jisyo";
 import { AbstractKanaMode } from "../AbstractKanaMode";
@@ -69,7 +68,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'l') {
             this.editor.fixateMidashigo().then(() => {
-                setInputMode(AsciiMode.getInstance());
+                this.editor.setInputMode(AsciiMode.getInstance());
             });
             return;
         }
@@ -106,7 +105,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'L') {
             this.editor.fixateMidashigo().then(() => {
-                setInputMode(ZeneiMode.getInstance());
+                this.editor.setInputMode(ZeneiMode.getInstance());
             });
             return;
         }
@@ -191,7 +190,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         switch (this.editor.deleteLeft()) {
             case DeleteLeftResult.markerDeleted:
             case DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted:
-                context.setHenkanMode(KakuteiMode.create(context, this.editor));
+            context.setHenkanMode(KakuteiMode.create(context, this.editor));
                 break;
             case DeleteLeftResult.otherCharacterDeleted:
                 // do nothing

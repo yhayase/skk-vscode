@@ -4,9 +4,16 @@ import { DeleteLeftResult, IEditor, IPosition, IRange } from "./IEditor";
 import wanakana = require('wanakana');
 import { getGlobalJisyo } from '../jisyo/jisyo';
 import { updateCursorMoveTimestamp } from '../extension';
+import { IInputMode } from '../input-mode/IInputMode';
+import { AsciiMode } from '../input-mode/AsciiMode';
 
 export class VSCodeEditor implements IEditor {
     private midashigoStart: vscode.Position | undefined = undefined;
+    private static inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
+    private static _inputModeMapCleaner = vscode.workspace.onDidCloseTextDocument((doc) => {
+        // Remove the input mode when the document is closed
+        this.inputModeMap.delete(doc);
+    });
 
     setMidashigoStartToCurrentPosition(): void {
         this.midashigoStart = vscode.window.activeTextEditor?.selection.start;
@@ -516,5 +523,28 @@ export class VSCodeEditor implements IEditor {
 
         // Close editor
         await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    }
+
+    // Input mode management methods
+    setInputMode(mode: IInputMode): void {
+        mode.reset();
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            throw Error("No active text editor");
+        }
+        VSCodeEditor.inputModeMap.set(editor.document, mode);
+    }
+
+    getCurrentInputMode(): IInputMode {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            throw Error("No active text editor");
+        }
+        let mode = VSCodeEditor.inputModeMap.get(editor.document);
+        if (mode === undefined) {
+            mode = AsciiMode.getInstance();
+            VSCodeEditor.inputModeMap.set(editor.document, mode);
+        }
+        return mode;
     }
 }

@@ -1,4 +1,5 @@
 import { Candidate } from "../jisyo/candidate";
+import { IInputMode } from '../input-mode/IInputMode';
 
 export enum DeleteLeftResult {
     markerDeleted,
@@ -106,4 +107,8 @@ export interface IEditor {
     openRegistrationEditor(yomi: string): Promise<void>;
     registerMidashigo(): Promise<void>;
     showErrorMessage(message: string): void;
+
+    // New methods for input mode management
+    setInputMode(mode: IInputMode): void;
+    getCurrentInputMode(): IInputMode;
 }

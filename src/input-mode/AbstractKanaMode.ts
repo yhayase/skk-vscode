@@ -1,5 +1,4 @@
 import { RomajiInput } from '../lib/romaji/RomajiInput';
-import { setInputMode } from '../extension';
 import { AbstractInputMode } from './AbstractInputMode';
 import { IInputMode } from './IInputMode';
 import { AbstractHenkanMode } from './henkan/AbstractHenkanMode';
@@ -43,7 +42,7 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
 
     toggleKanaMode() {
         let nextMode = this.nextMode();
-        setInputMode(nextMode);
+        this.editor.setInputMode(nextMode);
     }
 
     public upperAlphabetInput(key: string): void {

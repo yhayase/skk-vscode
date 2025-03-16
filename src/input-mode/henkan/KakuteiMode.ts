@@ -4,7 +4,6 @@ import { AbstractHenkanMode } from './AbstractHenkanMode';
 import { RomajiInput } from '../../lib/romaji/RomajiInput';
 import { MidashigoMode } from './MidashigoMode';
 import { AbbrevMode } from './AbbrevMode';
-import { setInputMode } from '../../extension';
 import { AsciiMode } from '../AsciiMode';
 import { ZeneiMode } from '../ZeneiMode';
 import { IEditor } from '../../editor/IEditor';
@@ -22,7 +21,7 @@ export class KakuteiMode extends AbstractHenkanMode {
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'l') {
-            setInputMode(AsciiMode.getInstance());
+            this.editor.setInputMode(AsciiMode.getInstance());
             return;
         }
 
@@ -35,7 +34,7 @@ export class KakuteiMode extends AbstractHenkanMode {
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
         if (key === 'L') {
-            setInputMode(ZeneiMode.getInstance());
+            this.editor.setInputMode(ZeneiMode.getInstance());
             return;
         }
 
@@ -90,10 +89,7 @@ export class KakuteiMode extends AbstractHenkanMode {
             return;
         }
 
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            vscode.commands.executeCommand('deleteLeft');
-        }
+        this.editor.deleteLeft();
     }
 
     onCtrlJ(context: AbstractKanaMode): void {

@@ -1,23 +1,21 @@
-import { setInputMode} from "../extension";
 import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
-import { VSCodeEditor } from "../editor/VSCodeEditor";
-import { IEditor } from "../editor/IEditor";
+import { AbstractInputMode } from "./AbstractInputMode";
 
-export class ZeneiMode implements IInputMode {
+export class ZeneiMode extends AbstractInputMode {
     private static zenkakuEisuuList: string[] = [
-    "　", "！", "”", "＃", "＄", "％", "＆", "’",
-    "（", "）", "＊", "＋", "，", "−", "．", "／",
-    "０", "１", "２", "３", "４", "５", "６", "７",
-    "８", "９", "：", "；", "＜", "＝", "＞", "？",
-    "＠", "Ａ", "Ｂ", "Ｃ", "Ｄ", "Ｅ", "Ｆ", "Ｇ",
-    "Ｈ", "Ｉ", "Ｊ", "Ｋ", "Ｌ", "Ｍ", "Ｎ", "Ｏ",
-    "Ｐ", "Ｑ", "Ｒ", "Ｓ", "Ｔ", "Ｕ", "Ｖ", "Ｗ",
-    "Ｘ", "Ｙ", "Ｚ", "［", "＼", "］", "＾", "＿",
-    "‘", "ａ", "ｂ", "ｃ", "ｄ", "ｅ", "ｆ", "ｇ",
-    "ｈ", "ｉ", "ｊ", "ｋ", "ｌ", "ｍ", "ｎ", "ｏ",
-    "ｐ", "ｑ", "ｒ", "ｓ", "ｔ", "ｕ", "ｖ", "ｗ",
-    "ｘ", "ｙ", "ｚ", "｛", "｜", "｝", "〜"
+        "　", "！", "”", "＃", "＄", "％", "＆", "’",
+        "（", "）", "＊", "＋", "，", "−", "．", "／",
+        "０", "１", "２", "３", "４", "５", "６", "７",
+        "８", "９", "：", "；", "＜", "＝", "＞", "？",
+        "＠", "Ａ", "Ｂ", "Ｃ", "Ｄ", "Ｅ", "Ｆ", "Ｇ",
+        "Ｈ", "Ｉ", "Ｊ", "Ｋ", "Ｌ", "Ｍ", "Ｎ", "Ｏ",
+        "Ｐ", "Ｑ", "Ｒ", "Ｓ", "Ｔ", "Ｕ", "Ｖ", "Ｗ",
+        "Ｘ", "Ｙ", "Ｚ", "［", "＼", "］", "＾", "＿",
+        "‘", "ａ", "ｂ", "ｃ", "ｄ", "ｅ", "ｆ", "ｇ",
+        "ｈ", "ｉ", "ｊ", "ｋ", "ｌ", "ｍ", "ｎ", "ｏ",
+        "ｐ", "ｑ", "ｒ", "ｓ", "ｔ", "ｕ", "ｖ", "ｗ",
+        "ｘ", "ｙ", "ｚ", "｛", "｜", "｝", "〜"
     ];
 
     public static convertToZenkakuEisuu(key: string): string {
@@ -36,12 +34,13 @@ export class ZeneiMode implements IInputMode {
     }
 
     // AsciiMode is stateless, so the singleton can be stored in a static field.
-    private static instance: ZeneiMode = new ZeneiMode();
-    public static getInstance(): ZeneiMode  {
+    private static instance: ZeneiMode;
+    public static getInstance(): ZeneiMode {
+        if (!ZeneiMode.instance) {
+            ZeneiMode.instance = new ZeneiMode();
+        }
         return this.instance;
     }
-
-    editor: IEditor = new VSCodeEditor();
 
     public reset(): void {
         // Do nothing
@@ -60,7 +59,7 @@ export class ZeneiMode implements IInputMode {
     }
 
     public ctrlJInput(): void {
-        setInputMode(HiraganaMode.getInstance());
+        this.editor.setInputMode(HiraganaMode.getInstance());
     }
 
     public ctrlGInput(): void {

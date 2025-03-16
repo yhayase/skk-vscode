@@ -1,15 +1,16 @@
-import { setInputMode } from "../extension";
 import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
-import { IEditor } from "../editor/IEditor";
-import { VSCodeEditor } from "../editor/VSCodeEditor";
+import { AbstractInputMode } from "./AbstractInputMode";
 
-export class AsciiMode implements IInputMode {
+export class AsciiMode extends AbstractInputMode {
     // AsciiMode is stateless, so the singleton can be stored in a static field.
-    private static instance: AsciiMode = new AsciiMode();
-    private editor: IEditor = new VSCodeEditor();
+    private static instance: AsciiMode;
+
     public static getInstance(): AsciiMode {
-        return new AsciiMode();
+        if (!AsciiMode.instance) {
+            AsciiMode.instance = new AsciiMode();
+        }
+        return AsciiMode.instance;
     }
 
     public reset(): void {
@@ -29,7 +30,7 @@ export class AsciiMode implements IInputMode {
     }
 
     public ctrlJInput(): void {
-        setInputMode(HiraganaMode.getInstance());
+        this.editor.setInputMode(HiraganaMode.getInstance());
     }
 
     public ctrlGInput(): void {
