@@ -4,7 +4,6 @@ import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { IEditor } from "../../editor/IEditor";
 import { Entry } from "../../jisyo/entry";
-import { openRegistrationEditor } from './RegistrationEditor';
 
 export class MenuHenkanMode extends AbstractHenkanMode {
     private readonly prevMode: InlineHenkanMode;
@@ -97,7 +96,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
 
     onSymbol(context: AbstractKanaMode, key: string): void {
         if (key === '.') {
-            openRegistrationEditor(this.prevMode.getMidashigo());
+            this.editor.openRegistrationEditor(this.prevMode.getMidashigo());
             return;
         }
         throw new Error("Method not implemented.");
@@ -105,7 +104,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
 
     onSpace(context: AbstractKanaMode): void {
         if (this.candidateIndex + this.nDisplayCandidates >= this.jisyoEntry.getCandidateList().length) {
-            openRegistrationEditor(this.prevMode.getMidashigo());
+            this.editor.openRegistrationEditor(this.prevMode.getMidashigo());
             return;
         }
 

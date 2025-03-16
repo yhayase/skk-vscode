@@ -4,8 +4,8 @@ import * as vscode from 'vscode';
 import { IInputMode } from './input-mode/IInputMode';
 import { AsciiMode } from './input-mode/AsciiMode';
 import * as jisyo from './jisyo/jisyo';
-import { registerMidashigo } from './input-mode/henkan/RegistrationEditor';
 import * as AsyncLock from 'async-lock';
+import { VSCodeEditor } from './editor/VSCodeEditor';
 
 let timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
 
@@ -152,7 +152,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const registerCandidateCommand = vscode.commands.registerCommand('skk.registerMidashigo', async () => {
 		commandLock.acquire('skk', async () => {
-			await registerMidashigo();
+			await new VSCodeEditor().registerMidashigo();
 		});
 	});
 	context.subscriptions.push(registerCandidateCommand);

@@ -486,62 +486,62 @@ export class VSCodeEditor implements IEditor {
     //     return new vscode.Position(position.line, position.character);
     // }
 
-    // showErrorMessage(message: string): void {
-    //     vscode.window.showErrorMessage(message);
-    // }
+    showErrorMessage(message: string): void {
+        vscode.window.showErrorMessage(message);
+    }
 
-    // async openRegistrationEditor(yomi: string): Promise<void> {
-    //     const content = `読み:${yomi}\n単語:`;
-    //     const doc = await vscode.workspace.openTextDocument({ content, language: 'plaintext' });
-    //     await vscode.window.showTextDocument(doc, { preview: false }).then(async (editor) => {
-    //         // move cursor to the end of the document
-    //         await vscode.commands.executeCommand('cursorBottom');
-    //     });
-    // }
+    async openRegistrationEditor(yomi: string): Promise<void> {
+        const content = `読み:${yomi}\n単語:`;
+        const doc = await vscode.workspace.openTextDocument({ content, language: 'plaintext' });
+        await vscode.window.showTextDocument(doc, { preview: false }).then(async (editor) => {
+            // move cursor to the end of the document
+            await vscode.commands.executeCommand('cursorBottom');
+        });
+    }
 
-    // async registerMidashigo(): Promise<void> {
-    //     const editor = vscode.window.activeTextEditor;
-    //     if (!editor) {
-    //         return;
-    //     }
+    async registerMidashigo(): Promise<void> {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            return;
+        }
 
-    //     const document = editor.document;
-    //     const content = document.getText();
-    //     const lines = content.split('\n');
+        const document = editor.document;
+        const content = document.getText();
+        const lines = content.split('\n');
 
-    //     // Format validation
-    //     if (lines.length < 2 ||
-    //         lines[0].slice(0, 3) !== "読み:" ||
-    //         lines[1].slice(0, 3) !== "単語:" ||
-    //         lines.slice(2).some(line => line.trim() !== '')) {
-    //         this.showErrorMessage("SKK: 辞書登録できません。フォーマットが不正です。");
-    //         return;
-    //     }
+        // Format validation
+        if (lines.length < 2 ||
+            lines[0].slice(0, 3) !== "読み:" ||
+            lines[1].slice(0, 3) !== "単語:" ||
+            lines.slice(2).some(line => line.trim() !== '')) {
+            this.showErrorMessage("SKK: 辞書登録できません。フォーマットが不正です。");
+            return;
+        }
 
-    //     const yomi = lines[0].slice(3);
-    //     const word = lines[1].slice(3);
+        const yomi = lines[0].slice(3);
+        const word = lines[1].slice(3);
 
-    //     if (yomi === '') {
-    //         this.showErrorMessage("SKK: 辞書登録できません。読みが空です。");
-    //         return;
-    //     }
+        if (yomi === '') {
+            this.showErrorMessage("SKK: 辞書登録できません。読みが空です。");
+            return;
+        }
 
-    //     if (word === '') {
-    //         this.showErrorMessage("SKK: 辞書登録できません。単語が空です。");
-    //         return;
-    //     }
+        if (word === '') {
+            this.showErrorMessage("SKK: 辞書登録できません。単語が空です。");
+            return;
+        }
 
-    //     // Register in user dictionary and save
-    //     getGlobalJisyo().registerCandidate(yomi, { word: word, annotation: undefined }, true);
+        // Register in user dictionary and save
+        getGlobalJisyo().registerCandidate(yomi, { word: word, annotation: undefined }, true);
 
-    //     // Clear editor content
-    //     await editor.edit(editBuilder => {
-    //         const lastLine = document.lineCount - 1;
-    //         const lastChar = document.lineAt(lastLine).text.length;
-    //         editBuilder.delete(new vscode.Range(0, 0, lastLine, lastChar));
-    //     });
+        // Clear editor content
+        await editor.edit(editBuilder => {
+            const lastLine = document.lineCount - 1;
+            const lastChar = document.lineAt(lastLine).text.length;
+            editBuilder.delete(new vscode.Range(0, 0, lastLine, lastChar));
+        });
 
-    //     // Close editor
-    //     await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-    // }
+        // Close editor
+        await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+    }
 }

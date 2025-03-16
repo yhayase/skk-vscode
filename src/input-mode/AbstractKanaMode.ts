@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { RomajiInput } from '../lib/romaji/RomajiInput';
 import { setInputMode } from '../extension';
 import { AbstractInputMode } from './AbstractInputMode';
@@ -35,7 +34,7 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
      * @param message string to show
      */
     showErrorMessage(message: string) {
-        vscode.window.showErrorMessage(message);
+        this.editor.showErrorMessage(message);
     }
 
     public lowerAlphabetInput(key: string): void {

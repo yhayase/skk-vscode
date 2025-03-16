@@ -1,5 +1,4 @@
 import { setInputMode } from "../extension";
-import * as vscode from 'vscode';
 import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
 import { IEditor } from "../editor/IEditor";
@@ -42,10 +41,7 @@ export class AsciiMode implements IInputMode {
     }
 
     public backspaceInput(): void {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            vscode.commands.executeCommand('deleteLeft');
-        }
+        this.editor.deleteLeft();
     }
 
     public numberInput(key: string): void {

@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { IEditor } from "../../editor/IEditor";
 import { setInputMode } from "../../extension";
 import { Entry } from "../../jisyo/entry";
@@ -9,7 +8,6 @@ import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
 import { MenuHenkanMode } from "./MenuHenkanMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
-import { openRegistrationEditor } from './RegistrationEditor';
 import { toHiragana } from 'wanakana';
 import { CandidateDeletionMode } from './CandidateDeletionMode';
 import { getGlobalJisyo } from '../../jisyo/jisyo';
@@ -146,7 +144,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     }
     onSpace(context: AbstractKanaMode): void {
         if (this.candidateIndex + 1 >= this.jisyoEntry.getCandidateList().length) {
-            openRegistrationEditor(this.getMidashigo());
+            this.editor.openRegistrationEditor(this.getMidashigo());
             return;
         }
 
@@ -168,7 +166,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     onBackspace(context: AbstractKanaMode): void {
         this.jisyoEntry.onCandidateSelected(this.candidateIndex);
         this.fixateAndGoKakuteiMode(context).then(() => {
-            vscode.commands.executeCommand('deleteLeft');
+            this.editor.deleteLeft();
         });
     }
 

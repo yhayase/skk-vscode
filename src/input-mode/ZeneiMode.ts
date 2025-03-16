@@ -1,5 +1,4 @@
 import { setInputMode} from "../extension";
-import * as vscode from 'vscode';
 import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
 import { VSCodeEditor } from "../editor/VSCodeEditor";
@@ -73,10 +72,7 @@ export class ZeneiMode implements IInputMode {
     }
 
     public backspaceInput(): void {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            vscode.commands.executeCommand('deleteLeft');
-        }
+        this.editor.deleteLeft();
     }
 
     public numberInput(key: string): void {

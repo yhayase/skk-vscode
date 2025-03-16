@@ -9,7 +9,6 @@ import { ZeneiMode } from "../ZeneiMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
-import { openRegistrationEditor } from './RegistrationEditor';
 import { lookupOkuriAlphabet } from "../../jisyo/okuri";
 
 export enum MidashigoType {
@@ -59,7 +58,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         const jisyoEntry = this.findCandidates(midashigo, okuri);
         if (jisyoEntry === undefined) {
             const {keyForLookup} = this.createJisyoKey(midashigo, okuri);
-            openRegistrationEditor(keyForLookup);
+            this.editor.openRegistrationEditor(keyForLookup);
             return;
         }
 

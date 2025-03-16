@@ -112,7 +112,7 @@ export interface IEditor {
     getTextInRange(range: IRange): string;
 
     // New registration editor operations
-    // openRegistrationEditor(yomi: string): Promise<void>;
-    // registerMidashigo(): Promise<void>;
-    // showErrorMessage(message: string): void;
+    openRegistrationEditor(yomi: string): Promise<void>;
+    registerMidashigo(): Promise<void>;
+    showErrorMessage(message: string): void;
 }
