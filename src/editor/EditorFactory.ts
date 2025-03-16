@@ -1,5 +1,4 @@
 import { IEditor } from './IEditor';
-import { VSCodeEditor } from './VSCodeEditor';
 
 export type EditorCreator = () => IEditor;
 
@@ -19,8 +18,7 @@ export class EditorFactory {
 
     public static getInstance(): EditorFactory {
         if (!EditorFactory.instance) {
-            // デフォルトのエディタ作成関数を使用して初期化
-            EditorFactory.initialize(() => new VSCodeEditor());
+            throw new Error('EditorFactory is not initialized. Call initialize() first.');
         }
         return EditorFactory.instance;
     }
@@ -32,5 +30,17 @@ export class EditorFactory {
     // テスト用にエディタ作成関数を変更できるメソッド
     public static resetForTest(editorCreator: EditorCreator): void {
         EditorFactory.instance = new EditorFactory(editorCreator);
+    }
+
+    private static originalInstance: EditorFactory;
+    // テスト用にインスタンスを直接設定できるメソッド
+    public static setInstance(editor: IEditor): void {
+        this.originalInstance = this.instance;
+        EditorFactory.instance = new EditorFactory(() => editor);
+    }
+
+    // テスト後のクリーンアップ用
+    public static reset(): void {
+        EditorFactory.instance = this.originalInstance;
     }
 }
