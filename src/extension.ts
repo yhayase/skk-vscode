@@ -59,6 +59,9 @@ function findInputMode(): IInputMode {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
+    // エディタファクトリの初期化
+    EditorFactory.initialize(() => new VSCodeEditor());
+
 	// Initialize jisyo
 	await jisyo.init(context.globalState, context.globalStorageUri);
 
