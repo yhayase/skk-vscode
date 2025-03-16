@@ -10,7 +10,6 @@ suite('文章の変換において', async () => {
 
     teardown('エディタを閉じる', async () => {
         await vscode.commands.executeCommand('workbench.action.closeAllEditors');
-        await vscode.commands.executeCommand('skk.nop'); // skk 拡張を有効にするための何もしないコマンド呼び出し
     });
 
     async function input(char: string) {
@@ -29,7 +28,7 @@ suite('文章の変換において', async () => {
             await new Promise(resolve => setTimeout(resolve, 30));
         } else {
             vscode.commands.executeCommand('skk.lowerAlphabetInput', char);
-            await new Promise(resolve => setTimeout(resolve, (char === 'q') ? 30 : 10));
+            await new Promise(resolve => setTimeout(resolve, (char === 'q') ? 50 : 30));
         }
     }
 
