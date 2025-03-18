@@ -310,8 +310,6 @@ export class VSCodeEditor implements IEditor {
                 vscode.window.showInformationMessage('It seems start marker "▼" is gone');
                 return Promise.resolve(false);
             }
-            // clear midashigoStart
-            this.midashigoStart = undefined;
 
             // erase candidate
             return this.replaceRange(iCandidateRange, '');
