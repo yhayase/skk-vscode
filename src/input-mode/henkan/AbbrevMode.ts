@@ -1,11 +1,9 @@
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 import { Entry } from "../../jisyo/entry";
-import { getGlobalJisyo } from "../../jisyo/jisyo";
 import { AbstractKanaMode } from "../AbstractKanaMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
-
 
 export class AbbrevMode extends AbstractMidashigoMode {
     constructor(context: AbstractKanaMode, editor: IEditor) {
@@ -16,29 +14,19 @@ export class AbbrevMode extends AbstractMidashigoMode {
         context.insertStringAndShowRemaining(insertStr, "", false);
     }
 
-    private findCandidates(midashigo: string): Entry | Error {
-        const candidates = getGlobalJisyo().get(midashigo);
-        if (candidates === undefined) {
-            return new Error('変換できません');
-        } else {
-            return new Entry(midashigo, candidates, "");
-        }
-    }
-
-    private henkan(context: AbstractKanaMode, optionalSuffix?: string): void {
+    private async henkan(context: AbstractKanaMode, optionalSuffix?: string): Promise<void> {
         const midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
             return;
         }
 
-        const jisyoEntry = this.findCandidates(midashigo);
-        if (jisyoEntry instanceof Error) {
-            context.showErrorMessage(jisyoEntry.message);
+        const jisyoCandidates = await this.editor.getJisyoProvider().lookupCandidates(midashigo);
+        if (jisyoCandidates=== undefined) {
+            context.showErrorMessage("変換できません");
             return;
         }
-
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, "", jisyoEntry, optionalSuffix));
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, "", jisyoCandidates, optionalSuffix));
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
@@ -73,8 +61,8 @@ export class AbbrevMode extends AbstractMidashigoMode {
         throw new Error("Method not implemented.");
     }
 
-    onBackspace(context: AbstractKanaMode): void {
-        switch (this.editor.deleteLeft()) {
+    async onBackspace(context: AbstractKanaMode): Promise<void> {
+        switch (await this.editor.deleteLeft()) {
             case DeleteLeftResult.markerDeleted:
             case DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted:
                 context.setHenkanMode(KakuteiMode.create(context, this.editor));

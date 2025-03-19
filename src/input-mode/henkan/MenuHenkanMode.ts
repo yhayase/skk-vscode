@@ -16,14 +16,14 @@ export class MenuHenkanMode extends AbstractHenkanMode {
 
     constructor(context: AbstractKanaMode, editor: IEditor, prevMode: InlineHenkanMode, jisyoEntry: Entry,
         candidateIndex: number, suffix: string) {
-        super("▼", editor);
+        super("Select", editor);
         this.prevMode = prevMode;
         this.jisyoEntry = jisyoEntry;
-        this.candidateIndexStart = this.candidateIndex = candidateIndex;
+        this.candidateIndexStart = candidateIndex;
+        this.candidateIndex = candidateIndex;
         this.suffix = suffix;
 
         this.editor.showCandidate(undefined, this.suffix);
-        //this.editor.showCandidateList(this.jisyoEntry.getCandidateList().slice(0, this.nDisplayCandidates), this.selectionKeys.map((s) => s.toUpperCase()));
         this.showCandidateList(context);
     }
 
@@ -125,7 +125,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     }
 
     private fixateAndGoKakuteiMode(context: AbstractKanaMode, index: number): PromiseLike<boolean> {
-        this.jisyoEntry.onCandidateSelected(index);
+        this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), index);
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
         return this.editor.fixateCandidate(this.jisyoEntry.getCandidateList()[index].word + this.suffix);
     }

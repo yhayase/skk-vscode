@@ -1,7 +1,6 @@
 import { AbstractHenkanMode } from './AbstractHenkanMode';
 import { AbstractKanaMode } from '../AbstractKanaMode';
 import { IEditor } from '../../editor/IEditor';
-import { getGlobalJisyo } from '../../jisyo/jisyo';
 import { KakuteiMode } from './KakuteiMode';
 import { InlineHenkanMode } from './InlineHenkanMode';
 import { Candidate } from '../../jisyo/candidate';
@@ -25,10 +24,10 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
-        if (key === 'y' || key === 'n') {
-            throw new Error('Type Y or N in upper case');
+        if (key === "y" || key === "n") {
+            throw new Error("Type Y or N in upper case");
         }
-        throw new Error('Type Y or N');
+        throw new Error("Type Y or N");
     }
 
     clearInlineDialogAndReturnToKakuteiMode(context: AbstractKanaMode) {
@@ -39,19 +38,19 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
     }
 
     onUpperAlphabet(context: AbstractKanaMode, key: string): void {
-        if (key === 'Y') {
-            getGlobalJisyo().deleteCandidate(this.midashigo, this.candidate);
+        if (key === "Y") {
+            this.editor.getJisyoProvider().deleteCandidate(this.midashigo, this.candidate);
             this.clearInlineDialogAndReturnToKakuteiMode(context);
             return;
         }
 
-        if (key === 'N') {
+        if (key === "N") {
             context.setHenkanMode(this.prevMode);
             this.prevMode.showCandidate(context);
             return;
         }
 
-        throw new Error('Type Y or N');
+        throw new Error("Type Y or N");
     }
 
     onCtrlG(context: AbstractKanaMode): void {
@@ -60,21 +59,26 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
     }
 
     onNumber(context: AbstractKanaMode, key: string): void {
-        throw new Error('Type Y or N');
+        throw new Error("Type Y or N");
     }
+
     onSymbol(context: AbstractKanaMode, key: string): void {
-        throw new Error('Type Y or N');
+        throw new Error("Type Y or N");
     }
+
     onSpace(context: AbstractKanaMode): void {
-        throw new Error('Type Y or N');
+        throw new Error("Type Y or N");
     }
+
     onEnter(context: AbstractKanaMode): void {
-        throw new Error('Type Y or N');
+        throw new Error("Type Y or N");
     }
+
     onBackspace(context: AbstractKanaMode): void {
-        throw new Error('Type Y or N');
+        throw new Error("Type Y or N");
     }
+
     onCtrlJ(context: AbstractKanaMode): void {
-        throw new Error('Type Y or N');
+        throw new Error("Type Y or N");
     }
 }

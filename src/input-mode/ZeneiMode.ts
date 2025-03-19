@@ -1,4 +1,3 @@
-import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
 import { AbstractInputMode } from "./AbstractInputMode";
 

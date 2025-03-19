@@ -6,6 +6,8 @@ import { getGlobalJisyo } from '../jisyo/jisyo';
 import { updateCursorMoveTimestamp } from '../extension';
 import { IInputMode } from '../input-mode/IInputMode';
 import { AsciiMode } from '../input-mode/AsciiMode';
+import { IJisyoProvider } from '../jisyo/IJisyoProvider';
+import { VSCodeJisyoProvider } from './VSCodeJisyoProvider';
 
 export class VSCodeEditor implements IEditor {
     private midashigoStart: vscode.Position | undefined = undefined;
@@ -14,10 +16,6 @@ export class VSCodeEditor implements IEditor {
         // Remove the input mode when the document is closed
         this.inputModeMap.delete(doc);
     });
-
-    setMidashigoStartToCurrentPosition(): void {
-        this.midashigoStart = vscode.window.activeTextEditor?.selection.start;
-    }
 
     private readonly remainingRomajiDecorationType: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
         after: {
@@ -34,6 +32,20 @@ export class VSCodeEditor implements IEditor {
         },
         rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen,
     });
+
+    private jisyoProvider: IJisyoProvider;
+
+    constructor() {
+        this.jisyoProvider = new VSCodeJisyoProvider();
+    }
+
+    getJisyoProvider(): IJisyoProvider {
+        return this.jisyoProvider;
+    }
+
+    setMidashigoStartToCurrentPosition(): void {
+        this.midashigoStart = vscode.window.activeTextEditor?.selection.start;
+    }
 
     showRemainingRomaji(remainingRomaji: string, isOkuri: boolean, offset: number = 0): void {
         if (remainingRomaji.length === 0) {
@@ -298,7 +310,7 @@ export class VSCodeEditor implements IEditor {
         return Promise.resolve(false);
     }
 
-    clearCandidate(): PromiseLike<boolean | void> {
+    clearCandidate(): PromiseLike<boolean> {
         this.showRemainingRomaji("", false);
         if (this.midashigoStart && vscode.window.activeTextEditor) {
             const candidateRange = new vscode.Range(this.midashigoStart, vscode.window.activeTextEditor?.selection.end);
@@ -357,30 +369,30 @@ export class VSCodeEditor implements IEditor {
      * If the cursor is at the position just after the midashigo start marker, and the character is not "▽",
      * delete the character and notify the caller.
      */
-    deleteLeft(): DeleteLeftResult {
+    async deleteLeft(): Promise<DeleteLeftResult> {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             return DeleteLeftResult.noEditor;
         }
         if (!this.midashigoStart) {
             // If midashigoStart is not set, just delete the character before the cursor
-            vscode.commands.executeCommand('deleteLeft');
+            await vscode.commands.executeCommand('deleteLeft');
             return DeleteLeftResult.otherCharacterDeleted;
         }
         // Check if the cursor is at the position just after the midashigo start marker, and the character is "▽"
         if (editor.selection.start.character === this.midashigoStart.character + 1) {
             const charBeforeCursor = editor.document.getText(new vscode.Range(this.midashigoStart, editor.selection.start));
             if (charBeforeCursor === '▽') {
-                vscode.commands.executeCommand('deleteLeft');
+                await vscode.commands.executeCommand('deleteLeft');
                 return DeleteLeftResult.markerDeleted;
                 // No need to reset romajiInput because it is empty
             } else {
                 vscode.window.showInformationMessage('It seems start marker "▽" is gone');
-                vscode.commands.executeCommand('deleteLeft');
+                await vscode.commands.executeCommand('deleteLeft');
                 return DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted;
             }
         } else {
-            vscode.commands.executeCommand('deleteLeft');
+            await vscode.commands.executeCommand('deleteLeft');
             return DeleteLeftResult.otherCharacterDeleted;
         }
     }
@@ -510,7 +522,7 @@ export class VSCodeEditor implements IEditor {
         }
 
         // Register in user dictionary and save
-        getGlobalJisyo().registerCandidate(yomi, { word: word, annotation: undefined }, true);
+        this.jisyoProvider.registerCandidate(yomi, { word: word, annotation: undefined });
 
         // Clear editor content
         await editor.edit(editBuilder => {

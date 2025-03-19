@@ -1,7 +1,6 @@
 import { RomajiInput } from "../../lib/romaji/RomajiInput";
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 import { Entry } from "../../jisyo/entry";
-import { getGlobalJisyo } from "../../jisyo/jisyo";
 import { AbstractKanaMode } from "../AbstractKanaMode";
 import { AsciiMode } from "../AsciiMode";
 import { ZeneiMode } from "../ZeneiMode";
@@ -16,7 +15,7 @@ export enum MidashigoType {
 }
 
 export class MidashigoMode extends AbstractMidashigoMode {
-    private readonly romajiInput: RomajiInput;
+    private romajiInput: RomajiInput;
     private midashigoMode: MidashigoType = MidashigoType.gokan;
 
     constructor(context: AbstractKanaMode, editor: IEditor, initialRomajiInput: string | undefined = undefined) {
@@ -30,39 +29,34 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
     }
 
-    findCandidates(midashigo: string, okuri: string): Entry | undefined {
-        const {key, keyForLookup} = this.createJisyoKey(midashigo, okuri);
-        const candidates =   getGlobalJisyo().get(keyForLookup);
-        if (candidates === undefined) {
-            return undefined;
-        } else {
-            return new Entry(key, candidates, okuri);
-        }
+    async findCandidates(midashigo: string, okuri: string): Promise<Entry | undefined> {
+        const { key, keyForLookup } = this.createJisyoKey(midashigo, okuri);
+        return await this.editor.getJisyoProvider().lookupCandidates(keyForLookup);
     }
 
-    private createJisyoKey(midashigo: string, okuri: string): {key: string, keyForLookup: string} {
+    private createJisyoKey(midashigo: string, okuri: string): { key: string, keyForLookup: string } {
         const okuriAlphabet = okuri.length > 0 ? (lookupOkuriAlphabet(okuri) || "") : "";
         const key = midashigo + okuriAlphabet;
         const keyForLookup = this.romajiInput.convertKanaToHiragana(key);
-        return {key, keyForLookup};
+        return { key, keyForLookup };
     }
 
-    private henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): void {
+    private async henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): Promise<void> {
         const midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
             return;
         }
 
-        const jisyoEntry = this.findCandidates(midashigo, okuri);
+        const jisyoEntry = await this.findCandidates(midashigo, okuri);
         if (jisyoEntry === undefined) {
-            const {keyForLookup} = this.createJisyoKey(midashigo, okuri);
+            const { keyForLookup } = this.createJisyoKey(midashigo, okuri);
             this.editor.openRegistrationEditor(keyForLookup);
             return;
         }
 
         const okuriAlphabet = okuri.length > 0 ? (lookupOkuriAlphabet(okuri) || "") : "";
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, okuriAlphabet, jisyoEntry, optionalSuffix));
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, okuriAlphabet, jisyoEntry, okuri));
     }
 
     onLowerAlphabet(context: AbstractKanaMode, key: string): void {
@@ -180,14 +174,14 @@ export class MidashigoMode extends AbstractMidashigoMode {
         throw new Error("Method not implemented.");
     }
 
-    onBackspace(context: AbstractKanaMode): void {
+    async onBackspace(context: AbstractKanaMode): Promise<void> {
         if (!this.romajiInput.isEmpty()) {
             this.romajiInput.deleteLastChar();
             context.insertStringAndShowRemaining("", this.romajiInput.getRemainingRomaji(), false);
             return;
         }
 
-        switch (this.editor.deleteLeft()) {
+        switch (await this.editor.deleteLeft()) {
             case DeleteLeftResult.markerDeleted:
             case DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted:
             context.setHenkanMode(KakuteiMode.create(context, this.editor));

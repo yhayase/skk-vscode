@@ -16,16 +16,16 @@ suite('文章の変換において', async () => {
         expect(char.length).to.equal(1);
         if (char === ' ') {
             vscode.commands.executeCommand('skk.spaceInput');
-            await new Promise(resolve => setTimeout(resolve, 30));
+            await new Promise(resolve => setTimeout(resolve, 50));
         } else if (char === '\n') {
             vscode.commands.executeCommand('skk.enterInput');
-            await new Promise(resolve => setTimeout(resolve, 30));
+            await new Promise(resolve => setTimeout(resolve, 50));
         } else if (char === '\r') {
             vscode.commands.executeCommand('skk.ctrlJInput');
-            await new Promise(resolve => setTimeout(resolve, 30));
+            await new Promise(resolve => setTimeout(resolve, 50));
         } else if (char === char.toUpperCase()) {
             vscode.commands.executeCommand('skk.upperAlphabetInput', char);
-            await new Promise(resolve => setTimeout(resolve, 30));
+            await new Promise(resolve => setTimeout(resolve, 50));
         } else {
             vscode.commands.executeCommand('skk.lowerAlphabetInput', char);
             await new Promise(resolve => setTimeout(resolve, (char === 'q') ? 50 : 30));
