@@ -47,13 +47,13 @@ export class KakuteiMode extends AbstractHenkanMode {
         context.insertStringAndShowRemaining(key, "", false);
     }
 
-    onSymbol(context: AbstractKanaMode, key: string): void {
+    async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
         // まずはローマ字テーブルを見て、かなや記号に変換できるならば変換する
         let kana = this.romajiInput.processInput(key);
         let remaining = this.romajiInput.getRemainingRomaji();
 
         // 変換できる文字があればそれを挿入する(例: "n" -> "ん")
-        context.insertStringAndShowRemaining(kana, remaining, false).then(() => {
+        await context.insertStringAndShowRemaining(kana, remaining, false).then(() => {
             // 「/」が入力された場合は SKK Abbrev mode に移行する
             if (key === "/") {
                 // "/" 自体は挿入しない
