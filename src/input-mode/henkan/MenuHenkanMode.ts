@@ -71,7 +71,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         this.showCandidateList(context);
     }
 
-    onLowerAlphabet(context: AbstractKanaMode, key: string): void {
+    async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'x') {
             this.scrollBackCandidatePage(context);
             return;
@@ -86,15 +86,15 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         this.prevMode.showCandidate(context);
     }
 
-    onUpperAlphabet(context: AbstractKanaMode, key: string): void {
+    async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         this.selectCandidateFromMenu(context, this.selectionKeys.map((s) => s.toUpperCase()), key);
     }
 
-    onNumber(context: AbstractKanaMode, key: string): void {
+    async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
         context.showErrorMessage(`'${key}' is not valid here!`);
     }
 
-    onSymbol(context: AbstractKanaMode, key: string): void {
+    async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === '.') {
             this.editor.openRegistrationEditor(this.prevMode.getMidashigo());
             return;
@@ -102,7 +102,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         throw new Error("Method not implemented.");
     }
 
-    onSpace(context: AbstractKanaMode): void {
+    async onSpace(context: AbstractKanaMode): Promise<void> {
         if (this.candidateIndex + this.nDisplayCandidates >= this.jisyoEntry.getCandidateList().length) {
             this.editor.openRegistrationEditor(this.prevMode.getMidashigo());
             return;
@@ -112,15 +112,15 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         this.showCandidateList(context);
     }
 
-    onEnter(context: AbstractKanaMode): void {
+    async onEnter(context: AbstractKanaMode): Promise<void> {
         context.showErrorMessage("Enter is not valid here!");
     }
 
-    onBackspace(context: AbstractKanaMode): void {
+    async onBackspace(context: AbstractKanaMode): Promise<void> {
         this.scrollBackCandidatePage(context);
     }
 
-    onCtrlJ(context: AbstractKanaMode): void {
+    async onCtrlJ(context: AbstractKanaMode): Promise<void> {
         context.showErrorMessage("C-j is not valid here!");
     }
 
@@ -130,7 +130,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         return this.editor.fixateCandidate(this.jisyoEntry.getCandidateList()[index].word + this.suffix);
     }
 
-    onCtrlG(context: AbstractKanaMode): void {
+    async onCtrlG(context: AbstractKanaMode): Promise<void> {
         this.editor.hideCandidateList();
         this.prevMode.returnToMidashigoMode(context);
     }

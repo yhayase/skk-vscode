@@ -29,36 +29,39 @@ export class AbbrevMode extends AbstractMidashigoMode {
         context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, "", jisyoCandidates, optionalSuffix));
     }
 
-    onLowerAlphabet(context: AbstractKanaMode, key: string): void {
+    async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         this.editor.insertOrReplaceSelection(key).then((value) => {
             this.editor.showRemainingRomaji("", false, 0);
         });
     }
 
-    onUpperAlphabet(context: AbstractKanaMode, key: string): void {
+    async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         this.editor.insertOrReplaceSelection(key).then((value) => {
             this.editor.showRemainingRomaji("", false, 0);
         });
     }
 
-    onNumber(context: AbstractKanaMode, key: string): void {
+    async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
         this.editor.insertOrReplaceSelection(key).then((value) => {
             this.editor.showRemainingRomaji("", false, 0);
         });
     }
 
-    onSymbol(context: AbstractKanaMode, key: string): void {
+    async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
         this.editor.insertOrReplaceSelection(key).then((value) => {
             this.editor.showRemainingRomaji("", false, 0);
         });
     }
 
-    onSpace(context: AbstractKanaMode): void {
+    async onSpace(context: AbstractKanaMode): Promise<void> {
         this.henkan(context, "");
     }
 
-    onEnter(context: AbstractKanaMode): void {
-        throw new Error("Method not implemented.");
+    async onEnter(context: AbstractKanaMode): Promise<void> {
+        await this.editor.fixateMidashigo();
+        await this.editor.insertOrReplaceSelection("\n");
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+
     }
 
     async onBackspace(context: AbstractKanaMode): Promise<void> {
@@ -76,13 +79,13 @@ export class AbbrevMode extends AbstractMidashigoMode {
         }
     }
 
-    onCtrlJ(context: AbstractKanaMode): void {
+    async onCtrlJ(context: AbstractKanaMode): Promise<void> {
         // delete heading ▽ and fix the remaining text
-        this.editor.fixateMidashigo();
+        await this.editor.fixateMidashigo();
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
     }
 
-    onCtrlG(context: AbstractKanaMode): void {
+    async onCtrlG(context: AbstractKanaMode): Promise<void> {
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
         this.editor.clearMidashigo();
     }

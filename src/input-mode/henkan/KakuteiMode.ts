@@ -19,7 +19,7 @@ export class KakuteiMode extends AbstractHenkanMode {
         this.romajiInput.reset();
     }
 
-    onLowerAlphabet(context: AbstractKanaMode, key: string): void {
+    async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'l') {
             this.editor.setInputMode(AsciiMode.getInstance());
             return;
@@ -32,7 +32,7 @@ export class KakuteiMode extends AbstractHenkanMode {
         context.insertStringAndShowRemaining(this.romajiInput.processInput(key), this.romajiInput.getRemainingRomaji(), false);
     }
 
-    onUpperAlphabet(context: AbstractKanaMode, key: string): void {
+    async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'L') {
             this.editor.setInputMode(ZeneiMode.getInstance());
             return;
@@ -42,9 +42,9 @@ export class KakuteiMode extends AbstractHenkanMode {
         context.setHenkanMode(midashigoMode);
     }
 
-    onNumber(context: AbstractKanaMode, key: string): void {
+    async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
         this.romajiInput.reset();
-        context.insertStringAndShowRemaining(key, "", false);
+        await context.insertStringAndShowRemaining(key, "", false);
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
@@ -53,7 +53,7 @@ export class KakuteiMode extends AbstractHenkanMode {
         let remaining = this.romajiInput.getRemainingRomaji();
 
         // 変換できる文字があればそれを挿入する(例: "n" -> "ん")
-        await context.insertStringAndShowRemaining(kana, remaining, false).then(() => {
+        await context.insertStringAndShowRemaining(kana, remaining, false).then(async () => {
             // 「/」が入力された場合は SKK Abbrev mode に移行する
             if (key === "/") {
                 // "/" 自体は挿入しない
@@ -66,40 +66,40 @@ export class KakuteiMode extends AbstractHenkanMode {
 
             // 変換できない場合は， remaining に入っている記号をそのまま挿入
             this.romajiInput.reset();
-            context.insertStringAndShowRemaining(remaining, "", false);
+            await context.insertStringAndShowRemaining(remaining, "", false);
         });
     }
 
-    onSpace(context: AbstractKanaMode): void {
+    async onSpace(context: AbstractKanaMode): Promise<void> {
         // "n" のように，仮名にできるローマ字がバッファに残っている場合は，スペースの前に仮名を入力する
         let kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
         this.romajiInput.reset();
-        context.insertStringAndShowRemaining(kana + " ", "", false);
+        await context.insertStringAndShowRemaining(kana + " ", "", false);
     }
 
-    onEnter(context: AbstractKanaMode): void {
+    async onEnter(context: AbstractKanaMode): Promise<void> {
         this.romajiInput.reset();
-        context.insertStringAndShowRemaining("\n", "", false);
+        await context.insertStringAndShowRemaining("\n", "", false);
     }
 
-    onBackspace(context: AbstractKanaMode): void {
+    async onBackspace(context: AbstractKanaMode): Promise<void> {
         if (!this.romajiInput.isEmpty()) {
             this.romajiInput.deleteLastChar();
-            context.insertStringAndShowRemaining("", this.romajiInput.getRemainingRomaji(), false);
+            await context.insertStringAndShowRemaining("", this.romajiInput.getRemainingRomaji(), false);
             return;
         }
 
-        this.editor.deleteLeft();
+        await this.editor.deleteLeft();
     }
 
-    onCtrlJ(context: AbstractKanaMode): void {
+    async onCtrlJ(context: AbstractKanaMode): Promise<void> {
         this.romajiInput.reset();
-        context.insertStringAndShowRemaining("", "", false);
+        await context.insertStringAndShowRemaining("", "", false);
     }
 
-    onCtrlG(context: AbstractKanaMode): void {
+    async onCtrlG(context: AbstractKanaMode): Promise<void> {
         this.romajiInput.reset();
-        context.insertStringAndShowRemaining("", "", false);
+        await context.insertStringAndShowRemaining("", "", false);
     }
 
     public constructor(context: AbstractKanaMode, editor: IEditor) {

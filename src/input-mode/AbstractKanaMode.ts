@@ -24,7 +24,7 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
         return Promise.resolve();
     }
 
-    public reset(): void {
+    public async reset(): Promise<void> {
         this.editor.showRemainingRomaji("", false, 0); // clear remaining romaji annotation
     }
 
@@ -36,8 +36,8 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
         this.editor.showErrorMessage(message);
     }
 
-    public lowerAlphabetInput(key: string): void {
-        this.henkanMode.onLowerAlphabet(this, key);
+    public async lowerAlphabetInput(key: string): Promise<void> {
+        await this.henkanMode.onLowerAlphabet(this, key);
     }
 
     toggleKanaMode() {
@@ -45,35 +45,35 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
         this.editor.setInputMode(nextMode);
     }
 
-    public upperAlphabetInput(key: string): void {
-        this.henkanMode.onUpperAlphabet(this, key);
+    public async upperAlphabetInput(key: string): Promise<void> {
+        await this.henkanMode.onUpperAlphabet(this, key);
     }
 
-    public spaceInput(): void {
-        this.henkanMode.onSpace(this);
+    public async spaceInput(): Promise<void> {
+        await this.henkanMode.onSpace(this);
     }
 
-    public ctrlJInput(): void {
-        this.henkanMode.onCtrlJ(this);
+    public async ctrlJInput(): Promise<void> {
+        await this.henkanMode.onCtrlJ(this);
     }
 
-    public ctrlGInput(): void {
-        this.henkanMode.onCtrlG(this);
+    public async ctrlGInput(): Promise<void> {
+        await this.henkanMode.onCtrlG(this);
     }
 
-    public enterInput(): void {
-        this.henkanMode.onEnter(this);
+    public async enterInput(): Promise<void> {
+        await this.henkanMode.onEnter(this);
     }
 
-    public backspaceInput(): void {
-        this.henkanMode.onBackspace(this);
+    public async backspaceInput(): Promise<void> {
+        await this.henkanMode.onBackspace(this);
     }
 
-    public numberInput(key: string): void {
-        this.henkanMode.onNumber(this, key);
+    public async numberInput(key: string): Promise<void> {
+        await this.henkanMode.onNumber(this, key);
     }
 
-    public symbolInput(key: string) {
-        this.henkanMode.onSymbol(this, key);
+    public async symbolInput(key: string): Promise<void> {
+        await this.henkanMode.onSymbol(this, key);
     }
 }

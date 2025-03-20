@@ -23,7 +23,7 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
         this.editor.showCandidate(undefined, `Really delete \"${midashigo} /${candidate.word}/\"? (Y/N)`);
     }
 
-    onLowerAlphabet(context: AbstractKanaMode, key: string): void {
+    async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === "y" || key === "n") {
             throw new Error("Type Y or N in upper case");
         }
@@ -37,9 +37,9 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
         });
     }
 
-    onUpperAlphabet(context: AbstractKanaMode, key: string): void {
+    async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === "Y") {
-            this.editor.getJisyoProvider().deleteCandidate(this.midashigo, this.candidate);
+            await this.editor.getJisyoProvider().deleteCandidate(this.midashigo, this.candidate);
             this.clearInlineDialogAndReturnToKakuteiMode(context);
             return;
         }
@@ -53,32 +53,32 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
         throw new Error("Type Y or N");
     }
 
-    onCtrlG(context: AbstractKanaMode): void {
+    async onCtrlG(context: AbstractKanaMode): Promise<void> {
         context.setHenkanMode(this.prevMode);
         this.prevMode.showCandidate(context);
     }
 
-    onNumber(context: AbstractKanaMode, key: string): void {
+    async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
         throw new Error("Type Y or N");
     }
 
-    onSymbol(context: AbstractKanaMode, key: string): void {
+    async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
         throw new Error("Type Y or N");
     }
 
-    onSpace(context: AbstractKanaMode): void {
+    async onSpace(context: AbstractKanaMode): Promise<void> {
         throw new Error("Type Y or N");
     }
 
-    onEnter(context: AbstractKanaMode): void {
+    async onEnter(context: AbstractKanaMode): Promise<void> {
         throw new Error("Type Y or N");
     }
 
-    onBackspace(context: AbstractKanaMode): void {
+    async onBackspace(context: AbstractKanaMode): Promise<void> {
         throw new Error("Type Y or N");
     }
 
-    onCtrlJ(context: AbstractKanaMode): void {
+    async onCtrlJ(context: AbstractKanaMode): Promise<void> {
         throw new Error("Type Y or N");
     }
 }

@@ -11,43 +11,43 @@ export class AsciiMode extends AbstractInputMode {
        return new AsciiMode();
     }
 
-    public reset(): void {
+    public async reset(): Promise<void> {
         // Do nothing
     }
 
-    public lowerAlphabetInput(key: string): void {
-        this.editor.insertOrReplaceSelection(key);
+    public async lowerAlphabetInput(key: string): Promise<void> {
+        await this.editor.insertOrReplaceSelection(key);
     }
 
-    public upperAlphabetInput(key: string): void {
-        this.editor.insertOrReplaceSelection(key);
+    public async upperAlphabetInput(key: string): Promise<void> {
+        await this.editor.insertOrReplaceSelection(key);
     }
 
-    public spaceInput(): void {
-        this.editor.insertOrReplaceSelection(" ");
+    public async spaceInput(): Promise<void> {
+        await this.editor.insertOrReplaceSelection(" ");
     }
 
-    public ctrlJInput(): void {
+    public async ctrlJInput(): Promise<void> {
         this.editor.setInputMode(HiraganaMode.getInstance());
     }
 
-    public ctrlGInput(): void {
+    public async ctrlGInput(): Promise<void> {
         // Do nothing
     }
 
-    public enterInput(): void {
-        this.editor.insertOrReplaceSelection("\n");
+    public async enterInput(): Promise<void> {
+        await this.editor.insertOrReplaceSelection("\n");
     }
 
-    public backspaceInput(): void {
-        this.editor.deleteLeft();
+    public async backspaceInput(): Promise<void> {
+        await this.editor.deleteLeft();
     }
 
-    public numberInput(key: string): void {
-        this.editor.insertOrReplaceSelection(key);
+    public async numberInput(key: string): Promise<void> {
+        await this.editor.insertOrReplaceSelection(key);
     }
 
-    public symbolInput(key: string): void {
-        this.editor.insertOrReplaceSelection(key);
+    public async symbolInput(key: string): Promise<void> {
+        await this.editor.insertOrReplaceSelection(key);
     }
 }

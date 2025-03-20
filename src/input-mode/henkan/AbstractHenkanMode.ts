@@ -39,53 +39,53 @@ export abstract class AbstractHenkanMode {
      * @param context  
      * @param ch 
      */
-    abstract onLowerAlphabet(context: AbstractKanaMode, key: string): void;
+    abstract onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void>;
 
     /**
      * 大文字アルファベットの入力を受け付ける．
      * @param context
      * @param ch
      */
-    abstract onUpperAlphabet(context: AbstractKanaMode, key: string): void;
+    abstract onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void>;
 
     /**
      * 数字の入力を受け付ける．
      * @param context
      * @param ch
      */
-    abstract onNumber(context: AbstractKanaMode, key: string): void;
+    abstract onNumber(context: AbstractKanaMode, key: string): Promise<void>;
 
     /**
      * 記号の入力を受け付ける．
      */
-    abstract onSymbol(context: AbstractKanaMode, key: string): void;
+    abstract onSymbol(context: AbstractKanaMode, key: string): Promise<void>;
 
     /**
      * スペースの入力を受け付ける．
      * @param context
      */
-    abstract onSpace(context: AbstractKanaMode): void;
+    abstract onSpace(context: AbstractKanaMode): Promise<void>;
 
     /**
      * Enter の入力を受け付ける．
      * @param context
      */
-    abstract onEnter(context: AbstractKanaMode): void;
+    abstract onEnter(context: AbstractKanaMode): Promise<void>;
 
     /**
      * Backspace の入力を受け付ける．
      * @param context
      */
-    abstract onBackspace(context: AbstractKanaMode): void;
+    abstract onBackspace(context: AbstractKanaMode): Promise<void>;
 
     /**
      * C-j の入力を受け付ける．
      * @param context
      */
-    abstract onCtrlJ(context: AbstractKanaMode): void;
+    abstract onCtrlJ(context: AbstractKanaMode): Promise<void>;
 
     /**
      * C-g の入力を受け付ける．
      */
-    abstract onCtrlG(context: AbstractKanaMode): void;
+    abstract onCtrlG(context: AbstractKanaMode): Promise<void>;
 }
