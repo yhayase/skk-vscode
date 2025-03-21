@@ -310,7 +310,7 @@ export class VSCodeEditor implements IEditor {
         return Promise.resolve(false);
     }
 
-    clearCandidate(): PromiseLike<boolean> {
+    async clearCandidate(): Promise<boolean> {
         this.showRemainingRomaji("", false);
         if (this.midashigoStart && vscode.window.activeTextEditor) {
             const candidateRange = new vscode.Range(this.midashigoStart, vscode.window.activeTextEditor?.selection.end);
@@ -320,13 +320,13 @@ export class VSCodeEditor implements IEditor {
             // head of candidate must be "▼"
             if (candidate[0] !== '▼') {
                 vscode.window.showInformationMessage('It seems start marker "▼" is gone');
-                return Promise.resolve(false);
+                return false;
             }
 
             // erase candidate
-            return this.replaceRange(iCandidateRange, '');
+            return await this.replaceRange(iCandidateRange, '');
         }
-        return Promise.resolve(false);
+        return false;
     }
 
     /**
@@ -334,21 +334,21 @@ export class VSCodeEditor implements IEditor {
      *
      * This method fixate the range from "▼" to the cursor position, then hide the annotation.
      */
-    fixateCandidate(candStr: string | undefined = undefined): PromiseLike<boolean> {
+    async fixateCandidate(candStr: string | undefined = undefined): Promise<boolean> {
         // Check the first char at the midashigoStart is "▼", then remove it
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            return Promise.resolve(false);
+            return false;
         }
         if (!this.midashigoStart) {
-            return Promise.resolve(false);
+            return false;
         }
         const firstCharRange = new vscode.Range(this.midashigoStart, this.midashigoStart.translate(0, 1));
         const iFirstCharRange = this.convertToIRange(firstCharRange);
         let firstChar = this.getTextInRange(iFirstCharRange);
         if (firstChar !== '▼') {
             vscode.window.showInformationMessage('It seems start marker "▼" is gone');
-            return Promise.resolve(false);
+            return false;
         }
 
         // hide the annotation
@@ -358,7 +358,7 @@ export class VSCodeEditor implements IEditor {
         this.midashigoStart = undefined;
 
         // Delete heading marker "▼"
-        return this.replaceRange(iFirstCharRange, candStr ? candStr : '');
+        return await this.replaceRange(iFirstCharRange, candStr ? candStr : '');
     }
 
 
