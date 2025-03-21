@@ -8,6 +8,31 @@ import { Entry } from '../../../jisyo/entry';
 import { EditorFactory } from '../../../editor/EditorFactory';
 
 /**
+ * Find the position of the nth occurrence of searchStr in currentText.
+ * If the occurence of searchStr is less than n, return undefined.
+ * If n is 0, return 0.
+ * If n is negative, return undefined.
+ */
+function positionOfNthOccurence(str: string, searchStr: string, n: number): number | undefined {
+    if (n < 0) {
+        return undefined;
+    }
+    if (n === 0) {
+        return 0;
+    }
+    let count = 0;
+    let index = -searchStr.length;
+    while (count < n) {
+        index = str.indexOf(searchStr, index + searchStr.length);
+        if (index === -1) {
+            return undefined;
+        }
+        count++;
+    }
+    return index;
+}
+
+/**
  * Mock implementation of IJisyoProvider for testing
  */
 export class MockJisyoProvider implements IJisyoProvider {
@@ -138,9 +163,6 @@ export class MockEditor implements IEditor {
         return this.wasDeleteLeftInvoked;
     }
 
-    getHenkanMode(): AbstractHenkanMode {
-        return this.henkanMode!;
-    }
 
     getRemainingRomaji(): string {
         return this.remainingRomaji;
@@ -170,10 +192,6 @@ export class MockEditor implements IEditor {
         return this.currentText;
     }
 
-    setHenkanMode(mode: AbstractHenkanMode): void {
-        this.henkanMode = mode;
-    }
-
     getState() {
         return {
             insertedText: this.insertedText,
@@ -196,39 +214,133 @@ export class MockEditor implements IEditor {
     // IEditor interface implementation
     async deleteLeft(): Promise<DeleteLeftResult> {
         this.wasDeleteLeftInvoked = true;
-        if (this.cursorPosition.character > 0) {
-            if (this.midashigoStartPosition &&
-                this.cursorPosition.character === this.midashigoStartPosition.character + 1) {
-                const char = this.currentText[this.cursorPosition.character - 1];
-                if (char === '▽') {
-                    this.midashigoStartPosition = null;
-                    this.currentText = this.currentText.slice(0, -1);
-                    this.cursorPosition.character--;
-                    return DeleteLeftResult.markerDeleted;
-                }
-                return DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted;
-            }
-            this.currentText = this.currentText.slice(0, -1);
-            this.cursorPosition.character--;
+
+        const cursorIndexOfLineStart = positionOfNthOccurence(this.currentText, '\n', this.cursorPosition.line);
+        if (cursorIndexOfLineStart === undefined) {
+            throw new Error('Invalid line number');
+        }
+        const cursorIndexInCurrentText = cursorIndexOfLineStart + this.cursorPosition.character;
+        if (cursorIndexInCurrentText === 0) {
+            // No need to delete since cursor is at the beginning of the text.
             return DeleteLeftResult.otherCharacterDeleted;
         }
-        return DeleteLeftResult.noEditor;
+
+        let rval = DeleteLeftResult.otherCharacterDeleted;
+        if (this.midashigoStartPosition !== null) {
+            const markerIndexOfLineStart = positionOfNthOccurence(this.currentText, '▼', this.midashigoStartPosition.line);
+            if (markerIndexOfLineStart === undefined) {
+                throw new Error('Invalid line number');
+            }
+            const markerIndexInCurrentText = markerIndexOfLineStart + this.midashigoStartPosition.character;
+
+            if (markerIndexInCurrentText === cursorIndexInCurrentText - 1) {
+                const charToDelete = this.currentText.charAt(cursorIndexInCurrentText - 1);
+                if (charToDelete !== '▽') {
+                    rval = DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted;
+                } else {
+                    rval = DeleteLeftResult.markerDeleted;
+                }
+            }
+        }
+
+        // delete the character at left of the cursor
+        this.currentText = this.currentText.slice(0, cursorIndexInCurrentText - 1) +
+            this.currentText.slice(cursorIndexInCurrentText);
+        this.cursorPosition.character--; // BUG: if character is 0, it will be -1
+        this.midashigoStartPosition = null;
+        this.midashigoText = '';
+        this.currentCandidate = undefined;
+
+        return rval;
     }
 
     async fixateCandidate(candStr: string | undefined): Promise<boolean> {
-        this.fixatedCandidate = candStr || '';
-        if (candStr) {
-            this.replaceCurrentMidashigo(candStr);
-            // 確定時には見出し語をクリア
+        // VSCodeEditor の実装
+        /*
+                // Check the first char at the midashigoStart is "▼", then remove it
+                const editor = vscode.window.activeTextEditor;
+                if (!editor) {
+                    return Promise.resolve(false);
+                }
+                if (!this.midashigoStart) {
+                    return Promise.resolve(false);
+                }
+                const firstCharRange = new vscode.Range(this.midashigoStart, this.midashigoStart.translate(0, 1));
+                const iFirstCharRange = this.convertToIRange(firstCharRange);
+                let firstChar = this.getTextInRange(iFirstCharRange);
+                if (firstChar !== '▼') {
+                    vscode.window.showInformationMessage('It seems start marker "▼" is gone');
+                    return Promise.resolve(false);
+                }
+        
+                // hide the annotation
+                this.showRemainingRomaji("", false);
+        
+                // clear midashigoStart
+                this.midashigoStart = undefined;
+        
+                // Delete heading marker "▼"
+                return this.replaceRange(iFirstCharRange, candStr ? candStr : '');
+        */
+        // Mock implementation
+        if (this.midashigoStartPosition) {
+            const startIndexOfLineStart = positionOfNthOccurence(this.currentText, '\n', this.midashigoStartPosition.line);
+            if (startIndexOfLineStart === undefined) {
+                return false;
+            }
+            const startIndexInCurrentText = startIndexOfLineStart + this.midashigoStartPosition.character;
+            const endIndexLineStart = positionOfNthOccurence(this.currentText, '\n', this.cursorPosition.line);
+            if (endIndexLineStart === undefined) {
+                return false;
+            }
+            const endIndexInCurrentText = endIndexLineStart + this.cursorPosition.character;
+            if (startIndexInCurrentText === undefined) {
+                return false;
+            }
+            if (this.currentText.charAt(startIndexInCurrentText) !== '▼') {
+                return false;
+            }
+            this.fixatedCandidate = this.currentText.slice(startIndexInCurrentText + 1, endIndexInCurrentText);
+
+            // Remove the "▼" marker
+            this.currentText = this.currentText.slice(0, startIndexInCurrentText) +
+                this.currentText.slice(startIndexInCurrentText + 1);
+            this.cursorPosition.character = this.cursorPosition.character - 1; // BUG: if character is 0, it will be -1
+
+            this.midashigoStartPosition = null;
             this.midashigoText = '';
+            this.currentCandidate = undefined;
+            this.appendedSuffix = '';
+            this.remainingRomaji = '';
         }
-        this.midashigoStartPosition = null;
-        return true;
     }
 
     async clearCandidate(): Promise<boolean> {
+        if (this.midashigoStartPosition) {
+            const startLineIndex = positionOfNthOccurence(this.currentText, '\n', this.midashigoStartPosition.line);
+            if (startLineIndex === undefined) {
+                return false;
+            }
+            const startIndexInCurrentText = startLineIndex + this.midashigoStartPosition.character;
+
+            const endLineIndex = positionOfNthOccurence(this.currentText, '\n', this.cursorPosition.line);
+            if (endLineIndex === undefined) {
+                return false;
+            }
+            const endIndexInCurrentText = endLineIndex + this.cursorPosition.character;
+
+            if (startIndexInCurrentText > endIndexInCurrentText) {
+                return false;
+            }
+            const head = this.currentText.slice(0, startIndexInCurrentText);
+            const tail = this.currentText.slice(endIndexInCurrentText);
+            this.currentText = head + tail;
+            this.cursorPosition = this.midashigoStartPosition;
+        }
+        this.midashigoStartPosition = null;
+        this.midashigoText = '';
         this.currentCandidate = undefined;
-        this.henkanMode = null;
+        this.appendedSuffix = '';
         return true;
     }
 
@@ -337,7 +449,7 @@ export class MockEditor implements IEditor {
                 this.midashigoText = text.slice(1);
             }
         }
-        
+
         return true;
     }
 

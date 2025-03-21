@@ -68,41 +68,39 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         if (key === 'q') {
             this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-            this.fixateCandidate(context).then(() => {
-                context.toggleKanaMode();
-                context.setHenkanMode(KakuteiMode.create(context, this.editor));
-            });
+            await this.fixateCandidate(context);
+            context.toggleKanaMode();
+            context.setHenkanMode(KakuteiMode.create(context, this.editor));
         }
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        this.fixateCandidate(context).then(() => {
-            context.setHenkanMode(KakuteiMode.create(context, this.editor));
-            context.lowerAlphabetInput(key);
-        });
+        await this.fixateCandidate(context);
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        await context.lowerAlphabetInput(key);
     }
 
-    returnToMidashigoMode(context: AbstractKanaMode) {
+    async returnToMidashigoMode(context: AbstractKanaMode) {
         context.setHenkanMode(this.prevMode);
         // recover orijinal midashigo
-        this.editor.clearCandidate().then(() => {
-            context.insertStringAndShowRemaining("▽" + this.origMidashigo + this.suffix, "", false);
-        });
+        // await this.editor.clearCandidate().then(() => {
+        //     context.insertStringAndShowRemaining("▽" + this.origMidashigo + this.suffix, "", false);
+        // });
+        await this.editor.clearCandidate();
+        await context.insertStringAndShowRemaining("▽" + this.origMidashigo + this.suffix, "", false);
     }
 
-    clearMidashigoAndReturnToKakuteiMode(context: AbstractKanaMode) {
+    async clearMidashigoAndReturnToKakuteiMode(context: AbstractKanaMode) {
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
-        this.editor.clearCandidate().then(() => {
-            context.insertStringAndShowRemaining("", "", false);
-        });
+        await this.editor.clearCandidate();
+        await context.insertStringAndShowRemaining("", "", false);
     }
 
     async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'L') {
             this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-            this.fixateCandidate(context).then(() => {
-                this.editor.setInputMode(ZeneiMode.getInstance());
-            });
+            await this.fixateCandidate(context);
+            this.editor.setInputMode(ZeneiMode.getInstance());
             return;
         }
 
@@ -121,22 +119,21 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        this.fixateCandidate(context).then(() => {
-            context.setHenkanMode(KakuteiMode.create(context, this.editor));
-            return context.upperAlphabetInput(key);
-        });
+        await this.fixateCandidate(context);
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        await context.upperAlphabetInput(key);
     }
 
     async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        this.fixateCandidate(context);
+        await this.fixateCandidate(context);
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
-        context.numberInput(key);
+        await context.numberInput(key);
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        this.fixateCandidate(context).then(() => {
+        await this.fixateCandidate(context).then(() => {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
             context.symbolInput(key);
         });
@@ -144,7 +141,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
     async onSpace(context: AbstractKanaMode): Promise<void> {
         if (this.candidateIndex + 1 >= this.jisyoEntry.getCandidateList().length) {
-            this.editor.openRegistrationEditor(this.getMidashigo());
+            await this.editor.openRegistrationEditor(this.getMidashigo());
             return;
         }
 
@@ -160,30 +157,28 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
     async onEnter(context: AbstractKanaMode): Promise<void> {
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        this.fixateAndGoKakuteiMode(context).then(() => {
-            context.insertStringAndShowRemaining("\n", "", false);
-        });
+        await this.fixateAndGoKakuteiMode(context);
+        await context.insertStringAndShowRemaining("\n", "", false);
     }
 
     async onBackspace(context: AbstractKanaMode): Promise<void> {
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        this.fixateAndGoKakuteiMode(context).then(() => {
-            this.editor.deleteLeft();
-        });
+        await this.fixateAndGoKakuteiMode(context);
+        await this.editor.deleteLeft();
     }
 
     async onCtrlJ(context: AbstractKanaMode): Promise<void> {
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        this.fixateAndGoKakuteiMode(context);
+        await this.fixateAndGoKakuteiMode(context);
     }
 
-    private fixateAndGoKakuteiMode(context: AbstractKanaMode): PromiseLike<boolean> {
+    private async fixateAndGoKakuteiMode(context: AbstractKanaMode): Promise<boolean> {
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
-        return this.fixateCandidate(context);
+        return await this.fixateCandidate(context);
     }
 
     async onCtrlG(context: AbstractKanaMode): Promise<void> {
-        this.returnToMidashigoMode(context);
+        await this.returnToMidashigoMode(context);
     }
 
     getMidashigo() {
