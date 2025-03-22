@@ -20,30 +20,35 @@ function indexOfPositionInString(str: string, pos: IPosition): number | undefine
             return undefined;
         }
         if (n === 0) {
-            return 0;
+            return -1;
         }
-        let count = 0;
+        
         let index = -searchStr.length;
-        while (count < n) {
+        
+        for (let count = 0; count < n; count++) {
             index = str.indexOf(searchStr, index + searchStr.length);
             if (index === -1) {
                 return undefined;
             }
-            count++;
         }
+        
         return index;
     }
+
+    if (pos.line === 0 && pos.character === 0) {
+        return 0;
+    }
     
-    const lineStartIndex = positionOfNthOccurence(str, '\n', pos.line);
-    if (lineStartIndex === undefined) {
+    const lastLineEndIndex = positionOfNthOccurence(str, '\n', pos.line);
+    if (lastLineEndIndex === undefined) {
         return undefined;
     }
-    // check if str[lineStartIndex..lineStartIndex + pos.character] consists of other than '\n'
-    const strSlice = str.slice(lineStartIndex, lineStartIndex + pos.character);
+    // check if str[lastLineEndIndex+1 .. lastLineEndIndex+1+pos.character] is valid
+    const strSlice = str.slice(lastLineEndIndex+1, lastLineEndIndex + 1 + pos.character);
     if (strSlice.length !== pos.character || strSlice.includes('\n')) {
         return undefined;
     }
-    return lineStartIndex + pos.character;
+    return lastLineEndIndex + 1 + pos.character;
 }
 
 
@@ -309,12 +314,13 @@ export class MockEditor implements IEditor {
             if (this.currentText.charAt(startIndexInCurrentText) !== '▼') {
                 return false;
             }
-            this.fixatedCandidate = this.currentText.slice(startIndexInCurrentText + 1, endIndexInCurrentText);
+            this.fixatedCandidate = candStr || this.currentText.slice(startIndexInCurrentText + 1, endIndexInCurrentText);
 
-            // Remove the "▼" marker
+            // replace startIndexInCurrentText to endIndexInCurrentText with fixatedCandidate
             this.currentText = this.currentText.slice(0, startIndexInCurrentText) +
-                this.currentText.slice(startIndexInCurrentText + 1);
-            this.cursorPosition.character = this.cursorPosition.character - 1; // BUG: if character is 0, it will be -1
+                this.fixatedCandidate +
+                this.currentText.slice(endIndexInCurrentText);
+            this.cursorPosition.character = startIndexInCurrentText + this.fixatedCandidate.length;
 
             this.midashigoStartPosition = null;
             this.midashigoText = '';
