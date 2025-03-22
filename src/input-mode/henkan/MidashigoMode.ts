@@ -18,15 +18,13 @@ export class MidashigoMode extends AbstractMidashigoMode {
     private romajiInput: RomajiInput;
     private midashigoMode: MidashigoType = MidashigoType.gokan;
 
-    constructor(context: AbstractKanaMode, editor: IEditor, initialRomajiInput: string | undefined = undefined) {
+    constructor(context: AbstractKanaMode, editor: IEditor, initialRomajiInput: string = "") {
         super("▽", editor);
         this.romajiInput = context.newRomajiInput();
 
-        if (initialRomajiInput) {
-            const insertStr = "▽" + this.romajiInput.processInput(initialRomajiInput.toLowerCase());
-            this.editor.setMidashigoStartToCurrentPosition();
-            context.insertStringAndShowRemaining(insertStr, this.romajiInput.getRemainingRomaji(), false);
-        }
+        const insertStr = "▽" + this.romajiInput.processInput(initialRomajiInput.toLowerCase());
+        this.editor.setMidashigoStartToCurrentPosition();
+        context.insertStringAndShowRemaining(insertStr, this.romajiInput.getRemainingRomaji(), false);
     }
 
     async findCandidates(midashigo: string, okuri: string): Promise<Entry | undefined> {
@@ -41,7 +39,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         return { key, keyForLookup };
     }
 
-    private async henkan(context: AbstractKanaMode, okuri: string, optionalSuffix?: string): Promise<void> {
+    private async henkan(context: AbstractKanaMode, okuri: string, optionalTrailingStr?: string): Promise<void> {
         const midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
@@ -56,6 +54,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
 
         const okuriAlphabet = okuri.length > 0 ? (lookupOkuriAlphabet(okuri) || "") : "";
+        // TODO: optionalTrailingStr をInlineHenkanMode に渡す
         context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, okuriAlphabet, jisyoEntry, okuri));
     }
 
@@ -144,10 +143,9 @@ export class MidashigoMode extends AbstractMidashigoMode {
         if (new Set(["。", "、", "．", "，", "」", "』", "］", "!", "！", ":", "：", ";", "；"]).has(lastKana)) {
             // 最後の1文字を除いた kana を挿入
             this.romajiInput.reset();
-            await context.insertStringAndShowRemaining(kana.slice(0, -1), "", false).then(async () => {
-                // 変換を開始する
-                await this.henkan(context, "", lastKana);
-            });
+            await context.insertStringAndShowRemaining(kana.slice(0, -1), "", false);
+            
+            await this.henkan(context, "", lastKana);
             return;
         }
 
@@ -165,9 +163,8 @@ export class MidashigoMode extends AbstractMidashigoMode {
         // "n" のように，仮名にできるローマ字がバッファに残っている場合は，仮名を入力してから変換を開始する
         const kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
         this.romajiInput.reset();
-        await context.insertStringAndShowRemaining(kana, "", false).then(async () => {
-            await this.henkan(context, "");
-        });
+        await context.insertStringAndShowRemaining(kana, "", false);
+        await this.henkan(context, "");
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {

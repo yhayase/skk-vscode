@@ -6,31 +6,46 @@ import { AbstractHenkanMode } from '../../../input-mode/henkan/AbstractHenkanMod
 import { IJisyoProvider } from '../../../jisyo/IJisyoProvider';
 import { Entry } from '../../../jisyo/entry';
 import { EditorFactory } from '../../../editor/EditorFactory';
+import * as wanakana from 'wanakana';
 
 /**
- * Find the position of the nth occurrence of searchStr in currentText.
- * If the occurence of searchStr is less than n, return undefined.
- * If n is 0, return 0.
- * If n is negative, return undefined.
+ * Utility function to find the index of a position in a string for internal use
+ * @param str The string to search in
+ * @param pos The position to find
+ * @returns The index of the position in the string or undefined if not found
  */
-function positionOfNthOccurence(str: string, searchStr: string, n: number): number | undefined {
-    if (n < 0) {
-        return undefined;
-    }
-    if (n === 0) {
-        return 0;
-    }
-    let count = 0;
-    let index = -searchStr.length;
-    while (count < n) {
-        index = str.indexOf(searchStr, index + searchStr.length);
-        if (index === -1) {
+function indexOfPositionInString(str: string, pos: IPosition): number | undefined {
+    function positionOfNthOccurence(str: string, searchStr: string, n: number): number | undefined {
+        if (n < 0) {
             return undefined;
         }
-        count++;
+        if (n === 0) {
+            return 0;
+        }
+        let count = 0;
+        let index = -searchStr.length;
+        while (count < n) {
+            index = str.indexOf(searchStr, index + searchStr.length);
+            if (index === -1) {
+                return undefined;
+            }
+            count++;
+        }
+        return index;
     }
-    return index;
+    
+    const lineStartIndex = positionOfNthOccurence(str, '\n', pos.line);
+    if (lineStartIndex === undefined) {
+        return undefined;
+    }
+    // check if str[lineStartIndex..lineStartIndex + pos.character] consists of other than '\n'
+    const strSlice = str.slice(lineStartIndex, lineStartIndex + pos.character);
+    if (strSlice.length !== pos.character || strSlice.includes('\n')) {
+        return undefined;
+    }
+    return lineStartIndex + pos.character;
 }
+
 
 /**
  * Mock implementation of IJisyoProvider for testing
@@ -215,11 +230,10 @@ export class MockEditor implements IEditor {
     async deleteLeft(): Promise<DeleteLeftResult> {
         this.wasDeleteLeftInvoked = true;
 
-        const cursorIndexOfLineStart = positionOfNthOccurence(this.currentText, '\n', this.cursorPosition.line);
-        if (cursorIndexOfLineStart === undefined) {
-            throw new Error('Invalid line number');
+        const cursorIndexInCurrentText = indexOfPositionInString(this.currentText, this.cursorPosition);
+        if (cursorIndexInCurrentText === undefined) {
+            throw new Error('Invalid cursor position');
         }
-        const cursorIndexInCurrentText = cursorIndexOfLineStart + this.cursorPosition.character;
         if (cursorIndexInCurrentText === 0) {
             // No need to delete since cursor is at the beginning of the text.
             return DeleteLeftResult.otherCharacterDeleted;
@@ -227,11 +241,10 @@ export class MockEditor implements IEditor {
 
         let rval = DeleteLeftResult.otherCharacterDeleted;
         if (this.midashigoStartPosition !== null) {
-            const markerIndexOfLineStart = positionOfNthOccurence(this.currentText, '▼', this.midashigoStartPosition.line);
-            if (markerIndexOfLineStart === undefined) {
-                throw new Error('Invalid line number');
+            const markerIndexInCurrentText = indexOfPositionInString(this.currentText, this.midashigoStartPosition);
+            if (markerIndexInCurrentText === undefined) {
+                throw new Error('Invalid marker position');
             }
-            const markerIndexInCurrentText = markerIndexOfLineStart + this.midashigoStartPosition.character;
 
             if (markerIndexInCurrentText === cursorIndexInCurrentText - 1) {
                 const charToDelete = this.currentText.charAt(cursorIndexInCurrentText - 1);
@@ -284,19 +297,15 @@ export class MockEditor implements IEditor {
         */
         // Mock implementation
         if (this.midashigoStartPosition) {
-            const startIndexOfLineStart = positionOfNthOccurence(this.currentText, '\n', this.midashigoStartPosition.line);
-            if (startIndexOfLineStart === undefined) {
-                return false;
-            }
-            const startIndexInCurrentText = startIndexOfLineStart + this.midashigoStartPosition.character;
-            const endIndexLineStart = positionOfNthOccurence(this.currentText, '\n', this.cursorPosition.line);
-            if (endIndexLineStart === undefined) {
-                return false;
-            }
-            const endIndexInCurrentText = endIndexLineStart + this.cursorPosition.character;
+            const startIndexInCurrentText = indexOfPositionInString(this.currentText, this.midashigoStartPosition);
             if (startIndexInCurrentText === undefined) {
                 return false;
             }
+            const endIndexInCurrentText = indexOfPositionInString(this.currentText, this.cursorPosition);
+            if (endIndexInCurrentText === undefined) {
+                return false;
+            }
+
             if (this.currentText.charAt(startIndexInCurrentText) !== '▼') {
                 return false;
             }
@@ -312,22 +321,23 @@ export class MockEditor implements IEditor {
             this.currentCandidate = undefined;
             this.appendedSuffix = '';
             this.remainingRomaji = '';
+
+            return true;
         }
+        return false;
     }
 
     async clearCandidate(): Promise<boolean> {
         if (this.midashigoStartPosition) {
-            const startLineIndex = positionOfNthOccurence(this.currentText, '\n', this.midashigoStartPosition.line);
-            if (startLineIndex === undefined) {
+            const startIndexInCurrentText = indexOfPositionInString(this.currentText, this.midashigoStartPosition);
+            if (startIndexInCurrentText === undefined) {
                 return false;
             }
-            const startIndexInCurrentText = startLineIndex + this.midashigoStartPosition.character;
 
-            const endLineIndex = positionOfNthOccurence(this.currentText, '\n', this.cursorPosition.line);
-            if (endLineIndex === undefined) {
+            const endIndexInCurrentText = indexOfPositionInString(this.currentText, this.cursorPosition);
+            if (endIndexInCurrentText === undefined) {
                 return false;
             }
-            const endIndexInCurrentText = endLineIndex + this.cursorPosition.character;
 
             if (startIndexInCurrentText > endIndexInCurrentText) {
                 return false;
@@ -360,12 +370,69 @@ export class MockEditor implements IEditor {
         return Promise.resolve(true);
     }
 
+    // FIXME: 正しい実装がない
     toggleCharTypeInMidashigoAndFixateMidashigo(): void {
         const midashigo = this.extractMidashigo();
         if (midashigo) {
-            // 簡易的な実装: ひらがなとカタカナの変換のみ
-            this.fixatedCandidate = midashigo;
+            // function retruns parameter without any conversion
+            function identity<T>(c: T): T {
+                return c;
+            }
+
+            // function converts ascii to full-width ascii
+            function toFullWidth(text: string): string {
+                return text.replace(/[\x20-\x7E]/g, function (c) {
+                    // space
+                    if (c === ' ') {
+                        return '　';
+                    }
+
+                    // other ascii printable characters
+                    return String.fromCharCode(c.charCodeAt(0) + 0xFEE0);
+                });
+            }
+            function toHalfWidth(text: string): string {
+                return text.replace(/(\u3000|[\uFF01-\uFF5E])/g, function (c) {
+                    // full width space
+                    if (c === '　') {
+                        return ' ';
+                    }
+                    // other full width ascii characters
+                    return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+                });
+            }
+            function isPrintableAsciiOrAsciiSpace(c: string): boolean {
+                if (c.length !== 1) {
+                    return false;
+                }
+                return ' ' <= c && c <= '~';
+            }
+            function isFullWidthAscii(c: string): boolean {
+                if (c.length !== 1) {
+                    return false;
+                }
+                return '！' <= c && c <= '～';
+            }
+
+            let convFunc = identity<string>;
+            let converted = midashigo.split('').map((c) => {
+                if (convFunc === identity<string>) {
+                    if (wanakana.isHiragana(c)) {
+                        convFunc = wanakana.toKatakana;
+                    } else if (wanakana.isKatakana(c)) {
+                        convFunc = wanakana.toHiragana;
+                    } else if (isPrintableAsciiOrAsciiSpace(c)) {
+                        convFunc = toFullWidth;
+                    } else if (isFullWidthAscii(c)) {
+                        convFunc = toHalfWidth;
+                    }
+                }
+                return convFunc(c);
+            }).join('');
+
+            this.replaceCurrentMidashigo(converted);
             this.midashigoStartPosition = null;
+            this.cursorPosition.character = this.cursorPosition.character - 1; // BUG: if character is 0, it will be -1
         }
     }
 
