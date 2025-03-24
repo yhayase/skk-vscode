@@ -179,6 +179,10 @@ export class MockEditor implements IEditor {
         return this.candidateList;
     }
 
+    getAppendedSuffix(): string {
+        return this.appendedSuffix;
+    }
+
     wasDeleteLeftCalled(): boolean {
         return this.wasDeleteLeftInvoked;
     }
