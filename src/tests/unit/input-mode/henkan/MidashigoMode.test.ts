@@ -165,7 +165,8 @@ describe('MidashigoMode', () => {
             await midashigoMode.onLowerAlphabet(context, 'a');
             await midashigoMode.onSymbol(context, '.');
             expect(context["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
-            expect(mockEditor.getCurrentText()).to.equal('▼可。');
+            await context.ctrlJInput();
+            expect(mockEditor.getCurrentText()).to.equal('可。', 'punctuation should be inserted after the kanji');
         });
     });
 });

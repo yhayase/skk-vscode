@@ -19,8 +19,8 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
         this.showInlineDialog(context, this.midashigo, this.candidate);
     }
 
-    showInlineDialog(context: AbstractKanaMode, midashigo: string, candidate: Candidate) {
-        this.editor.showCandidate(undefined, `Really delete \"${midashigo} /${candidate.word}/\"? (Y/N)`);
+    private async showInlineDialog(context: AbstractKanaMode, midashigo: string, candidate: Candidate): Promise<void> {
+        await this.editor.showCandidate(undefined, `Really delete \"${midashigo} /${candidate.word}/\"? (Y/N)`, '');
     }
 
     async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
@@ -30,17 +30,16 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
         throw new Error("Type Y or N");
     }
 
-    clearInlineDialogAndReturnToKakuteiMode(context: AbstractKanaMode) {
+    private async clearInlineDialogAndReturnToKakuteiMode(context: AbstractKanaMode) {
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
-        this.editor.clearCandidate().then(() => {
-            context.insertStringAndShowRemaining("", "", false);
-        });
+        await this.editor.clearCandidate();
+        await context.insertStringAndShowRemaining("", "", false);
     }
 
     async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === "Y") {
             await this.editor.getJisyoProvider().deleteCandidate(this.midashigo, this.candidate);
-            this.clearInlineDialogAndReturnToKakuteiMode(context);
+            await this.clearInlineDialogAndReturnToKakuteiMode(context);
             return;
         }
 
