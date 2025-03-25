@@ -10,20 +10,22 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     private readonly jisyoEntry: Entry;
     private readonly candidateIndexStart: number;
     private candidateIndex: number;
+    private readonly okuri: string;
     private readonly suffix: string;
 
     private readonly selectionKeys = ['a', 's', 'd', 'f', 'j', 'k', 'l'];
 
     constructor(context: AbstractKanaMode, editor: IEditor, prevMode: InlineHenkanMode, jisyoEntry: Entry,
-        candidateIndex: number, suffix: string) {
+        candidateIndex: number, okuri: string, suffix: string) {
         super("Select", editor);
         this.prevMode = prevMode;
         this.jisyoEntry = jisyoEntry;
         this.candidateIndexStart = candidateIndex;
         this.candidateIndex = candidateIndex;
+        this.okuri = okuri;
         this.suffix = suffix;
 
-        this.editor.showCandidate(undefined, this.suffix);
+        this.editor.showCandidate(undefined, this.okuri, this.suffix);
         this.showCandidateList(context);
     }
 
@@ -127,7 +129,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     private fixateAndGoKakuteiMode(context: AbstractKanaMode, index: number): PromiseLike<boolean> {
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), index);
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
-        return this.editor.fixateCandidate(this.jisyoEntry.getCandidateList()[index].word + this.suffix);
+        return this.editor.fixateCandidate(this.jisyoEntry.getCandidateList()[index].word + this.okuri + this.suffix);
     }
 
     async onCtrlG(context: AbstractKanaMode): Promise<void> {

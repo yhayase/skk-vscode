@@ -55,7 +55,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
         const okuriAlphabet = okuri.length > 0 ? (lookupOkuriAlphabet(okuri) || "") : "";
         // TODO: optionalTrailingStr をInlineHenkanMode に渡す
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, okuriAlphabet, jisyoEntry, okuri));
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, okuriAlphabet, jisyoEntry, okuri, optionalTrailingStr));
     }
 
     async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {

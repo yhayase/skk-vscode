@@ -14,7 +14,7 @@ export class AbbrevMode extends AbstractMidashigoMode {
         context.insertStringAndShowRemaining(insertStr, "", false);
     }
 
-    private async henkan(context: AbstractKanaMode, optionalSuffix?: string): Promise<void> {
+    private async henkan(context: AbstractKanaMode): Promise<void> {
         const midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
@@ -26,7 +26,7 @@ export class AbbrevMode extends AbstractMidashigoMode {
             context.showErrorMessage("変換できません");
             return;
         }
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, "", jisyoCandidates, optionalSuffix));
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, "", jisyoCandidates, "", ""));
     }
 
     async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
@@ -54,7 +54,7 @@ export class AbbrevMode extends AbstractMidashigoMode {
     }
 
     async onSpace(context: AbstractKanaMode): Promise<void> {
-        this.henkan(context, "");
+        this.henkan(context);
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {

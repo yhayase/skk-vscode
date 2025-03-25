@@ -54,7 +54,7 @@ export interface IEditor {
     fixateMidashigo(): PromiseLike<boolean>;
 
     // Candidate management
-    showCandidate(candidate: Candidate | undefined, suffix: string): PromiseLike<boolean | void>;
+    showCandidate(candidate: Candidate | undefined, okuri: string, suffix: string): PromiseLike<boolean | void>;
     showCandidateList(candidateList: Candidate[], alphabetList: string[]): void;
     hideCandidateList(): void;
     fixateCandidate(candStr: string | undefined): PromiseLike<boolean>;

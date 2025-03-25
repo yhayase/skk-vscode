@@ -283,31 +283,38 @@ export class VSCodeEditor implements IEditor {
     /**
      * Show henkan candidates over the midashigo.
      * @param candidate The candidate to show
+     * @param okuri The okurigana to show after the candidate
      * @param suffix Additional string to show after the candidate. e.g. "、" or "。"
      * @returns Promise that resolves to true if the candidate is shown, false otherwise
      */
-    showCandidate(candidate: Candidate | undefined, suffix: string): PromiseLike<boolean | void> {
+    async showCandidate(candidate: Candidate | undefined, okuri: string, suffix: string): Promise<boolean | void> {
         if (this.midashigoStart && vscode.window.activeTextEditor) {
             const midashigoRange = new vscode.Range(this.midashigoStart, vscode.window.activeTextEditor?.selection.end);
             const iMidashigoRange = this.convertToIRange(midashigoRange);
 
             if (!candidate) {
-                return this.replaceRange(iMidashigoRange, "▼").then((value) => {
-                    this.showRemainingRomaji(suffix, false);
-                });
+                const rval = await this.replaceRange(iMidashigoRange, "▼");
+                if (rval) {
+                    this.showRemainingRomaji(okuri + suffix, false);
+                    return true;
+                }
+                return false;
             }
 
-            return this.replaceRange(iMidashigoRange, "▼" + candidate.word).then((value) => {
+
+            if (await this.replaceRange(iMidashigoRange, "▼" + candidate.word)) {
                 if (candidate.annotation) {
-                    this.showRemainingRomaji("; " + candidate.annotation + suffix, false);
+                    this.showRemainingRomaji(okuri + suffix + "; " + candidate.annotation + ' ', false);
                 } else {
-                    this.showRemainingRomaji(suffix, false);
+                    this.showRemainingRomaji(okuri + suffix, false);
                 }
-            });
+                return true;
+            }
+            return false;
         }
         // hide the annotation
         this.showRemainingRomaji("", false);
-        return Promise.resolve(false);
+        return false;
     }
 
     async clearCandidate(): Promise<boolean> {

@@ -17,20 +17,22 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     private readonly jisyoEntry: Entry;
     private candidateIndex: number = 0;
     private readonly suffix: string;
+    private readonly okuri: string;
 
-    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: AbstractMidashigoMode, origMidashigo: string, okuriAlphabet: string, jisyoEntry: Entry, optionalSuffix?: string) {
+    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: AbstractMidashigoMode, origMidashigo: string, okuriAlphabet: string, jisyoEntry: Entry, okuri: string, optionalSuffix?: string) {
         super("▼", editor);
         this.prevMode = prevMode;
         this.origMidashigo = origMidashigo;
         this.okuriAlphabet = okuriAlphabet;
         this.jisyoEntry = jisyoEntry;
+        this.okuri = okuri;
         this.suffix = optionalSuffix || "";
 
         this.showCandidate(context);
     }
 
     showCandidate(context: AbstractKanaMode) {
-        this.editor.showCandidate(this.jisyoEntry.getCandidateList()[this.candidateIndex], this.suffix);
+        this.editor.showCandidate(this.jisyoEntry.getCandidateList()[this.candidateIndex], this.okuri, this.suffix);
     }
 
     /**
@@ -43,7 +45,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         if (!rval) {
             return false;
         }
-        await context.insertStringAndShowRemaining(this.suffix, "", false);
+        await context.insertStringAndShowRemaining(this.okuri + this.suffix, "", false);
         return true;
     }
 
@@ -147,7 +149,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         const MAX_INLINE_CANDIDATES = 3;
         if (this.candidateIndex + 1 >= MAX_INLINE_CANDIDATES) {
-            context.setHenkanMode(new MenuHenkanMode(context, this.editor, this, this.jisyoEntry, this.candidateIndex + 1, this.suffix));
+            context.setHenkanMode(new MenuHenkanMode(context, this.editor, this, this.jisyoEntry, this.candidateIndex + 1, this.okuri, this.suffix));
             return;
         }
 

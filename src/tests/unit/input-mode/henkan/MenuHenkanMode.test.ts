@@ -35,7 +35,7 @@ describe('MenuHenkanMode', () => {
             entry = new Entry('test', candidates, '');
             const midashigoMode = new MidashigoMode(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'み', 'み', entry, '');
-            menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '');
+            menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '', '');
         });
 
         it('should show candidate list with selection keys', async () => {
@@ -76,7 +76,7 @@ describe('MenuHenkanMode', () => {
             entry = new Entry('test', candidates, '');
             const midashigoMode = new MidashigoMode(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'み', 'み', entry, '');
-            menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '');
+            menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '', '');
             context.setHenkanMode(menuHenkanMode);
             mockEditor.setInputMode(context);
         });
@@ -117,7 +117,7 @@ describe('MenuHenkanMode', () => {
             entry = new Entry('test', candidates, '');
             const midashigoMode = new MidashigoMode(context, mockEditor, 'kanji');
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'かんじ', '', entry, '');
-            menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '');
+            menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '', '');
         });
 
         it('should return to midashigo mode on Ctrl+G', async () => {
@@ -136,8 +136,8 @@ describe('MenuHenkanMode', () => {
             expect(mockEditor.getLastErrorMessage()).to.contain('not valid here');
         });
 
-        it('should handle suffix in fixation', async () => {
-            const menuHenkanWithSuffix = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, 'です');
+        it('should handle okuri in fixation', async () => {
+            const menuHenkanWithSuffix = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, 'です', '');
             await menuHenkanWithSuffix.onLowerAlphabet(context, 'a');
             expect(mockEditor.getFixatedCandidate()).to.equal('候補1です');
         });
@@ -161,7 +161,7 @@ describe('MenuHenkanMode', () => {
             entry = new Entry('test', candidates, '');
             const midashigoMode = new MidashigoMode(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'み', 'み', entry, '');
-            menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '');
+            menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '', '');
         });
 
         it('should open registration editor on dot', async () => {
