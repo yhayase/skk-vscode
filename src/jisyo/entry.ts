@@ -1,5 +1,5 @@
 import { Candidate } from "./candidate";
-import { getGlobalJisyo } from "./jisyo";
+import { IJisyoProvider } from "./IJisyoProvider";
 
 export class Entry {
     private readonly midashigo: string;
@@ -27,14 +27,14 @@ export class Entry {
         return this.cookedCandidateList;
     }
 
-    onCandidateSelected(index: number): void {
+    onCandidateSelected(jisyoProvider: IJisyoProvider, index: number): void {
         // No order is changed, so no need to update the jisyo.
         if (index === 0) {
             return;
         }
 
         // Register reordered candidate list to the jisyo.
-        getGlobalJisyo().registerCandidate(this.midashigo, this.rawCandidateList[index], true);
+        jisyoProvider.reorderCandidate(this.midashigo, index);
     }
 
     getRawCandidateList(): ReadonlyArray<Candidate> {

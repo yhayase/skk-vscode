@@ -1,56 +1,53 @@
-import { insertOrReplaceSelection, setInputMode } from "../extension";
-import * as vscode from 'vscode';
 import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
+import { AbstractInputMode } from "./AbstractInputMode";
+import { EditorFactory } from "../editor/EditorFactory";
 
-export class AsciiMode implements IInputMode {
+export class AsciiMode extends AbstractInputMode {
     // AsciiMode is stateless, so the singleton can be stored in a static field.
-    private static instance: AsciiMode = new AsciiMode();
+    private static instance: AsciiMode;
 
     public static getInstance(): AsciiMode {
-        return AsciiMode.instance;
+       return new AsciiMode();
     }
 
-    public reset(): void {
+    public async reset(): Promise<void> {
         // Do nothing
     }
 
-    public lowerAlphabetInput(key: string): void {
-        insertOrReplaceSelection(key);
+    public async lowerAlphabetInput(key: string): Promise<void> {
+        await this.editor.insertOrReplaceSelection(key);
     }
 
-    public upperAlphabetInput(key: string): void {
-        insertOrReplaceSelection(key);
+    public async upperAlphabetInput(key: string): Promise<void> {
+        await this.editor.insertOrReplaceSelection(key);
     }
 
-    public spaceInput(): void {
-        insertOrReplaceSelection(" ");
+    public async spaceInput(): Promise<void> {
+        await this.editor.insertOrReplaceSelection(" ");
     }
 
-    public ctrlJInput(): void {
-        setInputMode(HiraganaMode.getInstance());
+    public async ctrlJInput(): Promise<void> {
+        this.editor.setInputMode(HiraganaMode.getInstance());
     }
 
-    public ctrlGInput(): void {
+    public async ctrlGInput(): Promise<void> {
         // Do nothing
     }
 
-    public enterInput(): void {
-        insertOrReplaceSelection("\n");
+    public async enterInput(): Promise<void> {
+        await this.editor.insertOrReplaceSelection("\n");
     }
 
-    public backspaceInput(): void {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            vscode.commands.executeCommand('deleteLeft');
-        }
+    public async backspaceInput(): Promise<void> {
+        await this.editor.deleteLeft();
     }
 
-    public numberInput(key: string): void {
-        insertOrReplaceSelection(key);
+    public async numberInput(key: string): Promise<void> {
+        await this.editor.insertOrReplaceSelection(key);
     }
 
-    public symbolInput(key: string): void {
-        insertOrReplaceSelection(key);
+    public async symbolInput(key: string): Promise<void> {
+        await this.editor.insertOrReplaceSelection(key);
     }
 }

@@ -4,20 +4,11 @@ import * as vscode from 'vscode';
 import { IInputMode } from './input-mode/IInputMode';
 import { AsciiMode } from './input-mode/AsciiMode';
 import * as jisyo from './jisyo/jisyo';
-import { registerMidashigo } from './input-mode/henkan/RegistrationEditor';
 import * as AsyncLock from 'async-lock';
+import { VSCodeEditor } from './editor/VSCodeEditor';
+import { EditorFactory } from './editor/EditorFactory';
 
 let timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
-
-/**
- * Map to hold input mode corresponding to each text editor.
- * The key is a text editor and the value is an input mode.
- * The value is undefined if no input mode is set to the text editor.
- * 
- * Note that WeakMap is used to avoid memory leak.
- * (TextEditor is a disposable object, so it is not appropriate to use it as a key of a Map.)
- */
-const inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
 
 /**
  * Mutex to avoid executing multiple commands at the same time.
@@ -30,11 +21,7 @@ const commandLock = new AsyncLock();
  * @throws Error if no active text editor is found.
  */
 export function setInputMode(mode: IInputMode) {
-	mode.reset();
-	if (!vscode.window.activeTextEditor) {
-		throw Error("No active text editor");
-	}
-	inputModeMap.set(vscode.window.activeTextEditor.document, mode);
+	EditorFactory.getInstance().getEditor().setInputMode(mode);
 }
 
 /**
@@ -44,20 +31,15 @@ export function setInputMode(mode: IInputMode) {
   * @throws Error if no active text editor is found.
  */
 function findInputMode(): IInputMode {
-	if (!vscode.window.activeTextEditor) {
-		throw Error("No active text editor");
-	}
-	let mode = inputModeMap.get(vscode.window.activeTextEditor.document);
-	if (mode === undefined) {
-		mode = AsciiMode.getInstance();
-		inputModeMap.set(vscode.window.activeTextEditor.document, mode);
-	}
-	return mode;
+	return EditorFactory.getInstance().getEditor().getCurrentInputMode();
 }
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
+    // エディタファクトリの初期化
+    EditorFactory.initialize(() => new VSCodeEditor());
+
 	// Initialize jisyo
 	await jisyo.init(context.globalState, context.globalStorageUri);
 
@@ -152,7 +134,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const registerCandidateCommand = vscode.commands.registerCommand('skk.registerMidashigo', async () => {
 		commandLock.acquire('skk', async () => {
-			await registerMidashigo();
+			await EditorFactory.getInstance().getEditor().registerMidashigo();
 		});
 	});
 	context.subscriptions.push(registerCandidateCommand);
@@ -175,36 +157,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.showInformationMessage("SKK: initialization completed");
 }
 
-export function insertOrReplaceSelection(str: string): Thenable<boolean> {
-	const editor = vscode.window.activeTextEditor;
-	let rval: Thenable<boolean> = Promise.resolve(false);
-	if (editor) {
-		rval = editor.edit(editBuilder => {
-			if (editor.selection.isEmpty) {
-				editBuilder.insert(editor.selection.active, str);
-				return;
-			} else {
-				editBuilder.replace(editor.selection, str);
-				// clear selection and move cursor to the end of the inserted text
-				editor.selection = new vscode.Selection(editor.selection.active, editor.selection.active);
-			}
-		});
-	}
-	timestampOfCursorMoveCausedByKeyInput = Date.now();
-	return rval;
-}
-
-export function replaceRange(range: vscode.Range, str: string): PromiseLike<boolean> {
-	const editor = vscode.window.activeTextEditor;
-	if (editor) {
-		return editor.edit(editBuilder => {
-			editBuilder.replace(range, str);
-		}).then((value) => {
-			timestampOfCursorMoveCausedByKeyInput = Date.now();
-			return value;
-		});
-	}
-	return Promise.resolve(false);
+export function updateCursorMoveTimestamp() {
+    timestampOfCursorMoveCausedByKeyInput = Date.now();
 }
 
 // This method is called when your extension is deactivated

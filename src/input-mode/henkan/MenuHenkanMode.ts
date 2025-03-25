@@ -1,11 +1,9 @@
 import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { AbstractKanaMode } from "../AbstractKanaMode";
-import * as vscode from 'vscode';
 import { KakuteiMode } from "./KakuteiMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { IEditor } from "../../editor/IEditor";
 import { Entry } from "../../jisyo/entry";
-import { openRegistrationEditor } from './RegistrationEditor';
 
 export class MenuHenkanMode extends AbstractHenkanMode {
     private readonly prevMode: InlineHenkanMode;
@@ -18,14 +16,14 @@ export class MenuHenkanMode extends AbstractHenkanMode {
 
     constructor(context: AbstractKanaMode, editor: IEditor, prevMode: InlineHenkanMode, jisyoEntry: Entry,
         candidateIndex: number, suffix: string) {
-        super("▼", editor);
+        super("Select", editor);
         this.prevMode = prevMode;
         this.jisyoEntry = jisyoEntry;
-        this.candidateIndexStart = this.candidateIndex = candidateIndex;
+        this.candidateIndexStart = candidateIndex;
+        this.candidateIndex = candidateIndex;
         this.suffix = suffix;
 
         this.editor.showCandidate(undefined, this.suffix);
-        //this.editor.showCandidateList(this.jisyoEntry.getCandidateList().slice(0, this.nDisplayCandidates), this.selectionKeys.map((s) => s.toUpperCase()));
         this.showCandidateList(context);
     }
 
@@ -73,7 +71,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         this.showCandidateList(context);
     }
 
-    onLowerAlphabet(context: AbstractKanaMode, key: string): void {
+    async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'x') {
             this.scrollBackCandidatePage(context);
             return;
@@ -88,25 +86,25 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         this.prevMode.showCandidate(context);
     }
 
-    onUpperAlphabet(context: AbstractKanaMode, key: string): void {
+    async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         this.selectCandidateFromMenu(context, this.selectionKeys.map((s) => s.toUpperCase()), key);
     }
 
-    onNumber(context: AbstractKanaMode, key: string): void {
+    async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
         context.showErrorMessage(`'${key}' is not valid here!`);
     }
 
-    onSymbol(context: AbstractKanaMode, key: string): void {
+    async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === '.') {
-            openRegistrationEditor(this.prevMode.getMidashigo());
+            this.editor.openRegistrationEditor(this.prevMode.getMidashigo());
             return;
         }
         throw new Error("Method not implemented.");
     }
 
-    onSpace(context: AbstractKanaMode): void {
+    async onSpace(context: AbstractKanaMode): Promise<void> {
         if (this.candidateIndex + this.nDisplayCandidates >= this.jisyoEntry.getCandidateList().length) {
-            openRegistrationEditor(this.prevMode.getMidashigo());
+            this.editor.openRegistrationEditor(this.prevMode.getMidashigo());
             return;
         }
 
@@ -114,25 +112,25 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         this.showCandidateList(context);
     }
 
-    onEnter(context: AbstractKanaMode): void {
+    async onEnter(context: AbstractKanaMode): Promise<void> {
         context.showErrorMessage("Enter is not valid here!");
     }
 
-    onBackspace(context: AbstractKanaMode): void {
+    async onBackspace(context: AbstractKanaMode): Promise<void> {
         this.scrollBackCandidatePage(context);
     }
 
-    onCtrlJ(context: AbstractKanaMode): void {
+    async onCtrlJ(context: AbstractKanaMode): Promise<void> {
         context.showErrorMessage("C-j is not valid here!");
     }
 
     private fixateAndGoKakuteiMode(context: AbstractKanaMode, index: number): PromiseLike<boolean> {
-        this.jisyoEntry.onCandidateSelected(index);
+        this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), index);
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
         return this.editor.fixateCandidate(this.jisyoEntry.getCandidateList()[index].word + this.suffix);
     }
 
-    onCtrlG(context: AbstractKanaMode): void {
+    async onCtrlG(context: AbstractKanaMode): Promise<void> {
         this.editor.hideCandidateList();
         this.prevMode.returnToMidashigoMode(context);
     }

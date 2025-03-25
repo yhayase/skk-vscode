@@ -1,4 +1,6 @@
 import { Candidate } from "../jisyo/candidate";
+import { IInputMode } from '../input-mode/IInputMode';
+import { IJisyoProvider } from '../jisyo/IJisyoProvider';
 
 export enum DeleteLeftResult {
     markerDeleted,
@@ -7,32 +9,33 @@ export enum DeleteLeftResult {
     noEditor
 }
 
+// Define Range interface to avoid direct VSCode dependency
+export interface IRange {
+    start: IPosition;
+    end: IPosition;
+}
+
+// Define Position interface to avoid direct VSCode dependency
+export interface IPosition {
+    line: number;
+    character: number;
+}
+
 export interface IEditor {
-    /**
-     * Basically, delete the character just before the cursor.
-     * If the cursor is at the position just after the midashigo start marker, and the character is "▽",
-     * delete the marker and notify the caller.
-     * If the cursor is at the position just after the midashigo start marker, and the character is not "▽",
-     * delete the character and notify the caller.
-     */
-    deleteLeft(): DeleteLeftResult;
+    // Jisyo provider
+    getJisyoProvider(): IJisyoProvider;
 
-    /**
-     * Fixate the candidate shown over the midashigo.
-     *
-     * This method fixate the range from "▼" to the cursor position, then hide the annotation.
-     */
-    fixateCandidate(candStr: string | undefined): PromiseLike<boolean>;
-    clearCandidate(): PromiseLike<boolean | void>;
+    // Input mode
+    setInputMode(mode: IInputMode): void;
+    getCurrentInputMode(): IInputMode;
 
-    /**
-     * Show henkan candidates over the midashigo.
-     * @param candidate The candidate to show
-     * @param suffix Additional string to show after the candidate. e.g. "、" or "。"
-     * @returns Promise that resolves to true if the candidate is shown, false otherwise
-     */
-    showCandidate(candidate: Candidate | undefined, suffix: string): PromiseLike<boolean | void>;
+    // Text manipulation
+    insertOrReplaceSelection(str: string): PromiseLike<boolean>;
+    replaceRange(range: IRange, str: string): PromiseLike<boolean>;
+    getTextInRange(range: IRange): string;
+    deleteLeft(): PromiseLike<DeleteLeftResult>;
 
+    // Midashigo management
     /**
      * Change character type according to the first character of the midashigo
      * and fixate the midashigo.
@@ -44,28 +47,22 @@ export interface IEditor {
      * @returns void
      */
     toggleCharTypeInMidashigoAndFixateMidashigo(): void;
-    clearMidashigo(): PromiseLike<boolean>;
-
-    /**
-     * Extract text from the midashigo start marker to the cursor position without heading marker "▽".
-     * @returns extracted text.  If any inconsistency found, returns undefined.
-     */
-    extractMidashigo(): string | undefined;
-
-    /**
-     * Calculate the range of the midashigo, which is started by "▽" and ended by the cursor position.
-     * @param editor active text editor
-     * @returns Range of the midashigo.  If any inconsistency found, returns undefined.
-     */
-    calcMidashigoRange(): any | undefined;
-
-    /**
-     * Fixate the unconversioned midashigo.
-     */
-    fixateMidashigo(): PromiseLike<boolean>;
     setMidashigoStartToCurrentPosition(): void;
-    hideCandidateList(): void;
-    showCandidateList(candidateList: Candidate[], alphabetList: string[]): void;
-    showRemainingRomaji(remainingRomaji: string, isOkuri: boolean, offset: number): void;
+    clearMidashigo(): PromiseLike<boolean>;
+    extractMidashigo(): string | undefined;
+    calcMidashigoRange(): IRange | undefined;
+    fixateMidashigo(): PromiseLike<boolean>;
 
+    // Candidate management
+    showCandidate(candidate: Candidate | undefined, suffix: string): PromiseLike<boolean | void>;
+    showCandidateList(candidateList: Candidate[], alphabetList: string[]): void;
+    hideCandidateList(): void;
+    fixateCandidate(candStr: string | undefined): PromiseLike<boolean>;
+    clearCandidate(): PromiseLike<boolean>;
+
+    // UI feedback
+    showRemainingRomaji(remainingRomaji: string, isOkuri: boolean, offset: number): void;
+    showErrorMessage(message: string): void;
+    openRegistrationEditor(yomi: string): PromiseLike<void>;
+    registerMidashigo(): PromiseLike<void>;
 }

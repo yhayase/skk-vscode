@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { RomajiInput } from "../../../../RomajiInput";
+import { RomajiInput } from "../../../../lib/romaji/RomajiInput";
 
 suite('ローマ字変換では', () => {
 	test('空の入力に対して空の結果を返す', () => {

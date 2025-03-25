@@ -74,11 +74,6 @@ suite('辞書登録機能において', async () => {
 
         // 子音の大文字を入力し、送りがなの区切りとする
         await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
-        const disposable2 = vscode.workspace.onDidChangeTextDocument(e => {
-            disposable2.dispose();
-            // 1つ目の候補が出ている状態で、さらにスペースキーを入力する
-            vscode.commands.executeCommand('skk.spaceInput');
-        });
 
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise((resolve, reject) => {
