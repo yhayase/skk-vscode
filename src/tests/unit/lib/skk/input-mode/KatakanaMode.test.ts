@@ -1,7 +1,6 @@
 import { expect } from 'chai';
-import { KatakanaMode } from '../../../input-mode/KatakanaMode';
-import { MockEditor } from '../mocks/MockEditor';
-import { EditorFactory } from '../../../editor/EditorFactory';
+import { KatakanaMode } from '../../../../../lib/skk/input-mode/KatakanaMode';
+import { MockEditor } from '../../../mocks/MockEditor';
 
 describe('KatakanaMode', () => {
     let katakanaMode: KatakanaMode;

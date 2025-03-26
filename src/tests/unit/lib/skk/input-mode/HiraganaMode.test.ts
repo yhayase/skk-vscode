@@ -1,7 +1,6 @@
 import { expect } from 'chai';
-import { HiraganaMode } from '../../../input-mode/HiraganaMode';
-import { MockEditor } from '../mocks/MockEditor';
-import { EditorFactory } from '../../../editor/EditorFactory';
+import { HiraganaMode } from '../../../../../lib/skk/input-mode/HiraganaMode';
+import { MockEditor } from '../../../mocks/MockEditor';
 
 describe('HiraganaMode', () => {
     let hiraganaMode: HiraganaMode;

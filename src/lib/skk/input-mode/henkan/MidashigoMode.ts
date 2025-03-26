@@ -1,4 +1,4 @@
-import { RomajiInput } from "../../lib/romaji/RomajiInput";
+import { RomajiInput } from "../../../../lib/romaji/RomajiInput";
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
 import { Entry } from "../../jisyo/entry";
 import { AbstractKanaMode } from "../AbstractKanaMode";

@@ -1,7 +1,7 @@
-import { Candidate } from "../jisyo/candidate";
-import { Entry } from "../jisyo/entry";
-import { IJisyoProvider } from "../jisyo/IJisyoProvider";
-import { getGlobalJisyo } from "../jisyo/jisyo";
+import { Candidate } from "./lib/skk/jisyo/candidate";
+import { Entry } from "./lib/skk/jisyo/entry";
+import { IJisyoProvider } from "./lib/skk/jisyo/IJisyoProvider";
+import { getGlobalJisyo } from "./lib/skk/jisyo/jisyo";
 
 /**
  * Implementation of IJisyoProvider for VS Code.

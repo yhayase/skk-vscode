@@ -1,9 +1,9 @@
 import { expect } from 'chai';
-import { AbbrevMode } from '../../../../input-mode/henkan/AbbrevMode';
-import { AbstractKanaMode } from '../../../../input-mode/AbstractKanaMode';
-import { HiraganaMode } from '../../../../input-mode/HiraganaMode';
-import { MockEditor } from '../../mocks/MockEditor';
-import { EditorFactory } from '../../../../editor/EditorFactory';
+import { MockEditor } from '../../../../mocks/MockEditor';
+import { EditorFactory } from '../../../../../../lib/skk/editor/EditorFactory';
+import { AbbrevMode } from '../../../../../../lib/skk/input-mode/henkan/AbbrevMode';
+import { AbstractKanaMode } from '../../../../../../lib/skk/input-mode/AbstractKanaMode';
+import { HiraganaMode } from '../../../../../../lib/skk/input-mode/HiraganaMode';
 
 describe('AbbrevMode', async () => {
     before(() => {

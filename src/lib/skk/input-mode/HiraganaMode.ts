@@ -1,4 +1,4 @@
-import { RomajiInput } from '../lib/romaji/RomajiInput';
+import { RomajiInput } from '../../../lib/romaji/RomajiInput';
 import { IInputMode } from './IInputMode';
 import { KatakanaMode } from './KatakanaMode';
 import { AbstractKanaMode } from './AbstractKanaMode';

@@ -1,12 +1,11 @@
 import * as vscode from 'vscode';
-import { Candidate } from '../jisyo/candidate';
-import { DeleteLeftResult, IEditor, IPosition, IRange } from "./IEditor";
+import { Candidate } from './lib/skk/jisyo/candidate';
+import { DeleteLeftResult, IEditor, IRange } from "./lib/skk/editor/IEditor";
 import wanakana = require('wanakana');
-import { getGlobalJisyo } from '../jisyo/jisyo';
-import { updateCursorMoveTimestamp } from '../extension';
-import { IInputMode } from '../input-mode/IInputMode';
-import { AsciiMode } from '../input-mode/AsciiMode';
-import { IJisyoProvider } from '../jisyo/IJisyoProvider';
+import { updateCursorMoveTimestamp } from './extension';
+import { IInputMode } from './lib/skk/input-mode/IInputMode';
+import { AsciiMode } from './lib/skk/input-mode/AsciiMode';
+import { IJisyoProvider } from './lib/skk/jisyo/IJisyoProvider';
 import { VSCodeJisyoProvider } from './VSCodeJisyoProvider';
 
 export class VSCodeEditor implements IEditor {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { CompositeMap } from "../lib/composite-map";
+import { CompositeMap } from "../../../lib/composite-map";
 import { Candidate } from "./candidate";
-import { Jisyo } from "../jisyo/types";
+import { Jisyo } from "../../../lib/skk/jisyo/types";
 
 const USER_JISYO_KEY = "skk.user-jisyo";
 
