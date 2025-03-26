@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { ZeneiMode } from '../../../input-mode/ZeneiMode';
-import { MockEditor } from '../mocks/MockEditor';
+import { ZeneiMode } from '../../../../../lib/skk/input-mode/ZeneiMode';
+import { MockEditor } from '../../../mocks/MockEditor';
 
 describe('ZeneiMode', () => {
     let zeneiMode: ZeneiMode;

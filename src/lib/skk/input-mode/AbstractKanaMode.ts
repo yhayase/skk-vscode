@@ -1,4 +1,4 @@
-import { RomajiInput } from '../lib/romaji/RomajiInput';
+import { RomajiInput } from '../../romaji/RomajiInput';
 import { AbstractInputMode } from './AbstractInputMode';
 import { IInputMode } from './IInputMode';
 import { AbstractHenkanMode } from './henkan/AbstractHenkanMode';

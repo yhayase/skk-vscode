@@ -1,7 +1,6 @@
 import { IInputMode } from "./IInputMode";
 import { HiraganaMode } from "./HiraganaMode";
 import { AbstractInputMode } from "./AbstractInputMode";
-import { EditorFactory } from "../editor/EditorFactory";
 
 export class AsciiMode extends AbstractInputMode {
     // AsciiMode is stateless, so the singleton can be stored in a static field.

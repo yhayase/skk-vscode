@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import { KakuteiMode } from '../../../../input-mode/henkan/KakuteiMode';
-import { AbstractKanaMode } from '../../../../input-mode/AbstractKanaMode';
-import { HiraganaMode } from '../../../../input-mode/HiraganaMode';
-import { MockEditor } from '../../mocks/MockEditor';
+import { KakuteiMode } from '../../../../../../lib/skk/input-mode/henkan/KakuteiMode';
+import { MockEditor } from '../../../../mocks/MockEditor';
+import { AbstractKanaMode } from '../../../../../../lib/skk/input-mode/AbstractKanaMode';
+import { HiraganaMode } from '../../../../../../lib/skk/input-mode/HiraganaMode';
 
 describe('KakuteiMode', () => {
     describe('basic input handling', () => {

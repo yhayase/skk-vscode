@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { AbstractKanaMode } from '../AbstractKanaMode';
 import { AbstractHenkanMode } from './AbstractHenkanMode';
-import { RomajiInput } from '../../lib/romaji/RomajiInput';
+import { RomajiInput } from '../../../../lib/romaji/RomajiInput';
 import { MidashigoMode } from './MidashigoMode';
 import { AbbrevMode } from './AbbrevMode';
 import { AsciiMode } from '../AsciiMode';

@@ -1,12 +1,12 @@
 import { expect } from 'chai';
-import { MenuHenkanMode } from '../../../../input-mode/henkan/MenuHenkanMode';
-import { AbstractKanaMode } from '../../../../input-mode/AbstractKanaMode';
-import { HiraganaMode } from '../../../../input-mode/HiraganaMode';
-import { MockEditor } from '../../mocks/MockEditor';
-import { Candidate } from '../../../../jisyo/candidate';
-import { Entry } from '../../../../jisyo/entry';
-import { InlineHenkanMode } from '../../../../input-mode/henkan/InlineHenkanMode';
-import { MidashigoMode } from '../../../../input-mode/henkan/MidashigoMode';
+import { MenuHenkanMode } from '../../../../../../lib/skk/input-mode/henkan/MenuHenkanMode';
+import { MockEditor } from '../../../../mocks/MockEditor';
+import { AbstractKanaMode } from '../../../../../../lib/skk/input-mode/AbstractKanaMode';
+import { Entry } from '../../../../../../lib/skk/jisyo/entry';
+import { InlineHenkanMode } from '../../../../../../lib/skk/input-mode/henkan/InlineHenkanMode';
+import { HiraganaMode } from '../../../../../../lib/skk/input-mode/HiraganaMode';
+import { Candidate } from '../../../../../../lib/skk/jisyo/candidate';
+import { MidashigoMode } from '../../../../../../lib/skk/input-mode/henkan/MidashigoMode';
 
 describe('MenuHenkanMode', () => {
     describe('candidate display', () => {

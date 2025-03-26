@@ -1,12 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { IInputMode } from './input-mode/IInputMode';
-import { AsciiMode } from './input-mode/AsciiMode';
-import * as jisyo from './jisyo/jisyo';
+import { IInputMode } from './lib/skk/input-mode/IInputMode';
+import * as jisyo from './lib/skk/jisyo/jisyo';
 import * as AsyncLock from 'async-lock';
-import { VSCodeEditor } from './editor/VSCodeEditor';
-import { EditorFactory } from './editor/EditorFactory';
+import { VSCodeEditor } from './VSCodeEditor';
+import { EditorFactory } from './lib/skk/editor/EditorFactory';
 
 let timestampOfCursorMoveCausedByKeyInput: number | undefined = undefined;
 

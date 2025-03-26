@@ -1,5 +1,4 @@
 import { DeleteLeftResult, IEditor } from "../../editor/IEditor";
-import { Entry } from "../../jisyo/entry";
 import { AbstractKanaMode } from "../AbstractKanaMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
