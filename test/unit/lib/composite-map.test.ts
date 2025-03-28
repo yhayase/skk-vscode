@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { CompositeMap } from '../../../lib/composite-map';
+import { CompositeMap } from '../../../src/lib/composite-map';
 
 describe('CompositeMap', () => {
     let compositeMap: CompositeMap<string, string>;

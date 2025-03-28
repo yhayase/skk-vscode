@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { HiraganaMode } from '../../../../../lib/skk/input-mode/HiraganaMode';
+import { HiraganaMode } from '../../../../../src/lib/skk/input-mode/HiraganaMode';
 import { MockEditor } from '../../../mocks/MockEditor';
 
 describe('HiraganaMode', () => {

@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import { MidashigoMode } from '../../../../../../lib/skk/input-mode/henkan/MidashigoMode';
+import { MidashigoMode } from '../../../../../../src/lib/skk/input-mode/henkan/MidashigoMode';
 import { MockEditor } from '../../../../mocks/MockEditor';
-import { AbstractKanaMode } from '../../../../../../lib/skk/input-mode/AbstractKanaMode';
-import { HiraganaMode } from '../../../../../../lib/skk/input-mode/HiraganaMode';
+import { AbstractKanaMode } from '../../../../../../src/lib/skk/input-mode/AbstractKanaMode';
+import { HiraganaMode } from '../../../../../../src/lib/skk/input-mode/HiraganaMode';
 
 describe('MidashigoMode', () => {
     describe('basic input handling', () => {

@@ -10,7 +10,7 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
-				"--disable-extensions",
+				"--profile-temp",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
@@ -23,12 +23,12 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
-				"--disable-extensions",
+				"--profile-temp",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/tests/integration/suite/index"
+				"--extensionTestsPath=${workspaceFolder}/out/test/integration/suite/index"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/tests/integration/**/*.js"
+				"${workspaceFolder}/out/test/integration/**/*.js"
 			],
 			"preLaunchTask": "${defaultBuildTask}"
 		},

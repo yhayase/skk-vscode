@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { RomajiInput } from '../../lib/romaji/RomajiInput';
+import { RomajiInput } from '../../src/lib/romaji/RomajiInput';
 
 describe('RomajiInput', () => {
     let romajiInput: RomajiInput;
