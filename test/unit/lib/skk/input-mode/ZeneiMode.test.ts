@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ZeneiMode } from '../../../../../lib/skk/input-mode/ZeneiMode';
+import { ZeneiMode } from '../../../../../src/lib/skk/input-mode/ZeneiMode';
 import { MockEditor } from '../../../mocks/MockEditor';
 
 describe('ZeneiMode', () => {

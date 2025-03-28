@@ -1,12 +1,12 @@
 import * as wanakana from 'wanakana';
-import { DeleteLeftResult, IEditor, IPosition, IRange } from '../../../lib/skk/editor/IEditor';
-import { IJisyoProvider } from '../../../lib/skk/jisyo/IJisyoProvider';
-import { Candidate } from '../../../lib/skk/jisyo/candidate';
-import { Entry } from '../../../lib/skk/jisyo/entry';
-import { IInputMode } from '../../../lib/skk/input-mode/IInputMode';
-import { AbstractHenkanMode } from '../../../lib/skk/input-mode/henkan/AbstractHenkanMode';
-import { EditorFactory } from '../../../lib/skk/editor/EditorFactory';
-import { HiraganaMode } from '../../../lib/skk/input-mode/HiraganaMode';
+import { DeleteLeftResult, IEditor, IPosition, IRange } from '../../../src/lib/skk/editor/IEditor';
+import { IJisyoProvider } from '../../../src/lib/skk/jisyo/IJisyoProvider';
+import { Candidate } from '../../../src/lib/skk/jisyo/candidate';
+import { Entry } from '../../../src/lib/skk/jisyo/entry';
+import { IInputMode } from '../../../src/lib/skk/input-mode/IInputMode';
+import { AbstractHenkanMode } from '../../../src/lib/skk/input-mode/henkan/AbstractHenkanMode';
+import { EditorFactory } from '../../../src/lib/skk/editor/EditorFactory';
+import { HiraganaMode } from '../../../src/lib/skk/input-mode/HiraganaMode';
 
 /**
  * Utility function to find the index of a position in a string for internal use

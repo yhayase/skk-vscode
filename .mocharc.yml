@@ -1,4 +1,4 @@
 require:
   - ts-node/register
 spec:
-  - src/tests/unit/**/*.test.ts
+  - test/unit/**/*.test.ts

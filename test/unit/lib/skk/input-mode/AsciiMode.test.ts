@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { AsciiMode } from '../../../../../lib/skk/input-mode/AsciiMode';
+import { AsciiMode } from '../../../../../src/lib/skk/input-mode/AsciiMode';
 import { MockEditor } from '../../../mocks/MockEditor';
 
 describe('AsciiMode', () => {
