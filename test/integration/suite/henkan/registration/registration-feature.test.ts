@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { getGlobalJisyo } from '../../../../src/lib/skk/jisyo/jisyo';
+import { getGlobalJisyo } from '../../../../../src/lib/skk/jisyo/jisyo';
 import { expect } from 'chai';
 
 suite('辞書登録機能において', async () => {
