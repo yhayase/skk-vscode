@@ -10,13 +10,17 @@ suite('辞書登録単語挿入機能において', async () => {
     const okuriganaAlphabetVowel = 'a';
 
     setup('新しい空のエディタを開き、見出し語が登録されていない状態にする', async () => {
-        await vscode.commands.executeCommand('workbench.action.closeAllEditors');
         await vscode.commands.executeCommand('workbench.action.files.newUntitledFile');
         await vscode.commands.executeCommand('skk.nop'); // skk 拡張を有効にするための何もしないコマンド呼び出し
 
         const globalJisyo = getGlobalJisyo();
         globalJisyo?.delete(unexistYomi);
         globalJisyo?.delete(unexistYomi + okuriganaAlphabetConsonant);
+
+        // エディタが開かれるまで待機する
+        while (!vscode.window.activeTextEditor) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
     });
 
     teardown('エディタを閉じ、登録された不要な見出し語を削除する', async () => {
