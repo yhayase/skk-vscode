@@ -7,14 +7,13 @@ import { IInputMode } from './lib/skk/input-mode/IInputMode';
 import { AsciiMode } from './lib/skk/input-mode/AsciiMode';
 import { IJisyoProvider } from './lib/skk/jisyo/IJisyoProvider';
 import { VSCodeJisyoProvider } from './VSCodeJisyoProvider';
+import { AbstractKanaMode } from './lib/skk/input-mode/AbstractKanaMode';
+import { KakuteiMode } from './lib/skk/input-mode/henkan/KakuteiMode';
 
 export class VSCodeEditor implements IEditor {
     private midashigoStart: vscode.Position | undefined = undefined;
     private static inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
-    private static _inputModeMapCleaner = vscode.workspace.onDidCloseTextDocument((doc) => {
-        // Remove the input mode when the document is closed
-        this.inputModeMap.delete(doc);
-    });
+    private static registrationModeOrigin: WeakMap<vscode.TextDocument, [VSCodeEditor, vscode.TextDocument, vscode.Position, ]> = new WeakMap();
 
     private readonly remainingRomajiDecorationType: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
         after: {
@@ -33,6 +32,7 @@ export class VSCodeEditor implements IEditor {
     });
 
     private jisyoProvider: IJisyoProvider;
+    private okuri: string = "";
 
     constructor() {
         this.jisyoProvider = new VSCodeJisyoProvider();
@@ -340,7 +340,7 @@ export class VSCodeEditor implements IEditor {
      *
      * This method fixate the range from "▼" to the cursor position, then hide the annotation.
      */
-    async fixateCandidate(candStr: string | undefined = undefined): Promise<boolean> {
+    async fixateCandidate(candStr: string | undefined = undefined, cusorPosition: vscode.Position | undefined = undefined): Promise<boolean> {
         // Check the first char at the midashigoStart is "▼", then remove it
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -352,7 +352,7 @@ export class VSCodeEditor implements IEditor {
         const firstCharRange = new vscode.Range(this.midashigoStart, this.midashigoStart.translate(0, 1));
         const iFirstCharRange = this.convertToIRange(firstCharRange);
         let firstChar = this.getTextInRange(iFirstCharRange);
-        if (firstChar !== '▼') {
+        if (!['▼', '▽'].includes(firstChar)) {
             vscode.window.showInformationMessage('It seems start marker "▼" is gone');
             return false;
         }
@@ -363,8 +363,9 @@ export class VSCodeEditor implements IEditor {
         // clear midashigoStart
         this.midashigoStart = undefined;
 
-        // Delete heading marker "▼"
-        return await this.replaceRange(iFirstCharRange, candStr ? candStr : '');
+        // Delete from heading marker "▼"|"▽" to the cursor position
+        const range = new vscode.Range(firstCharRange.start, cusorPosition ? cusorPosition : editor.selection.end);
+        return await this.replaceRange(range, candStr || '');
     }
 
 
@@ -486,10 +487,16 @@ export class VSCodeEditor implements IEditor {
         vscode.window.showErrorMessage(message);
     }
 
-    async openRegistrationEditor(yomi: string): Promise<void> {
+    async openRegistrationEditor(yomi: string, okuri: string): Promise<void> {
+        this.okuri = okuri;
         const content = `読み:${yomi}\n単語:`;
-        const doc = await vscode.workspace.openTextDocument({ content, language: 'plaintext' });
-        await vscode.window.showTextDocument(doc, { preview: false }).then(async (editor) => {
+        const newDoc = await vscode.workspace.openTextDocument({ content, language: 'plaintext' });
+        // 新しく開いた辞書登録用のドキュメントが、どのエディタから開かれたものかを記録する
+        const origDoc = vscode.window.activeTextEditor?.document;
+        if (origDoc) {
+            VSCodeEditor.registrationModeOrigin.set(newDoc, [this, origDoc, vscode.window.activeTextEditor!.selection.end]);
+        }
+        await vscode.window.showTextDocument(newDoc, { preview: false }).then(async (editor) => {
             // move cursor to the end of the document
             await vscode.commands.executeCommand('cursorBottom');
         });
@@ -530,6 +537,32 @@ export class VSCodeEditor implements IEditor {
         // Register in user dictionary and save
         this.jisyoProvider.registerCandidate(yomi, { word: word, annotation: undefined });
 
+        // insert the new word to the original editor
+        const originalEditorDocCursor = VSCodeEditor.registrationModeOrigin.get(document);
+        if (originalEditorDocCursor) {
+            const disposable = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+                const activeTextEditor = vscode.window.activeTextEditor;
+                if (!activeTextEditor) {
+                    return;
+                }
+
+                disposable.dispose();
+                if (activeTextEditor.document !== originalEditorDocCursor[1]) {
+                    vscode.window.showWarningMessage("SKK: 辞書登録は成功しましたが、元のエディタが見つかりません。");
+                }
+                // Insert the new word at the current cursor position
+                await originalEditorDocCursor[0].fixateCandidate(word + originalEditorDocCursor[0].okuri, originalEditorDocCursor[2]);
+                
+                // 変換モードを KakuteiMode に戻す
+                const currentMode = originalEditorDocCursor[0].getCurrentInputMode();
+                if (currentMode instanceof AbstractKanaMode) {
+                    currentMode.setHenkanMode(KakuteiMode.create(currentMode, originalEditorDocCursor[0]));
+                }
+            });
+        }
+
+
+
         // Clear editor content
         await editor.edit(editBuilder => {
             const lastLine = document.lineCount - 1;
@@ -539,6 +572,7 @@ export class VSCodeEditor implements IEditor {
 
         // Close editor
         await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+
     }
 
     // Input mode management methods

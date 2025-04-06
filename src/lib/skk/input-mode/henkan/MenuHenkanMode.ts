@@ -98,7 +98,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === '.') {
-            this.editor.openRegistrationEditor(this.prevMode.getMidashigo());
+            this.editor.openRegistrationEditor(this.prevMode.getMidashigo(), this.okuri);
             return;
         }
         throw new Error("Method not implemented.");
@@ -106,7 +106,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
 
     async onSpace(context: AbstractKanaMode): Promise<void> {
         if (this.candidateIndex + this.nDisplayCandidates >= this.jisyoEntry.getCandidateList().length) {
-            this.editor.openRegistrationEditor(this.prevMode.getMidashigo());
+            this.editor.openRegistrationEditor(this.prevMode.getMidashigo(), this.okuri);
             return;
         }
 
