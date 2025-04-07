@@ -41,11 +41,11 @@ export class InlineHenkanMode extends AbstractHenkanMode {
      * @returns Promise that resolves to true if the candidate is successfully fixated, false otherwise.
      */
     async fixateCandidate(context: AbstractKanaMode): Promise<boolean> {
-        let rval = await this.editor.fixateCandidate(undefined);
+        let rval = await this.editor.fixateCandidate(this.jisyoEntry.getCandidateList()[this.candidateIndex].word + this.okuri + this.suffix);
         if (!rval) {
             return false;
         }
-        await context.insertStringAndShowRemaining(this.okuri + this.suffix, "", false);
+        await context.insertStringAndShowRemaining("", "", false);
         return true;
     }
 
@@ -143,7 +143,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
     async onSpace(context: AbstractKanaMode): Promise<void> {
         if (this.candidateIndex + 1 >= this.jisyoEntry.getCandidateList().length) {
-            await this.editor.openRegistrationEditor(this.getMidashigo());
+            await this.editor.openRegistrationEditor(this.getMidashigo(), this.okuri);
             return;
         }
 

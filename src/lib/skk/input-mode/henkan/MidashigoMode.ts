@@ -49,7 +49,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         const jisyoEntry = await this.findCandidates(midashigo, okuri);
         if (jisyoEntry === undefined) {
             const { keyForLookup } = this.createJisyoKey(midashigo, okuri);
-            await this.editor.openRegistrationEditor(keyForLookup);
+            await this.editor.openRegistrationEditor(keyForLookup, okuri);
             return;
         }
 

@@ -63,6 +63,6 @@ export interface IEditor {
     // UI feedback
     showRemainingRomaji(remainingRomaji: string, isOkuri: boolean, offset: number): void;
     showErrorMessage(message: string): void;
-    openRegistrationEditor(yomi: string): PromiseLike<void>;
+    openRegistrationEditor(yomi: string, okuri: string): PromiseLike<void>;
     registerMidashigo(): PromiseLike<void>;
 }

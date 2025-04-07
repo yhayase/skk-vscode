@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { getGlobalJisyo } from '../../../../src/lib/skk/jisyo/jisyo';
+import { getGlobalJisyo } from '../../../../../src/lib/skk/jisyo/jisyo';
 import { expect } from 'chai';
 
 suite('辞書登録機能において', async () => {
@@ -16,6 +16,11 @@ suite('辞書登録機能において', async () => {
         const globalJisyo = getGlobalJisyo();
         globalJisyo?.delete(unexistYomi);
         globalJisyo?.delete(unexistYomi + okuriganaAlphabetConsonant);
+
+        // エディタが開かれるまで待機する
+        while (! vscode.window.activeTextEditor) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
     });
 
     teardown('エディタを閉じ、登録された不要な見出し語を削除する', async () => {
@@ -211,10 +216,16 @@ suite('辞書登録機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise(async (resolve, reject) => {
-            const disposable1 = vscode.workspace.onDidOpenTextDocument(async document => {
+            //const disposable1 = vscode.workspace.onDidOpenTextDocument(async document => {
+            const disposable1 = vscode.window.onDidChangeActiveTextEditor(async editor => {
+                if (editor === undefined) {
+                    // 既存のエディタからスコープが外れただけ。次のイベントを待つ
+                    return;
+                }
+
                 disposable1.dispose();
                 try {
-                    expect(document.getText()).equal(`読み:${unexistYomi + okuriganaAlphabetConsonant}\n単語:`);
+                    expect(editor.document.getText()).equal(`読み:${unexistYomi + okuriganaAlphabetConsonant}\n単語:`);
                     await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
                     resolve();
                 } catch (e) {
