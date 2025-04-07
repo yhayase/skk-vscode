@@ -211,7 +211,7 @@ export class VSCodeEditor implements IEditor {
      */
     public calcMidashigoRange(): IRange | undefined {
         if (this.midashigoStart === undefined) {
-            vscode.window.showInformationMessage('開始開始位置が不明です');
+            vscode.window.showInformationMessage('開始位置が不明です');
             return undefined;
         }
 
@@ -339,6 +339,8 @@ export class VSCodeEditor implements IEditor {
      * Fixate the candidate shown over the midashigo.
      *
      * This method fixate the range from "▼" to the cursor position, then hide the annotation.
+     * @param candStr The string to replace the candidate with. If undefined, the candidate will be removed.
+     * @param cusorPosition The position to fixate the candidate. If undefined, the current cursor position will be used.
      */
     async fixateCandidate(candStr: string | undefined = undefined, cusorPosition: vscode.Position | undefined = undefined): Promise<boolean> {
         // Check the first char at the midashigoStart is "▼", then remove it
