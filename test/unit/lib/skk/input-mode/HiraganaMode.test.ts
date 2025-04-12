@@ -102,7 +102,7 @@ describe('HiraganaMode', () => {
             // 「っ」と未確定の「s」で見出し語モードが開始する
             expect(hiraganaMode["henkanMode"].constructor.name).to.equal('MidashigoMode');
             expect(mockEditor.getCurrentText()).to.equal('▽っ');
-            expect(mockEditor.getAppendedSuffix()).to.equal('s');
+            expect(mockEditor.getRemainingRomaji()).to.equal('s');
         });
 
         it('should handle "n" correctly in KakuteiMode when followed by uppercase vowel', async () => {
@@ -121,8 +121,8 @@ describe('HiraganaMode', () => {
             // 「ん」が捨てられて、「か」で見出し語モードが開始する欠陥があった。
             // 正しくは、「ん」と未確定の「k」で見出し語モードが開始する
             expect(hiraganaMode["henkanMode"].constructor.name).to.equal('MidashigoMode');
-            expect(mockEditor.getCurrentText()).to.equal('▽ん');
-            expect(mockEditor.getAppendedSuffix()).to.equal('k');
+            expect(mockEditor.getCurrentText()).to.equal('ん▽');
+            expect(mockEditor.getRemainingRomaji()).to.equal('k');
         });
 
         it('should handle "n" correctly in KakuteiMode when followed by uppercase N', async () => {
@@ -132,8 +132,8 @@ describe('HiraganaMode', () => {
             // 「ん」が捨てられて、「n」で見出し語モードが開始する欠陥があった。
             // 正しくは、「ん」と未確定の「n」で見出し語モードが開始する
             expect(hiraganaMode["henkanMode"].constructor.name).to.equal('MidashigoMode');
-            expect(mockEditor.getCurrentText()).to.equal('▽');
-            expect(mockEditor.getAppendedSuffix()).to.equal('n');
+            expect(mockEditor.getCurrentText()).to.equal('ん▽');
+            expect(mockEditor.getRemainingRomaji()).to.equal('n');
         });
     });
 });
