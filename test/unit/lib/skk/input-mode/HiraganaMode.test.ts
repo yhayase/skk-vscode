@@ -58,7 +58,7 @@ describe('HiraganaMode', () => {
     });
 
     describe('Unfixed n followd by uppercase letter', () => {
-        it('should handle "n" correctly in MidashigoMode when followed by uppercase letter', async () => {
+        it('should handle "n" correctly in MidashigoMode when followed by uppercase consonant', async () => {
             mockEditor.getJisyoProvider().registerCandidate('かn', { word: '兼' });
             mockEditor.getJisyoProvider().registerCandidate('かんs', { word: '関' });
 
@@ -70,7 +70,7 @@ describe('HiraganaMode', () => {
             // "S" を入力（送り仮名モードに切り替わる）
             await hiraganaMode.upperAlphabetInput('S');
 
-            // 「か」が語幹、「ん」が送り仮名とし解釈される欠陥があった。
+            // 「か」が語幹、「ん」が送り仮名として解釈される欠陥があった。
             // 本来はこの時点ではまだ MidashigoMode であり、「かん」が語幹、「s」が入力途中の送り仮名となっている
             expect(hiraganaMode["henkanMode"].constructor.name).to.equal('MidashigoMode');
             expect(mockEditor.getCurrentText()).to.equal('▽かん'); // 「s」はannotationとして表示される
@@ -82,6 +82,23 @@ describe('HiraganaMode', () => {
             expect(mockEditor.getAppendedSuffix()).to.equal('す');
             // 変換が行われていることを確認
             expect(hiraganaMode["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
+        });
+
+        it('should handle "n" correctly in MidashigoMode when followed by uppercase vowel', async () => {
+            mockEditor.getJisyoProvider().registerCandidate('かn', { word: '兼' });
+            mockEditor.getJisyoProvider().registerCandidate('かんe', { word: '缶' });
+
+            // "kan" を入力
+            await hiraganaMode.upperAlphabetInput('K');
+            await hiraganaMode.lowerAlphabetInput('a');
+            await hiraganaMode.lowerAlphabetInput('n');
+            // "E" を入力（送り仮名モードに切り替わる）
+            await hiraganaMode.upperAlphabetInput('E');
+            // 「か」が語幹、「ね」が送り仮名として解釈される欠陥があった。
+            // 本来は「かん」が語幹、「え」が送り仮名として変換が開始される
+            expect(hiraganaMode["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
+            expect(mockEditor.getCurrentText()).to.equal('▼缶'); // 「え」は送り仮名として表示される
+            expect(mockEditor.getAppendedSuffix()).to.equal('え');
         });
 
         it('should handle consonant correctly in KakuteiMode when followed by uppercase vowel', async () => {
