@@ -78,6 +78,7 @@ describe('HiraganaMode', () => {
         await hiraganaMode.lowerAlphabetInput('u');
         
         expect(mockEditor.getCurrentText()).to.equal('▼関'); // 「す」はannotationとして表示される
+        expect(mockEditor.getAppendedSuffix()).to.equal('す');
         // 変換が行われていることを確認
         expect(hiraganaMode["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
     });

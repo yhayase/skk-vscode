@@ -369,7 +369,7 @@ export class MockEditor implements IEditor {
         this.appendedSuffix = suffix;
         if (candidate) {
             // 候補を表示する際にカーソル位置も更新
-            const text = '▼' + candidate.word + (suffix || '');
+            const text = '▼' + candidate.word; // suffix はエディタのテキストとしては表示せず、インラインのアノテーションとして表示する
             if (this.midashigoStartPosition) {
                 this.currentText = this.currentText.slice(0, this.midashigoStartPosition.character) +
                     text +
