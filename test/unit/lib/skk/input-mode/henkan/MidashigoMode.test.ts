@@ -97,7 +97,8 @@ describe('MidashigoMode', () => {
             await midashigoMode.onUpperAlphabet(context, 'K');
             await midashigoMode.onLowerAlphabet(context, 'a');
             expect(context["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
-            expect(mockEditor.getCurrentText()).to.equal('▼書か');
+            expect(mockEditor.getCurrentText()).to.equal('▼書'); // 送りがなは本文として表示されない
+            expect(mockEditor.getAppendedSuffix()).to.equal('か');
         });
 
     });

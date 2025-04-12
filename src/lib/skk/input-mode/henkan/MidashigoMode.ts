@@ -116,14 +116,21 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
         this.midashigoMode = MidashigoType.okurigana;
 
-        const okuri = this.romajiInput.processInput(key.toLowerCase());
-        if (okuri.length === 0) {
-            this.editor.showRemainingRomaji(this.romajiInput.getRemainingRomaji(), true, 0);
-            return;
+
+        // ローマ字の変換を行う。
+        const kanaForRemainedRomaji = this.romajiInput.findExactKanaForRomBuffer();
+        if (kanaForRemainedRomaji !== undefined) {
+            this.romajiInput.reset();
         }
 
-        this.romajiInput.reset();
-        await this.henkan(context, okuri);
+        const kana = this.romajiInput.processInput(key.toLowerCase());
+        const remainingRomaji = this.romajiInput.getRemainingRomaji();
+        await context.insertStringAndShowRemaining(kanaForRemainedRomaji || "", remainingRomaji, true);
+        if (kana.length === 0) {
+            return;
+        }
+        
+        await this.henkan(context, kana);
     }
 
     async onNumber(context: AbstractKanaMode, key: string): Promise<void> {

@@ -38,7 +38,15 @@ export class KakuteiMode extends AbstractHenkanMode {
             return;
         }
 
-        let midashigoMode = new MidashigoMode(context, this.editor, key);
+        if (this.romajiInput.getRemainingRomaji().length > 0) {
+            // 変換できる文字があればそれを挿入する(例: "n" -> "ん")
+            const kana = this.romajiInput.findExactKanaForRomBuffer();
+            if (kana !== undefined) {
+                await context.insertStringAndShowRemaining(kana, "", false);
+                this.romajiInput.reset();
+            }
+        }
+        const midashigoMode = new MidashigoMode(context, this.editor, this.romajiInput.getRemainingRomaji() + key);
         context.setHenkanMode(midashigoMode);
     }
 
