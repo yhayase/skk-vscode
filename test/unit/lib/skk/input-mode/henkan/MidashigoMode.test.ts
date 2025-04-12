@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { MidashigoMode } from '../../../../../../src/lib/skk/input-mode/henkan/MidashigoMode';
+import { MidashigoMode, MidashigoType } from '../../../../../../src/lib/skk/input-mode/henkan/MidashigoMode';
 import { MockEditor } from '../../../../mocks/MockEditor';
 import { AbstractKanaMode } from '../../../../../../src/lib/skk/input-mode/AbstractKanaMode';
 import { HiraganaMode } from '../../../../../../src/lib/skk/input-mode/HiraganaMode';
@@ -168,6 +168,34 @@ describe('MidashigoMode', () => {
             expect(context["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
             await context.ctrlJInput();
             expect(mockEditor.getCurrentText()).to.equal('可。', 'punctuation should be inserted after the kanji');
+        });
+    });
+
+    describe('behavior after deleting okuri-alphabet', () => {
+        let midashigoMode: MidashigoMode;
+        let mockEditor: MockEditor;
+        let context: AbstractKanaMode;
+
+        beforeEach(() => {
+            mockEditor = new MockEditor();
+            context = new HiraganaMode();
+            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            context.setHenkanMode(midashigoMode);
+            mockEditor.setInputMode(context);
+        });
+
+        it('should handle okurigana deletion correctly', async () => {
+            await midashigoMode.onLowerAlphabet(context, 'k');
+            await midashigoMode.onLowerAlphabet(context, 'a');
+            await midashigoMode.onUpperAlphabet(context, 'K');
+
+            expect(midashigoMode["midashigoMode"]).to.equal(MidashigoType.okurigana, 'should be in okurigana mode');
+
+            await midashigoMode.onBackspace(context);
+            
+            expect(midashigoMode["midashigoMode"]).to.equal(MidashigoType.gokan, 'should be in gokan mode');
+            expect(mockEditor.getCurrentText()).to.equal('▽か');
+            expect(mockEditor.getRemainingRomaji()).to.equal('', 'should have no remaining romaji');
         });
     });
 });

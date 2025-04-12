@@ -182,6 +182,9 @@ export class MidashigoMode extends AbstractMidashigoMode {
         if (!this.romajiInput.isEmpty()) {
             this.romajiInput.deleteLastChar();
             await context.insertStringAndShowRemaining("", this.romajiInput.getRemainingRomaji(), false);
+            if (this.romajiInput.isEmpty()) {
+                this.midashigoMode = MidashigoType.gokan;
+            }
             return;
         }
 
