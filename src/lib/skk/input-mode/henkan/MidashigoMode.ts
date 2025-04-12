@@ -116,25 +116,20 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
         this.midashigoMode = MidashigoType.okurigana;
 
+
         // ローマ字の変換を行う。
+        const kanaForRemainedRomaji = this.romajiInput.findExactKanaForRomBuffer();
+        if (kanaForRemainedRomaji !== undefined) {
+            this.romajiInput.reset();
+        }
+
         const kana = this.romajiInput.processInput(key.toLowerCase());
         const remainingRomaji = this.romajiInput.getRemainingRomaji();
-
+        await context.insertStringAndShowRemaining(kanaForRemainedRomaji || "", remainingRomaji, true);
         if (kana.length === 0) {
-            this.editor.showRemainingRomaji(remainingRomaji, true, 0);
             return;
         }
-        // kana.length > 0
-
-        // key の入力によって、元々ローマ字バッファにあった未変換のローマ字が確定された分については、送り仮名ではなく語幹として取り扱う
-        if (remainingRomaji === key.toLowerCase()) {
-            // key がローマ字バッファに残っているのに kana 1文字以上が出力された。
-            // つまり、 kana は key の入力によって確定された未変換のローマ字である。
-            await context.insertStringAndShowRemaining(kana, remainingRomaji, true);
-            return;
-        }
-
-        this.romajiInput.reset();
+        
         await this.henkan(context, kana);
     }
 
