@@ -9,6 +9,7 @@ describe('HiraganaMode', () => {
     beforeEach(() => {
         mockEditor = new MockEditor();
         hiraganaMode = new HiraganaMode();
+        mockEditor.setInputMode(hiraganaMode);
     });
 
     it('should convert romaji to hiragana', () => {
@@ -54,5 +55,30 @@ describe('HiraganaMode', () => {
     it('should switch to ascii mode on l', () => {
         hiraganaMode.lowerAlphabetInput('l');
         expect(mockEditor.getCurrentInputMode().constructor.name).to.equal('AsciiMode');
+    });
+
+    it('should handle "n" correctly when followed by uppercase letter', async () => {
+        mockEditor.getJisyoProvider().registerCandidate('かn', {word: '兼'});
+        mockEditor.getJisyoProvider().registerCandidate('かんs', {word: '関'});
+
+        // "kan" を入力
+        await hiraganaMode.upperAlphabetInput('K');
+        await hiraganaMode.lowerAlphabetInput('a');
+        await hiraganaMode.lowerAlphabetInput('n');
+        
+        // "S" を入力（送り仮名モードに切り替わる）
+        await hiraganaMode.upperAlphabetInput('S');
+        
+        // 「か」が語幹、「ん」が送り仮名とし解釈される欠陥があった。
+        // 本来はこの時点ではまだ MidashigoMode であり、「かん」が語幹、「s」が入力途中の送り仮名となっている
+        expect(hiraganaMode["henkanMode"].constructor.name).to.equal('MidashigoMode');
+        expect(mockEditor.getCurrentText()).to.equal('▽かん'); // 「s」はannotationとして表示される
+        
+        // "u" を入力（送り仮名として）
+        await hiraganaMode.lowerAlphabetInput('u');
+        
+        expect(mockEditor.getCurrentText()).to.equal('▼関'); // 「す」はannotationとして表示される
+        // 変換が行われていることを確認
+        expect(hiraganaMode["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
     });
 });
