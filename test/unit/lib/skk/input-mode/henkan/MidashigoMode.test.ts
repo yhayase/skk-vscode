@@ -171,7 +171,7 @@ describe('MidashigoMode', () => {
         });
     });
 
-    describe('behaviror after deleting okuri-alphabet', () => {
+    describe('behavior after deleting okuri-alphabet', () => {
         let midashigoMode: MidashigoMode;
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
