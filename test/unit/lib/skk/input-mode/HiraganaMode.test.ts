@@ -58,7 +58,7 @@ describe('HiraganaMode', () => {
         expect(mockEditor.getCurrentInputMode().constructor.name).to.equal('AsciiMode');
     });
 
-    describe('Integration test: Unfixed n followd by uppercase letter', () => {
+    describe('Integration test: Unfixed n followed by uppercase letter', () => {
         it('should handle "n" correctly in MidashigoMode when followed by uppercase consonant', async () => {
             mockEditor.getJisyoProvider().registerCandidate('かn', { word: '兼' });
             mockEditor.getJisyoProvider().registerCandidate('かんs', { word: '関' });
