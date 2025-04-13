@@ -27,6 +27,10 @@ export class MidashigoMode extends AbstractMidashigoMode {
         context.insertStringAndShowRemaining(insertStr, this.romajiInput.getRemainingRomaji(), false);
     }
 
+    resetOkuriState(): void {
+        this.midashigoMode = MidashigoType.gokan;
+    }
+
     async findCandidates(midashigo: string, okuri: string): Promise<Entry | undefined> {
         const { key, keyForLookup } = this.createJisyoKey(midashigo, okuri);
         return await this.editor.getJisyoProvider().lookupCandidates(keyForLookup);
@@ -54,7 +58,6 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
 
         const okuriAlphabet = okuri.length > 0 ? (lookupOkuriAlphabet(okuri) || "") : "";
-        // TODO: optionalTrailingStr をInlineHenkanMode に渡す
         context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, okuriAlphabet, jisyoEntry, okuri, optionalTrailingStr));
     }
 

@@ -84,12 +84,9 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
     async returnToMidashigoMode(context: AbstractKanaMode) {
         context.setHenkanMode(this.prevMode);
-        // recover orijinal midashigo
-        // await this.editor.clearCandidate().then(() => {
-        //     context.insertStringAndShowRemaining("▽" + this.origMidashigo + this.suffix, "", false);
-        // });
+        this.prevMode.resetOkuriState();
         await this.editor.clearCandidate();
-        await context.insertStringAndShowRemaining("▽" + this.origMidashigo + this.suffix, "", false);
+        await context.insertStringAndShowRemaining("▽" + this.origMidashigo + this.okuri + this.suffix, "", false);
     }
 
     async clearMidashigoAndReturnToKakuteiMode(context: AbstractKanaMode) {

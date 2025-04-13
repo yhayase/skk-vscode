@@ -13,6 +13,10 @@ export class AbbrevMode extends AbstractMidashigoMode {
         context.insertStringAndShowRemaining(insertStr, "", false);
     }
 
+    resetOkuriState(): void {
+        // do nothing
+    }
+
     private async henkan(context: AbstractKanaMode): Promise<void> {
         const midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
