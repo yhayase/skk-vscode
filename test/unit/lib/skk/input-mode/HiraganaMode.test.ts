@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { HiraganaMode } from '../../../../../src/lib/skk/input-mode/HiraganaMode';
 import { MockEditor } from '../../../mocks/MockEditor';
+import { MidashigoMode, MidashigoType } from '../../../../../src/lib/skk/input-mode/henkan/MidashigoMode';
 
 describe('HiraganaMode', () => {
     let hiraganaMode: HiraganaMode;
@@ -57,7 +58,7 @@ describe('HiraganaMode', () => {
         expect(mockEditor.getCurrentInputMode().constructor.name).to.equal('AsciiMode');
     });
 
-    describe('Unfixed n followd by uppercase letter', () => {
+    describe('Integration test: Unfixed n followed by uppercase letter', () => {
         it('should handle "n" correctly in MidashigoMode when followed by uppercase consonant', async () => {
             mockEditor.getJisyoProvider().registerCandidate('かn', { word: '兼' });
             mockEditor.getJisyoProvider().registerCandidate('かんs', { word: '関' });
@@ -151,6 +152,28 @@ describe('HiraganaMode', () => {
             expect(hiraganaMode["henkanMode"].constructor.name).to.equal('MidashigoMode');
             expect(mockEditor.getCurrentText()).to.equal('ん▽');
             expect(mockEditor.getRemainingRomaji()).to.equal('n');
+        });
+    });
+
+    describe('Integration test: Returning to MidashigoMode from okuri-ari midashigo conversion', () => {
+        it('should be in gokan mode when returning from okuri-ari midashigo conversion', async () => {
+            mockEditor.getJisyoProvider().registerCandidate('あu', { word: '合' });
+
+            // "AU" を入力して InlineHenkanMode に遷移
+            await hiraganaMode.upperAlphabetInput('A');
+            await hiraganaMode.upperAlphabetInput('U');
+
+            expect(hiraganaMode["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
+
+            // x を入力して MidashigoMode に戻る
+            await hiraganaMode.lowerAlphabetInput('x');
+            expect(hiraganaMode["henkanMode"].constructor.name).to.equal('MidashigoMode');
+
+            // DDSKK 互換の振舞いとして、送り仮名は語幹に追加される
+            expect(mockEditor.getCurrentText()).to.equal('▽あう');
+
+            // midashigoMode は gokan でなければならない
+            expect((hiraganaMode["henkanMode"] as MidashigoMode)["midashigoMode"]).to.equal(MidashigoType.gokan, 'should be in gokan mode');
         });
     });
 });
