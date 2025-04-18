@@ -1,10 +1,15 @@
 .vscode/**
 .vscode-test/**
+.github/**
+.clinerules/**
+memory-bank/**
 src/**
 .gitignore
 .yarnrc
+.mocharc.yml
 vsc-extension-quickstart.md
 **/tsconfig.json
+**/tsconfig.*.json
 **/.eslintrc.json
 **/*.map
 **/*.ts

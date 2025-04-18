@@ -2,7 +2,7 @@
   "name": "skk",
   "displayName": "SKK",
   "description": "Simple Kana to Kanji conversion program (SKK) for VSCode",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "publisher": "hayase",
   "license": "GPL-3.0",
   "private": true,
