@@ -7,8 +7,8 @@ import { AbstractHenkanMode } from "./AbstractHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
 import { MenuHenkanMode } from "./MenuHenkanMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
-import { toHiragana } from 'wanakana';
 import { CandidateDeletionMode } from './CandidateDeletionMode';
+import wanakana = require('wanakana');
 
 export class InlineHenkanMode extends AbstractHenkanMode {
     private readonly prevMode: AbstractMidashigoMode;
@@ -180,7 +180,13 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         await this.returnToMidashigoMode(context);
     }
 
-    getMidashigo() {
-        return toHiragana(this.origMidashigo) + this.okuriAlphabet;
+    /**
+     * 辞書の見出し語に使えない文字を、使える文字に変換する。具体的には、カタカナをひらがなに変換する。
+     * @returns {string} 辞書の見出し語
+     */
+    getMidashigo(): string {
+        return this.origMidashigo.split("").map((char) => {
+            return wanakana.isKatakana(char) ? wanakana.toHiragana(char) : char;
+        }).join("") + this.okuriAlphabet;
     }
 }

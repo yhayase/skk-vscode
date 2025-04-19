@@ -80,6 +80,26 @@ describe('AbbrevMode', async () => {
             abbrevMode.onSpace(context);
             expect(mockEditor.getMidashigo()).to.equal('http');
         });
+
+        it('should registration editor have unconverted romaji yomi', async () => {
+            mockEditor.getJisyoProvider().registerCandidate('a', { word: 'α' });
+            await context.lowerAlphabetInput('a');
+            expect(mockEditor.getMidashigo()).to.equal('a');
+            await context.spaceInput();
+            expect(context["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
+            expect(mockEditor.getCurrentText()).to.equal('▼α');
+            await context.spaceInput();
+            expect(mockEditor.wasRegistrationEditorOpened()).to.be.true;
+            expect(mockEditor.getRegistrationYomi()).to.equal('a', "辞書登録の読みは'a'であるべき");
+        });
+
+        it('should open registration editor on converting unexisting abbrev word', async () => {
+            const unexistingWord = 'ahoskihoiasdfo';
+            context.lowerAlphabetInput(unexistingWord);
+            await context.spaceInput();
+            expect(mockEditor.wasRegistrationEditorOpened()).to.be.true;
+            expect(mockEditor.getRegistrationYomi()).to.equal(unexistingWord, `辞書登録の読みは'${unexistingWord}'であるべき`);
+        });
     });
 
     describe('special input handling', () => {

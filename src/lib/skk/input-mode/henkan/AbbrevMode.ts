@@ -26,7 +26,7 @@ export class AbbrevMode extends AbstractMidashigoMode {
 
         const jisyoCandidates = await this.editor.getJisyoProvider().lookupCandidates(midashigo);
         if (jisyoCandidates=== undefined) {
-            context.showErrorMessage("変換できません");
+            await this.editor.openRegistrationEditor(midashigo, "");
             return;
         }
         context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, "", jisyoCandidates, "", ""));
