@@ -22,29 +22,29 @@ function indexOfPositionInString(str: string, pos: IPosition): number | undefine
         if (n === 0) {
             return -1;
         }
-        
+
         let index = -searchStr.length;
-        
+
         for (let count = 0; count < n; count++) {
             index = str.indexOf(searchStr, index + searchStr.length);
             if (index === -1) {
                 return undefined;
             }
         }
-        
+
         return index;
     }
 
     if (pos.line === 0 && pos.character === 0) {
         return 0;
     }
-    
+
     const lastLineEndIndex = positionOfNthOccurence(str, '\n', pos.line);
     if (lastLineEndIndex === undefined) {
         return undefined;
     }
     // check if str[lastLineEndIndex+1 .. lastLineEndIndex+1+pos.character] is valid
-    const strSlice = str.slice(lastLineEndIndex+1, lastLineEndIndex + 1 + pos.character);
+    const strSlice = str.slice(lastLineEndIndex + 1, lastLineEndIndex + 1 + pos.character);
     if (strSlice.length !== pos.character || strSlice.includes('\n')) {
         return undefined;
     }
@@ -150,6 +150,7 @@ export class MockEditor implements IEditor {
     private midashigoStartPosition: IPosition | null = null;
     private appendedSuffix: string = '';
     private jisyoProvider: IJisyoProvider;
+    private registrationYomi: string|undefined = undefined;
 
     constructor() {
         // まずEditorFactoryを初期化
@@ -550,6 +551,11 @@ export class MockEditor implements IEditor {
 
     async openRegistrationEditor(yomi: string): Promise<void> {
         this.wasRegistrationEditorOpened_ = true;
+        this.registrationYomi = yomi;
+    }
+
+    getRegistrationYomi(): string | undefined {
+        return this.registrationYomi;
     }
 
     async registerMidashigo(): Promise<void> {
