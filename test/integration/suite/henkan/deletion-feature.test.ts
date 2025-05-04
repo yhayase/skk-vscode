@@ -43,33 +43,28 @@ suite('候補削除機能において', async () => {
         // エディタに、候補が1つだけの見出し語を入力する
         await vscode.commands.executeCommand('type', { text: existYomi });
 
-        // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise((resolve, reject) => {
             const disposable1 = vscode.workspace.onDidChangeTextDocument(async e => {
                 disposable1.dispose();
                 const disposable2 = vscode.workspace.onDidChangeTextDocument(async e => {
                     disposable2.dispose();
-                    try {
-                        const disposable3 = vscode.workspace.onDidChangeTextDocument(async e => {
-                            disposable3.dispose();
-                            try {
-                                // テキストエディタが空になっていることを確認する
-                                expect(document?.getText()).equal('');
-                                // ユーザ辞書から候補が削除されていることを確認する
-                                const candidate = getGlobalJisyo()?.get(existYomi);
-                                expect(candidate).equal(undefined);
+                    const disposable3 = vscode.workspace.onDidChangeTextDocument(async e => {
+                        disposable3.dispose();
+                        try {
+                            // テキストエディタが空になっていることを確認する
+                            expect(document?.getText()).equal('');
+                            // ユーザ辞書から候補が削除されていることを確認する
+                            const candidate = getGlobalJisyo()?.get(existYomi);
+                            expect(candidate).equal(undefined);
 
-                                resolve();
-                            } catch (e) {
-                                reject(e);
-                            }
-                        });
+                            resolve();
+                        } catch (err) {
+                            reject(err);
+                        }
+                    });
 
-                        // Y を入力して、候補を削除する
-                        vscode.commands.executeCommand('skk.upperAlphabetInput', 'Y');
-                    } catch (e) {
-                        reject(e);
-                    }
+                    // Y を入力して、候補を削除する
+                    vscode.commands.executeCommand('skk.upperAlphabetInput', 'Y');
                 });
 
                 // X を入力して、候補削除のモードに入る
@@ -97,33 +92,28 @@ suite('候補削除機能において', async () => {
         // エディタに、候補が1つだけの見出し語をカタカナで入力する
         await vscode.commands.executeCommand('type', { text: existKatakanaYomi });
 
-        // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise(async (resolve, reject) => {
             const disposable1 = vscode.workspace.onDidChangeTextDocument(async e => {
                 disposable1.dispose();
                 const disposable2 = vscode.workspace.onDidChangeTextDocument(async e => {
                     disposable2.dispose();
-                    try {
-                        const disposable3 = vscode.workspace.onDidChangeTextDocument(async e => {
-                            disposable3.dispose();
-                            try {
-                                // テキストエディタが空になっていることを確認する
-                                expect(document?.getText()).equal('');
-                                // ユーザ辞書から候補が削除されていることを確認する
-                                const candidate = getGlobalJisyo()?.get(existYomi);
-                                expect(candidate).equal(undefined);
+                    const disposable3 = vscode.workspace.onDidChangeTextDocument(async e => {
+                        disposable3.dispose();
+                        try {
+                            // テキストエディタが空になっていることを確認する
+                            expect(document?.getText()).equal('');
+                            // ユーザ辞書から候補が削除されていることを確認する
+                            const candidate = getGlobalJisyo()?.get(existYomi);
+                            expect(candidate).equal(undefined);
 
-                                resolve();
-                            } catch (e) {
-                                reject(e);
-                            }
-                        });
+                            resolve();
+                        } catch (err) {
+                            reject(err);
+                        }
+                    });
 
-                        // Y を入力して、候補を削除する
-                        await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Y');
-                    } catch (e) {
-                        reject(e);
-                    }
+                    // Y を入力して、候補を削除する
+                    await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Y');
                 });
 
                 // X を入力して、候補削除のモードに入る
@@ -151,33 +141,28 @@ suite('候補削除機能において', async () => {
         // 送りがなの子音を入力する
         await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
 
-        // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise(async (resolve, reject) => {
             const disposable1 = vscode.workspace.onDidChangeTextDocument(async e => {
                 disposable1.dispose();
                 const disposable2 = vscode.workspace.onDidChangeTextDocument(async e => {
                     disposable2.dispose();
-                    try {
-                        const disposable3 = vscode.workspace.onDidChangeTextDocument(async e => {
-                            disposable3.dispose();
-                            try {
-                                // テキストエディタが空になっていることを確認する
-                                expect(document?.getText()).equal('');
-                                // ユーザ辞書から候補が削除されていることを確認する
-                                const candidate = getGlobalJisyo()?.get(existYomi + okuriganaAlphabetConsonant);
-                                expect(candidate).equal(undefined);
+                    const disposable3 = vscode.workspace.onDidChangeTextDocument(async e => {
+                        disposable3.dispose();
+                        try {
+                            // テキストエディタが空になっていることを確認する
+                            expect(document?.getText()).equal('');
+                            // ユーザ辞書から候補が削除されていることを確認する
+                            const candidate = getGlobalJisyo()?.get(existYomi + okuriganaAlphabetConsonant);
+                            expect(candidate).equal(undefined);
 
-                                resolve();
-                            } catch (e) {
-                                reject(e);
-                            }
-                        });
+                            resolve();
+                        } catch (err) {
+                            reject(err);
+                        }
+                    });
 
-                        // Y を入力して、候補を削除する
-                        await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Y');
-                    } catch (e) {
-                        reject(e);
-                    }
+                    // Y を入力して、候補を削除する
+                    await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Y');
                 });
 
                 // X を入力して、候補削除のモードに入る
