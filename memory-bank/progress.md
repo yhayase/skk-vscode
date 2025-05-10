@@ -56,6 +56,13 @@
 - [ ] Refactor duplicate code in registration editor opening logic
 - [ ] Update documentation for registration feature
 
+### Keybinding Contextualization (Issue #55)
+- [ ] Design custom `when` clause contexts for SKK modes and active keys
+- [ ] Modify `lib/skk` to expose active keys for current mode
+- [ ] Implement `setContext` logic in VSCode extension layer
+- [ ] Refactor `package.json` keybindings to use new contexts
+- [ ] Write unit and integration tests for keybinding contextualization
+
 ### Additional Features
 - [ ] Improved candidate display for long lines
 - [ ] Enhanced dictionary management
@@ -75,9 +82,10 @@
 - Next planned version: 0.0.3 (with registration and candidate deletion features)
 
 ### Development Status
-- Active development on candidate deletion and registration features
-- Core functionality is stable and working
-- Testing is ongoing for new features
+- Active development on candidate deletion and registration features.
+- **Starting development on Issue #55: Keybinding Contextualization.**
+- Core functionality is stable and working.
+- Testing is ongoing for new features and will be created for Issue #55.
 
 ### Known Issues
 - Conversion candidate menu is displayed at the beginning of the line, which can be problematic for long lines
@@ -117,10 +125,11 @@
 - Implemented Abbrev mode
 - Released as v0.0.2
 
-### Milestone 3: Dictionary Management (In Progress)
+### Milestone 3: Dictionary Management & Keybinding Robustness (In Progress)
 - Implementing dictionary registration
 - Implementing candidate deletion
-- Adding tests for dictionary operations
+- **Implementing contextual keybinding (Issue #55)**
+- Adding tests for dictionary operations and keybinding
 - Planned for v0.0.3
 
 ### Milestone 4: Refinement (Planned)

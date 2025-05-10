@@ -58,6 +58,13 @@ The skk-vscode extension follows a layered architecture with clear separation of
      - Confirmation dialog with Y/N options
      - Dictionary update upon confirmation
 
+5. **Contextual Keybinding Control (Issue #55)**
+   - Utilizes VSCode's `when` clause contexts to enable/disable keybindings based on the current SKK mode and active keys.
+   - `lib/skk` (Core SKK Layer) exposes a list of keys it can currently handle.
+   - The VSCode Layer reads this list and updates custom contexts (e.g., `skk.mode`, `skk.activeKey.[Key]`) using `setContext`.
+   - `package.json` keybindings use these contexts in their `when` clauses for fine-grained control.
+   - This minimizes conflicts with other extensions and VSCode's native keybindings.
+
 ## Design Patterns in Use
 
 1. **State Pattern**
@@ -99,6 +106,11 @@ The skk-vscode extension follows a layered architecture with clear separation of
 4. **Registration and Dictionary**
    - Registration process adds entries to the user dictionary
    - User dictionary entries are immediately available for future conversions
+
+5. **SKK Core and VSCode Layer (for Keybinding Context)**
+   - The Core SKK Layer (specifically, the current input mode) determines which keys are relevant.
+   - The VSCode Layer queries the Core SKK Layer for this information.
+   - The VSCode Layer then translates this into `when` clause contexts that VSCode's keybinding system can understand.
 
 ## Critical Implementation Paths
 

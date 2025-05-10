@@ -2,7 +2,10 @@
 
 ## Current Work Focus
 
-The current development focus is on implementing the **candidate deletion feature** and completing the **dictionary registration feature**. 
+The current development focus is on:
+- Implementing the **candidate deletion feature**
+- Completing the **dictionary registration feature**
+- **Keybinding contextualization and optimization (Issue #55)**: Implementing fine-grained keybinding control using VSCode's `when` clause contexts to ensure the extension only handles necessary key events based on the current SKK mode. This aims to improve compatibility with other extensions and VSCode's native functionalities.
 
 The candidate deletion feature allows users to delete unwanted candidates from their dictionary during conversion. This is useful for removing incorrect or outdated entries.
 
@@ -62,6 +65,14 @@ The registration feature is not implemented as a separate "mode" like the input 
 
 ## Next Steps
 
+**Issue #55: Keybinding Contextualization**
+1.  **Design Custom Contexts**: Define `when` clause contexts for SKK modes (e.g., `skk.mode`) and active keys (e.g., `skk.activeKey.[KeyCode]`).
+2.  **Update `lib/skk`**: Modify core SKK logic to expose currently active keys for each mode.
+3.  **Implement Context Updates**: In the VSCode extension layer, fetch active keys from `lib/skk` and update `when` clause contexts using `setContext`.
+4.  **Refactor `package.json`**: Update keybinding definitions to use the new contexts.
+5.  **Testing**: Implement unit tests for `lib/skk` key exposure and integration tests for context updates and keybinding behavior.
+
+**Existing Next Steps**
 1. **Candidate Deletion Enhancement**
    - Add keyboard shortcut documentation for the deletion feature
    - Consider adding a menu-based deletion option for multiple candidates
@@ -84,6 +95,15 @@ The registration feature is not implemented as a separate "mode" like the input 
    - Add usage examples for both workflows
 
 ## Active Decisions and Considerations
+
+**Issue #55: Keybinding Contextualization**
+-   **Context Design**:
+    -   `skk.mode`: String representing the current SKK mode (e.g., `hiragana`, `katakana`, `henkan`, `ascii`, `disabled`).
+    -   `skk.activeKey.[NORMALIZED_KEY_NAME]`: Boolean, true if `NORMALIZED_KEY_NAME` (e.g., `Space`, `Ctrl+J`, `Enter`) is active in the current `skk.mode`.
+-   **Performance**: Monitor the frequency of `setContext` calls and their impact on VSCode performance. Avoid overly granular updates if they cause noticeable slowdowns.
+-   **Key Name Normalization**: Establish a consistent way to represent key names between `package.json` keybindings and `lib/skk` logic.
+-   **Coverage**: Ensure all relevant SKK states and key interactions are covered by the new context logic.
+-   **Fallback/Default Behavior**: Define how keybindings should behave if a context is not set or is in an unexpected state.
 
 1. **Candidate Deletion Workflow**
    - Using 'X' key during conversion to trigger deletion mode
