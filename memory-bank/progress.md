@@ -41,6 +41,14 @@
 - [ ] Dedicated mode for registration editor
 - [ ] Keyboard shortcut for registration command
 
+### Keybinding Contextualization (Issue #55) - Basic Implementation
+- [x] Core logic in `lib/skk` modes to define active keys (`getActiveKeys`) and contextual names (`getContextualName`) (partially implemented across key modes).
+- [x] `VSCodeEditor` updated to manage and set `skk.mode` and `skk.activeKey.*` contexts.
+- [x] `package.json` keybindings updated to use these new contexts.
+- [x] Helper utilities in `keyUtils.ts` for key name normalization and context key generation.
+- [x] Unit tests for `getActiveKeys` in some modes.
+- [x] Existing integration tests pass with these changes.
+
 ## What's Left to Build
 
 ### Candidate Deletion Enhancement
@@ -56,12 +64,12 @@
 - [ ] Refactor duplicate code in registration editor opening logic
 - [ ] Update documentation for registration feature
 
-### Keybinding Contextualization (Issue #55)
-- [ ] Design custom `when` clause contexts for SKK modes and active keys
-- [ ] Modify `lib/skk` to expose active keys for current mode
-- [ ] Implement `setContext` logic in VSCode extension layer
-- [ ] Refactor `package.json` keybindings to use new contexts
-- [ ] Write unit and integration tests for keybinding contextualization
+### Keybinding Contextualization (Issue #55) - Remaining Tasks
+- [~] Complete implementation of `getActiveKeys()` and `getContextualName()` for **all** input mode classes and their internal states.
+- [~] Add comprehensive unit tests for `getActiveKeys()` and `getContextualName()` for all modes.
+- [ ] Create new integration tests specifically for verifying `skk.mode` and `skk.activeKey.*` context values and their effect on keybinding activation.
+- [ ] Conduct thorough manual testing and debugging of keybinding behavior in all modes and scenarios.
+- [ ] Performance review of the context update mechanism.
 
 ### Additional Features
 - [ ] Improved candidate display for long lines
@@ -83,9 +91,9 @@
 
 ### Development Status
 - Active development on candidate deletion and registration features.
-- **Starting development on Issue #55: Keybinding Contextualization.**
+- **Basic implementation for Issue #55 (Keybinding Contextualization) is complete.** Remaining work involves full mode coverage and targeted testing.
 - Core functionality is stable and working.
-- Testing is ongoing for new features and will be created for Issue #55.
+- Existing integration tests pass with recent changes.
 
 ### Known Issues
 - Conversion candidate menu is displayed at the beginning of the line, which can be problematic for long lines
@@ -128,8 +136,8 @@
 ### Milestone 3: Dictionary Management & Keybinding Robustness (In Progress)
 - Implementing dictionary registration
 - Implementing candidate deletion
-- **Implementing contextual keybinding (Issue #55)**
-- Adding tests for dictionary operations and keybinding
+- **Basic implementation for contextual keybinding (Issue #55) complete.**
+- Adding tests for dictionary operations and keybinding (ongoing for Issue #55).
 - Planned for v0.0.3
 
 ### Milestone 4: Refinement (Planned)

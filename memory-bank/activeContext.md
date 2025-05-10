@@ -5,7 +5,7 @@
 The current development focus is on:
 - Implementing the **candidate deletion feature**
 - Completing the **dictionary registration feature**
-- **Keybinding contextualization and optimization (Issue #55)**: Implementing fine-grained keybinding control using VSCode's `when` clause contexts to ensure the extension only handles necessary key events based on the current SKK mode. This aims to improve compatibility with other extensions and VSCode's native functionalities.
+- **Keybinding contextualization and optimization (Issue #55) - Basic Implementation Complete**: The foundational work for fine-grained keybinding control using VSCode's `when` clause contexts is complete. This includes updates to core SKK logic, context update mechanisms in the VSCode layer, and `package.json` modifications. Remaining work involves full coverage for all modes and comprehensive testing.
 
 The candidate deletion feature allows users to delete unwanted candidates from their dictionary during conversion. This is useful for removing incorrect or outdated entries.
 
@@ -65,12 +65,14 @@ The registration feature is not implemented as a separate "mode" like the input 
 
 ## Next Steps
 
-**Issue #55: Keybinding Contextualization**
-1.  **Design Custom Contexts**: Define `when` clause contexts for SKK modes (e.g., `skk.mode`) and active keys (e.g., `skk.activeKey.[KeyCode]`).
-2.  **Update `lib/skk`**: Modify core SKK logic to expose currently active keys for each mode.
-3.  **Implement Context Updates**: In the VSCode extension layer, fetch active keys from `lib/skk` and update `when` clause contexts using `setContext`.
-4.  **Refactor `package.json`**: Update keybinding definitions to use the new contexts.
-5.  **Testing**: Implement unit tests for `lib/skk` key exposure and integration tests for context updates and keybinding behavior.
+**Issue #55: Keybinding Contextualization - Remaining Tasks**
+-   **Complete Mode Implementation**: Ensure `getActiveKeys()` and `getContextualName()` are fully implemented for all remaining input mode classes (especially `InlineHenkanMode`, `MenuHenkanMode`, `AbbrevMode`, `CandidateDeletionMode` and any other `AbstractHenkanMode` subclasses). Add comprehensive unit tests for these.
+-   **Targeted Integration Tests**: Create new integration tests specifically designed to verify:
+    -   Correctness of `skk.mode` and `skk.activeKey.*` context values across various mode transitions and states.
+    -   That keybindings are correctly enabled/disabled based on these contexts, ensuring SKK only captures keys when appropriate.
+-   **Manual Testing & Debugging**: Conduct thorough manual testing across all SKK features to identify and fix any regressions or unexpected keybinding behavior.
+-   **Performance Review**: Assess if the context update mechanism introduces any noticeable performance overhead, especially during rapid mode changes or typing. Optimize if necessary.
+-   **Documentation**: Update any relevant developer or user documentation regarding keybinding behavior if changes are significant.
 
 **Existing Next Steps**
 1. **Candidate Deletion Enhancement**
@@ -96,14 +98,17 @@ The registration feature is not implemented as a separate "mode" like the input 
 
 ## Active Decisions and Considerations
 
-**Issue #55: Keybinding Contextualization**
--   **Context Design**:
-    -   `skk.mode`: String representing the current SKK mode (e.g., `hiragana`, `katakana`, `henkan`, `ascii`, `disabled`).
-    -   `skk.activeKey.[NORMALIZED_KEY_NAME]`: Boolean, true if `NORMALIZED_KEY_NAME` (e.g., `Space`, `Ctrl+J`, `Enter`) is active in the current `skk.mode`.
--   **Performance**: Monitor the frequency of `setContext` calls and their impact on VSCode performance. Avoid overly granular updates if they cause noticeable slowdowns.
--   **Key Name Normalization**: Establish a consistent way to represent key names between `package.json` keybindings and `lib/skk` logic.
--   **Coverage**: Ensure all relevant SKK states and key interactions are covered by the new context logic.
--   **Fallback/Default Behavior**: Define how keybindings should behave if a context is not set or is in an unexpected state.
+**Issue #55: Keybinding Contextualization - Key Decisions Made**
+-   **Context Design Implemented**:
+    -   `skk.mode`: Uses `IInputMode.getContextualName()` (e.g., `"ascii"`, `"hiragana:kakutei"`, `"midashigo"`).
+    -   `skk.activeKey.[SAFE_KEY_NAME]`: Uses `IInputMode.getActiveKeys()` and `keyUtils.getActiveKeyContext()` to generate safe context keys (e.g., `skk.activeKey.a`, `skk.activeKey.ctrl_j`, `skk.activeKey.num0`).
+-   **Key Name Normalization**: `keyUtils.ts` provides `normalizeVscodeKey` (for `package.json` `key` property to internal representation) and `getActiveKeyContext` (for internal representation to context key suffix).
+-   **Context Update Mechanism**: `VSCodeEditor` handles context updates via `updateSkkContexts()`, triggered by `setInputMode()` and `notifyModeInternalStateChanged()`.
+
+**Issue #55: Keybinding Contextualization - Ongoing Considerations**
+-   **Performance**: Continue to monitor the impact of `setContext` calls, especially with many active keys or rapid changes. The optimization to update contexts only when values change has been implemented in `VSCodeEditor.updateSkkContexts`.
+-   **Coverage & Robustness**: Ensuring all modes and edge cases are correctly handled by `getActiveKeys` and `getContextualName` is critical. The list of active keys for some modes (e.g., those that throw errors for many inputs) needs to be comprehensive.
+-   **Clarity of `skk.mode` values**: The composite names like `"hiragana:kakutei"` are informative but need to be consistently applied and documented.
 
 1. **Candidate Deletion Workflow**
    - Using 'X' key during conversion to trigger deletion mode

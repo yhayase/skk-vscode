@@ -58,12 +58,20 @@ The skk-vscode extension follows a layered architecture with clear separation of
      - Confirmation dialog with Y/N options
      - Dictionary update upon confirmation
 
-5. **Contextual Keybinding Control (Issue #55)**
-   - Utilizes VSCode's `when` clause contexts to enable/disable keybindings based on the current SKK mode and active keys.
-   - `lib/skk` (Core SKK Layer) exposes a list of keys it can currently handle.
-   - The VSCode Layer reads this list and updates custom contexts (e.g., `skk.mode`, `skk.activeKey.[Key]`) using `setContext`.
-   - `package.json` keybindings use these contexts in their `when` clauses for fine-grained control.
-   - This minimizes conflicts with other extensions and VSCode's native keybindings.
+5. **Contextual Keybinding Control (Issue #55) - Implemented**
+   - Utilizes VSCode's `when` clause contexts to enable/disable keybindings.
+   - **Core SKK Layer**: Each `IInputMode` implementation now has:
+     - `getActiveKeys(): Set<string>`: Returns a set of normalized key names (e.g., "a", "ctrl+j", "space") that the mode currently handles.
+     - `getContextualName(): string`: Returns a string identifier for the mode (e.g., "ascii", "hiragana:kakutei", "midashigo").
+   - **VSCode Layer (`VSCodeEditor.ts`)**:
+     - Manages two main custom contexts:
+       - `skk.mode`: Set to the value from `currentMode.getContextualName()`.
+       - `skk.activeKey.[SAFE_KEY_NAME]`: Boolean, set to `true` if `SAFE_KEY_NAME` (derived from a normalized key via `keyUtils.getActiveKeyContext`) is in the current mode's `getActiveKeys()` set, `false` otherwise.
+     - `updateSkkContexts()` method updates these contexts using `vscode.commands.executeCommand('setContext', ...)`.
+     - Contexts are updated when the input mode changes (`setInputMode`) or when an input mode signals an internal state change that might affect active keys (`notifyModeInternalStateChanged`).
+   - **`package.json`**: Keybindings now use `when: "editorTextFocus && skk.activeKey.[SAFE_KEY_NAME]"` to ensure they only fire when the specific key is relevant to the current SKK state.
+   - **`keyUtils.ts`**: Provides helper functions `normalizeVscodeKey` (to standardize key names from `package.json`) and `getActiveKeyContext` (to generate safe context key suffixes from normalized key names).
+   - This approach minimizes conflicts by ensuring SKK only intercepts keys it intends to process in its current state.
 
 ## Design Patterns in Use
 
@@ -107,10 +115,14 @@ The skk-vscode extension follows a layered architecture with clear separation of
    - Registration process adds entries to the user dictionary
    - User dictionary entries are immediately available for future conversions
 
-5. **SKK Core and VSCode Layer (for Keybinding Context)**
-   - The Core SKK Layer (specifically, the current input mode) determines which keys are relevant.
-   - The VSCode Layer queries the Core SKK Layer for this information.
-   - The VSCode Layer then translates this into `when` clause contexts that VSCode's keybinding system can understand.
+5. **SKK Core and VSCode Layer (for Keybinding Context) - Updated**
+   - The Core SKK Layer (current `IInputMode` instance) provides its contextual name via `getContextualName()` and its set of currently handled keys via `getActiveKeys()`.
+   - The VSCode Layer (`VSCodeEditor`):
+     - Retrieves this information from the current input mode.
+     - Updates the `skk.mode` context with the contextual name.
+     - Iterates through the active keys and previously active keys to set/unset `skk.activeKey.[SAFE_KEY_NAME]` boolean contexts.
+     - Uses `keyUtils.ts` to ensure consistency in key naming and context key generation.
+   - This allows `package.json` keybindings to be conditional on `skk.activeKey.*` without needing to explicitly check `skk.mode` in most cases, as `getActiveKeys()` is mode-dependent.
 
 ## Critical Implementation Paths
 
