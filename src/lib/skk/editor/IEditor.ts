@@ -65,4 +65,11 @@ export interface IEditor {
     showErrorMessage(message: string): void;
     openRegistrationEditor(yomi: string, okuri: string): PromiseLike<void>;
     registerMidashigo(): PromiseLike<void>;
+
+    /**
+     * Notifies the editor that the internal state of the current input mode has changed,
+     * potentially affecting active keys or contextual name.
+     * The editor should then update any relevant UI or contexts.
+     */
+    notifyModeInternalStateChanged(): Promise<void>;
 }

@@ -10,12 +10,14 @@ import { KakuteiMode } from './henkan/KakuteiMode';
  */
 export abstract class AbstractKanaMode extends AbstractInputMode {
     protected abstract nextMode(): IInputMode;
+    protected abstract getKanaModeBaseName(): string; // e.g., "hiragana", "katakana"
     abstract newRomajiInput(): RomajiInput;
 
     private henkanMode: AbstractHenkanMode = new KakuteiMode(this, this.editor);
 
     setHenkanMode(henkanMode: AbstractHenkanMode) {
         this.henkanMode = henkanMode;
+        this.editor.notifyModeInternalStateChanged(); // Notify editor to update contexts
     }
 
     async insertStringAndShowRemaining(str: string, remaining: string, isOkuri: boolean): Promise<void> {
@@ -99,5 +101,9 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
         // that it can process to form kana.
 
         return activeKeys;
+    }
+
+    public override getContextualName(): string {
+        return `${this.getKanaModeBaseName()}:${this.henkanMode.getContextualName()}`;
     }
 }

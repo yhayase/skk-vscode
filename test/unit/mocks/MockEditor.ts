@@ -592,4 +592,11 @@ export class MockEditor implements IEditor {
             this.currentCandidate = undefined;
         }
     }
+
+    async notifyModeInternalStateChanged(): Promise<void> {
+        // console.log(`MockEditor.notifyModeInternalStateChanged`);
+        // This is a mock, so typically no action is needed unless a test
+        // specifically wants to verify this call or its side effects.
+        return Promise.resolve();
+    }
 }
