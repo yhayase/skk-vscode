@@ -46,16 +46,39 @@ export function getActiveKeyContext(normalizedKey: string): string {
     else if (safeKey === '.') {safeKey = 'dot';}
     else if (safeKey === ',') {safeKey = 'comma';}
     else if (safeKey === '/') {safeKey = 'slash';}
-    else if (safeKey === '-') {safeKey = 'hyphen';} // Changed from 'dash' to avoid potential conflict if 'dash' is a key
+    else if (safeKey === '-') safeKey = 'hyphen';
     // Handle numeric keys by prefixing
-    else if (safeKey >= '0' && safeKey <= '9') {safeKey = `num${safeKey}`;}
-    else if (safeKey === 'escape') {safeKey = 'escape';}
-    else if (safeKey === 'backspace') {safeKey = 'backspace';}
-    else if (safeKey === 'enter') {safeKey = 'enter';}
-    // Add more explicit mappings for symbols if needed:
-    // else if (safeKey === '!') safeKey = 'exclamation';
-    // else if (safeKey === '@') safeKey = 'at';
-    // ... etc.
+    else if (safeKey >= '0' && safeKey <= '9') safeKey = `num${safeKey}`;
+    else if (safeKey === 'escape') safeKey = 'escape';
+    else if (safeKey === 'backspace') safeKey = 'backspace';
+    else if (safeKey === 'enter') safeKey = 'enter';
+    // Add explicit mappings for symbols that might be returned by getActiveKeys
+    else if (safeKey === '!') safeKey = 'exclamation';
+    else if (safeKey === '@') safeKey = 'at';
+    else if (safeKey === '#') safeKey = 'hash';
+    else if (safeKey === '$') safeKey = 'dollar';
+    else if (safeKey === '%') safeKey = 'percent';
+    else if (safeKey === '&') safeKey = 'ampersand';
+    else if (safeKey === "'") safeKey = 'apostrophe';
+    else if (safeKey === '(') safeKey = 'open_paren';
+    else if (safeKey === ')') safeKey = 'close_paren';
+    else if (safeKey === '*') safeKey = 'asterisk';
+    else if (safeKey === '<') safeKey = 'less_than';
+    else if (safeKey === '=') safeKey = 'equals';
+    else if (safeKey === '>') safeKey = 'greater_than';
+    else if (safeKey === '?') safeKey = 'question';
+    else if (safeKey === '[') safeKey = 'open_bracket';
+    else if (safeKey === '\\') safeKey = 'backslash';
+    else if (safeKey === ']') safeKey = 'close_bracket';
+    else if (safeKey === '^') safeKey = 'caret';
+    else if (safeKey === '_') safeKey = 'underscore';
+    else if (safeKey === '`') safeKey = 'backtick';
+    else if (safeKey === '{') safeKey = 'open_brace';
+    else if (safeKey === '|') safeKey = 'pipe';
+    else if (safeKey === '}') safeKey = 'close_brace';
+    else if (safeKey === '~') safeKey = 'tilde';
+    else if (safeKey === '"') safeKey = 'double_quote'; // Added mapping for double quote
+
 
     // Replace '+' with '_' for modifiers
     safeKey = safeKey.replace(/\+/g, '_');
