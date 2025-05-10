@@ -9,4 +9,5 @@ export interface IInputMode {
     backspaceInput: () => void;
     numberInput: (key: string) => void;
     symbolInput: (key: string) => void;
-};    
+    getActiveKeys: () => Set<string>; // Returns a set of normalized key names active in this mode
+};

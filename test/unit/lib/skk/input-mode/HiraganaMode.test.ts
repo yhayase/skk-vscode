@@ -2,6 +2,9 @@ import { expect } from 'chai';
 import { HiraganaMode } from '../../../../../src/lib/skk/input-mode/HiraganaMode';
 import { MockEditor } from '../../../mocks/MockEditor';
 import { MidashigoMode, MidashigoType } from '../../../../../src/lib/skk/input-mode/henkan/MidashigoMode';
+import { EditorFactory } from '../../../../../src/lib/skk/editor/EditorFactory';
+import { KakuteiMode } from '../../../../../src/lib/skk/input-mode/henkan/KakuteiMode';
+import { AbstractKanaMode } from '../../../../../src/lib/skk/input-mode/AbstractKanaMode';
 
 describe('HiraganaMode', () => {
     let hiraganaMode: HiraganaMode;
@@ -9,8 +12,16 @@ describe('HiraganaMode', () => {
 
     beforeEach(() => {
         mockEditor = new MockEditor();
-        hiraganaMode = new HiraganaMode();
-        mockEditor.setInputMode(hiraganaMode);
+        EditorFactory.setInstance(mockEditor); // Setup EditorFactory for modes that use it
+        hiraganaMode = HiraganaMode.getInstance(); // Use getInstance as per class design
+        // AbstractKanaMode constructor calls this.editor.setInputMode,
+        // but HiraganaMode itself doesn't directly call setInputMode on mockEditor in its constructor.
+        // If direct setInputMode is needed for mockEditor state, it should be explicit.
+        // For now, assume HiraganaMode correctly initializes its internal editor via EditorFactory.
+    });
+
+    afterEach(() => {
+        EditorFactory.reset(); // Clean up EditorFactory
     });
 
     it('should convert romaji to hiragana', () => {
@@ -175,5 +186,36 @@ describe('HiraganaMode', () => {
             // midashigoMode は gokan でなければならない
             expect((hiraganaMode["henkanMode"] as MidashigoMode)["midashigoMode"]).to.equal(MidashigoType.gokan, 'should be in gokan mode');
         });
+    });
+
+    describe('getActiveKeys', () => {
+        it('should return keys from KakuteiMode plus "q" when henkanMode is KakuteiMode (default state)', () => {
+            // HiraganaMode initializes with KakuteiMode internally
+            const kakuteiMode = new KakuteiMode(hiraganaMode as AbstractKanaMode, mockEditor);
+            const expectedKeysFromKakutei = kakuteiMode.getActiveKeys();
+            const expectedKeys = new Set(expectedKeysFromKakutei);
+            expectedKeys.add("q"); // AbstractKanaMode adds 'q'
+
+            const activeKeys = hiraganaMode.getActiveKeys();
+            expect(activeKeys).to.deep.equal(expectedKeys);
+        });
+
+        it('should include basic romaji input keys when in default (KakuteiMode) state', () => {
+            const activeKeys = hiraganaMode.getActiveKeys();
+            // Check for a few representative keys from KakuteiMode's expected set
+            expect(activeKeys.has('a'), "key 'a'").to.be.true;
+            expect(activeKeys.has('shift+a'), "key 'shift+a'").to.be.true;
+            expect(activeKeys.has('1'), "key '1'").to.be.true;
+            expect(activeKeys.has('/'), "key '/'").to.be.true;
+            expect(activeKeys.has('space'), "key 'space'").to.be.true;
+            expect(activeKeys.has('enter'), "key 'enter'").to.be.true;
+            expect(activeKeys.has('backspace'), "key 'backspace'").to.be.true;
+            expect(activeKeys.has('ctrl+j'), "key 'ctrl+j'").to.be.true;
+            expect(activeKeys.has('ctrl+g'), "key 'ctrl+g'").to.be.true;
+            expect(activeKeys.has('q'), "key 'q' (added by AbstractKanaMode)").to.be.true;
+        });
+
+        // TODO: Add tests for getActiveKeys when HiraganaMode is in other internal henkan states
+        // (e.g., MidashigoMode, InlineHenkanMode) once those modes also implement getActiveKeys.
     });
 });

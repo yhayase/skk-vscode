@@ -88,4 +88,13 @@ export abstract class AbstractHenkanMode {
      * C-g の入力を受け付ける．
      */
     abstract onCtrlG(context: AbstractKanaMode): Promise<void>;
+
+    /**
+     * この変換モードでアクティブなキーのセットを返す．
+     * デフォルトでは空のセットを返す．具象クラスでオーバーライドして、
+     * 実際に処理するキーを返すようにする．
+     */
+    public getActiveKeys(): Set<string> {
+        return new Set<string>();
+    }
 }

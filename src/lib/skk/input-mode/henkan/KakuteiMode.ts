@@ -115,4 +115,46 @@ export class KakuteiMode extends AbstractHenkanMode {
         this.romajiInput = context.newRomajiInput();
     }
 
+    public override getActiveKeys(): Set<string> {
+        const keys = new Set<string>();
+
+        // Alphabets for Romaji input
+        for (let i = 0; i < 26; i++) {
+            keys.add(String.fromCharCode('a'.charCodeAt(0) + i));
+        }
+        // Shift + Alphabets for Midashigo trigger or special mode change (L)
+        for (let i = 0; i < 26; i++) {
+            keys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`);
+        }
+
+        // Numbers
+        for (let i = 0; i < 10; i++) {
+            keys.add(String(i));
+        }
+
+        // Symbols - common ones, specific ones like '/' are handled by onSymbol
+        // For simplicity, we can list common symbols or rely on a more generic "any printable"
+        // For now, let's add some common ones explicitly.
+        // This part might need refinement based on how `when` clauses handle broad categories.
+        keys.add(".");
+        keys.add(",");
+        keys.add("/"); // Special: triggers AbbrevMode
+        keys.add("-");
+        keys.add("@");
+        // Potentially more symbols...
+
+        // Special keys
+        keys.add("space");
+        keys.add("enter");
+        keys.add("backspace");
+        keys.add("ctrl+j");
+        keys.add("ctrl+g");
+        // 'q' and 'l' are handled by AbstractKanaMode or delegated,
+        // but KakuteiMode's onLowerAlphabet handles them.
+        // 'q' is added by AbstractKanaMode.getActiveKeys().
+        // 'l' should be here as it's processed by onLowerAlphabet.
+        // keys.add("l"); // Already covered by lowercase alphabet loop
+
+        return keys;
+    }
 }
