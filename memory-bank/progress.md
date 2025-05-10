@@ -17,12 +17,15 @@
 - [x] Okurigana (送り仮名) handling
 - [x] Candidate selection and confirmation
 - [x] Candidate prioritization based on selection history
+- [x] Candidate deletion with confirmation dialog
 
-### Dictionary System
+### Dictionary Management
 - [x] Multiple dictionary support
 - [x] Dictionary configuration through settings
 - [x] Postal code dictionary support
 - [x] Dictionary search in priority order
+- [x] Candidate deletion with confirmation dialog
+- [x] Integration tests for dictionary operations
 
 ### Registration Feature (In Progress)
 - [x] Opening registration editor from InlineHenkanMode
@@ -39,6 +42,12 @@
 - [ ] Keyboard shortcut for registration command
 
 ## What's Left to Build
+
+### Candidate Deletion Enhancement
+- [ ] Add keyboard shortcut documentation for deletion feature
+- [ ] Consider menu-based deletion for multiple candidates
+- [ ] Add undo functionality for accidental deletions
+- [ ] Improve error handling for deletion operations
 
 ### Registration Feature Completion
 - [ ] Implement dedicated registration mode
@@ -63,10 +72,10 @@
 
 ### Version
 - Current version: 0.0.2
-- Next planned version: 0.0.3 (with registration feature)
+- Next planned version: 0.0.3 (with registration and candidate deletion features)
 
 ### Development Status
-- Active development on registration feature
+- Active development on candidate deletion and registration features
 - Core functionality is stable and working
 - Testing is ongoing for new features
 
@@ -74,6 +83,7 @@
 - Conversion candidate menu is displayed at the beginning of the line, which can be problematic for long lines
 - No dedicated mode for registration editor yet
 - Some code duplication in registration editor opening logic
+- No undo functionality for candidate deletion yet
 
 ## Evolution of Project Decisions
 
@@ -87,6 +97,7 @@
 - Implemented Abbrev mode for postal code lookup
 - Enhanced conversion candidate handling
 - Started work on registration feature
+- Implemented candidate deletion functionality
 
 ### Future Direction
 - Complete registration feature with dedicated mode
@@ -106,9 +117,10 @@
 - Implemented Abbrev mode
 - Released as v0.0.2
 
-### Milestone 3: Registration Feature (In Progress)
+### Milestone 3: Dictionary Management (In Progress)
 - Implementing dictionary registration
-- Adding tests for registration workflow
+- Implementing candidate deletion
+- Adding tests for dictionary operations
 - Planned for v0.0.3
 
 ### Milestone 4: Refinement (Planned)

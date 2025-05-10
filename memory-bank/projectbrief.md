@@ -14,6 +14,7 @@ skk-vscode is a VSCode extension that implements the SKK (Simple Kana to Kanji) 
    - Support multiple dictionaries
    - Allow configuration of dictionary sources
    - Enable postal code dictionary support
+   - Support dictionary management (adding and removing entries)
 
 3. **Conversion Features**
    - Support inline conversion for the first 3 candidates
@@ -43,4 +44,6 @@ skk-vscode is a VSCode extension that implements the SKK (Simple Kana to Kanji) 
 0.0.2
 
 ## Development Focus
-The current development focus is on implementing the dictionary registration feature, which allows users to add new word-reading pairs to their user dictionary.
+The current development focus is on implementing dictionary management features:
+1. The dictionary registration feature, which allows users to add new word-reading pairs to their user dictionary
+2. The candidate deletion feature, which allows users to remove unwanted entries from their dictionary during conversion

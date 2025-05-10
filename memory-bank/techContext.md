@@ -90,6 +90,7 @@
    - Dictionary providers implement the IJisyoProvider interface
    - Dictionary entries are cached for performance
    - User dictionary is persisted between sessions
+   - Dictionary operations include lookup, registration, and deletion
 
 4. **Testing Approach**
    - Unit tests for core logic

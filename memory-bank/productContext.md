@@ -32,11 +32,17 @@ The extension should provide a seamless Japanese input experience within VSCode:
    - Multiple dictionaries can be configured and searched
    - User dictionary allows for personalization
    - Dictionary registration allows adding new word-reading pairs
+   - Dictionary management allows removing unwanted entries
 
-4. **Registration Workflow**
-   - When a conversion candidate is not found, a registration editor opens
-   - Users input the desired word for the reading
-   - Upon registration, the word is added to the user dictionary and inserted at the cursor position
+4. **Dictionary Management Workflow**
+   - Registration:
+     - When a conversion candidate is not found, a registration editor opens
+     - Users input the desired word for the reading
+     - Upon registration, the word is added to the user dictionary and inserted at the cursor position
+   - Deletion:
+     - During conversion, users can press 'X' to enter deletion mode
+     - A confirmation prompt (Y/N) is displayed
+     - Upon confirmation, the entry is removed from the dictionary
 
 ## User Experience Goals
 

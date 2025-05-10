@@ -35,6 +35,7 @@ The skk-vscode extension follows a layered architecture with clear separation of
 1. **Mode-Based State Machine**
    - The system uses a state machine pattern for input modes
    - Each mode (Hiragana, Katakana, ASCII, etc.) is a separate class
+   - Special modes like CandidateDeletionMode handle specific interactions
    - Mode transitions are handled through well-defined events
 
 2. **Editor Abstraction**
@@ -47,11 +48,15 @@ The skk-vscode extension follows a layered architecture with clear separation of
    - Dictionaries are searched in priority order
    - User dictionary is given highest priority for lookups
 
-4. **Registration Implementation**
+4. **Dictionary Management**
    - Registration is implemented as a combination of:
      - A specialized editor tab with a specific format
      - Commands to open and process the registration
      - Logic to insert the registered word back into the original context
+   - Deletion is implemented as:
+     - A specialized mode (CandidateDeletionMode) for confirmation
+     - Confirmation dialog with Y/N options
+     - Dictionary update upon confirmation
 
 ## Design Patterns in Use
 
@@ -103,5 +108,8 @@ The skk-vscode extension follows a layered architecture with clear separation of
 2. **Registration Flow**
    - No (more) candidates found → Registration editor opens → User inputs word → Registration command → Dictionary update → Word insertion
 
-3. **Mode Transition Flow**
+3. **Deletion Flow**
+   - During conversion, press X → CandidateDeletionMode activated → Confirmation dialog → Y confirms deletion / N cancels → Dictionary update if confirmed
+
+4. **Mode Transition Flow**
    - Mode-specific key detected → Current mode cleanup → New mode initialization → Editor state update
