@@ -80,4 +80,50 @@ export class ZeneiMode extends AbstractInputMode {
     public async symbolInput(key: string): Promise<void> {
         await this.editor.insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
     }
+
+    public override getActiveKeys(): Set<string> {
+        const keys = new Set<string>();
+        // All printable ASCII characters are handled by ZeneiMode to convert to Zenkaku
+        for (let i = 32; i <= 126; i++) { // ASCII printable characters
+            keys.add(String.fromCharCode(i));
+            // Need to consider how to represent these in a normalized way for context keys
+            // For single char keys like 'a', '1', '!', it's just the char itself.
+            // For 'space', it's "space".
+        }
+        // Overwrite specific representations if needed (e.g. space)
+        keys.delete(" "); // remove single char space
+        keys.add("space"); // add "space" keyword
+
+        // Add shift + printable characters as well, as they also result in zenkaku
+        for (let i = 32; i <= 126; i++) {
+            const char = String.fromCharCode(i);
+            // This is a simplification; actual shifted chars depend on layout.
+            // Assuming standard US layout for common shifted symbols like !, @, #, etc.
+            // and shifted letters A-Z.
+            // For simplicity, we'll assume that if 'a' is active, 'shift+a' might also be.
+            // However, ZeneiMode converts based on the input char, not its shifted state.
+            // So, if 'a' is pressed, it becomes 'ａ'. If 'A' (shift+a) is pressed, it becomes 'Ａ'.
+            // The current getActiveKeys model might need refinement for this.
+            // For now, let's assume all base printable keys are active.
+            // Shifted versions will be separate entries in package.json like "shift+a".
+            // So, we should add "shift+<key>" if the base key is a letter.
+            if (char >= 'a' && char <= 'z') {
+                keys.add(`shift+${char}`);
+            }
+            // If the key is a number and its shifted version is a symbol (e.g. shift+1 -> !),
+            // that symbol is already covered by the loop if it's printable.
+        }
+
+
+        keys.add("ctrl+j"); // Mode switch
+        keys.add("ctrl+g"); // Does nothing, but SKK might still "consume" it
+        keys.add("enter");
+        keys.add("backspace");
+
+        return keys;
+    }
+
+    public getContextualName(): string {
+        return "zenei";
+    }
 }
