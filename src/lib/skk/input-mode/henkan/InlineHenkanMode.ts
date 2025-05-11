@@ -65,6 +65,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
             }
 
             this.showCandidate(context);
+            this.editor.notifyModeInternalStateChanged(); // Notify about candidate index change
             return;
         }
 
@@ -87,6 +88,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         this.prevMode.resetOkuriState();
         await this.editor.clearCandidate();
         await context.insertStringAndShowRemaining("▽" + this.origMidashigo + this.okuri + this.suffix, "", false);
+        this.editor.notifyModeInternalStateChanged(); // Notify about mode change
     }
 
     async clearMidashigoAndReturnToKakuteiMode(context: AbstractKanaMode) {
@@ -152,6 +154,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         this.candidateIndex += 1;
         this.showCandidate(context);
+        this.editor.notifyModeInternalStateChanged(); // Notify about candidate index change
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {
@@ -188,5 +191,39 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         return this.origMidashigo.split("").map((char) => {
             return wanakana.isKatakana(char) ? wanakana.toHiragana(char) : char;
         }).join("") + this.okuriAlphabet;
+    }
+
+    public override getActiveKeys(): Set<string> {
+        const keys = new Set<string>();
+
+        // Alphabets (lower and upper)
+        for (let i = 0; i < 26; i++) {
+            keys.add(String.fromCharCode('a'.charCodeAt(0) + i));
+            keys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`);
+        }
+        // Numbers
+        for (let i = 0; i < 10; i++) {
+            keys.add(String(i));
+        }
+        // Symbols - most symbols will fixate and then input the symbol
+        // For simplicity, list common ones.
+        keys.add(".");
+        keys.add(",");
+        keys.add("/");
+        keys.add("-");
+        // etc.
+
+        // Special keys
+        keys.add("space");
+        keys.add("enter");
+        keys.add("backspace");
+        keys.add("ctrl+j");
+        keys.add("ctrl+g");
+
+        return keys;
+    }
+
+    public override getContextualName(): string {
+        return "inlineHenkan";
     }
 }

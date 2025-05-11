@@ -20,4 +20,5 @@ export abstract class AbstractInputMode implements IInputMode {
     public getActiveKeys(): Set<string> {
         return new Set<string>(); // Default: no keys are active by SKK
     }
+    public abstract getContextualName(): string;
 }

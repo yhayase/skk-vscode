@@ -19,4 +19,8 @@ export class HiraganaMode extends AbstractKanaMode implements IInputMode {
     protected nextMode() {
         return KatakanaMode.getInstance();
     }
+
+    protected getKanaModeBaseName(): string {
+        return "hiragana";
+    }
 }

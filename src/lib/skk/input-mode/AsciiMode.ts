@@ -55,4 +55,8 @@ export class AsciiMode extends AbstractInputMode {
         // Other keys should be passed through to VSCode's default handling or other extensions.
         return new Set<string>(["ctrl+j"]);
     }
+
+    public getContextualName(): string {
+        return "ascii";
+    }
 }

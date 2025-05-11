@@ -97,4 +97,10 @@ export abstract class AbstractHenkanMode {
     public getActiveKeys(): Set<string> {
         return new Set<string>();
     }
+
+    /**
+     * この変換モードのコンテキスト名を返す．
+     * (例: "kakutei", "midashigo", "henkan")
+     */
+    public abstract getContextualName(): string;
 }

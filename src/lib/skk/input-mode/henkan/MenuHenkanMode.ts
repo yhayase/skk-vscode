@@ -71,6 +71,7 @@ export class MenuHenkanMode extends AbstractHenkanMode {
         }
 
         this.showCandidateList(context);
+        this.editor.notifyModeInternalStateChanged(); // Notify about candidate index change
     }
 
     async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
@@ -135,5 +136,37 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     async onCtrlG(context: AbstractKanaMode): Promise<void> {
         this.editor.hideCandidateList();
         this.prevMode.returnToMidashigoMode(context);
+    }
+
+    public override getActiveKeys(): Set<string> {
+        const keys = new Set<string>();
+
+        // Selection keys (lower and upper)
+        this.selectionKeys.forEach(key => {
+            keys.add(key);
+            keys.add(`shift+${key}`);
+        });
+
+        keys.add("x"); // Previous page or return to inline
+        keys.add("space"); // Next page or registration
+        keys.add("."); // Registration
+        keys.add("backspace"); // Previous page
+        keys.add("ctrl+g"); // Cancel
+
+        // Keys that show error messages
+        // Numbers 0-9
+        for (let i = 0; i <= 9; i++) {
+            keys.add(i.toString());
+        }
+        keys.add("enter");
+        keys.add("ctrl+j");
+        // Other symbols might also throw errors if onSymbol is not fully implemented for them.
+        // For now, this covers explicitly handled error cases.
+
+        return keys;
+    }
+
+    public override getContextualName(): string {
+        return "menuHenkan";
     }
 }

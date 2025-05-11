@@ -14,9 +14,9 @@ import { getActiveKeyContext } from './lib/util/keyUtils'; // Import the utility
 
 export class VSCodeEditor implements IEditor {
     private midashigoStart: vscode.Position | undefined = undefined;
-    private static inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
-    private static registrationModeOrigin: WeakMap<vscode.TextDocument, [VSCodeEditor, vscode.TextDocument, vscode.Position, ]> = new WeakMap();
-    private previouslyActiveKeys: Set<string> = new Set(); // For context updates
+    private static readonly inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
+    private static readonly registrationModeOrigin: WeakMap<vscode.TextDocument, [VSCodeEditor, vscode.TextDocument, vscode.Position, ]> = new WeakMap();
+    private static readonly knownSkkActiveKeys: Set<string> = new Set<string>(); // 追加
 
     private readonly remainingRomajiDecorationType: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
         after: {
@@ -606,39 +606,42 @@ export class VSCodeEditor implements IEditor {
         return mode;
     }
 
-    private async updateSkkContexts(): Promise<void> {
-        const currentMode = this.getCurrentInputMode();
+    /**
+     * SKKキーバインドcontextの洗い替え方式による更新
+     * @param editor アクティブなエディタ（undefined可）
+     */
+    public static async updateSkkContexts(editor: vscode.TextEditor | undefined): Promise<void> {
+        let currentMode: IInputMode;
+        if (editor && VSCodeEditor.inputModeMap.has(editor.document)) {
+            currentMode = VSCodeEditor.inputModeMap.get(editor.document)!;
+        } else {
+            currentMode = AsciiMode.getInstance();
+        }
+
         const modeName = currentMode.getContextualName();
         const activeKeys = currentMode.getActiveKeys();
 
-        // Update skk.mode context
+        // skk.mode contextを更新
         await vscode.commands.executeCommand('setContext', 'skk.mode', modeName);
 
-        // Keys to turn off: in previouslyActiveKeys but not in activeKeys
-        for (const oldKey of this.previouslyActiveKeys) {
-            if (!activeKeys.has(oldKey)) {
-                await vscode.commands.executeCommand('setContext', getActiveKeyContext(oldKey), false);
+        // 既知の全キーについて、activeでなければfalseに
+        for (const knownKey of VSCodeEditor.knownSkkActiveKeys) {
+            if (!activeKeys.has(knownKey)) {
+                await vscode.commands.executeCommand('setContext', getActiveKeyContext(knownKey), false);
             }
         }
-
-        // Keys to turn on: in activeKeys (and might not have been in previouslyActiveKeys)
+        // 現在activeなキーはtrueにし、knownSkkActiveKeysに追加
         for (const newKey of activeKeys) {
-            // Set to true only if it wasn't true, or to ensure it is true.
-            // Redundant true setting is fine.
             await vscode.commands.executeCommand('setContext', getActiveKeyContext(newKey), true);
+            VSCodeEditor.knownSkkActiveKeys.add(newKey);
         }
-
-        this.previouslyActiveKeys = new Set(activeKeys);
     }
 
     // Implementation for IEditor
     public async notifyModeInternalStateChanged(): Promise<void> {
-        // It's important that context updates do not block the main flow.
-        // Run this asynchronously without awaiting it in the caller if possible,
-        // or ensure it's very fast.
-        this.updateSkkContexts().catch(err => {
+        // staticなupdateSkkContextsを呼ぶ
+        VSCodeEditor.updateSkkContexts(vscode.window.activeTextEditor).catch(err => {
             console.error("SKK: Failed to update contexts", err);
-            // Optionally, show a vscode error message to the user if this is critical
         });
     }
 }

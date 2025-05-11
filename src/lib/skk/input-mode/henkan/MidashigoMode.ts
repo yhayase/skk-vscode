@@ -118,6 +118,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
 
         this.midashigoMode = MidashigoType.okurigana;
+        this.editor.notifyModeInternalStateChanged(); // Notify editor about state change
 
 
         // ローマ字の変換を行う。
@@ -187,6 +188,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
             await context.insertStringAndShowRemaining("", this.romajiInput.getRemainingRomaji(), false);
             if (this.romajiInput.isEmpty()) {
                 this.midashigoMode = MidashigoType.gokan;
+                this.editor.notifyModeInternalStateChanged(); // Notify editor about state change
             }
             return;
         }

@@ -157,4 +157,8 @@ export class KakuteiMode extends AbstractHenkanMode {
 
         return keys;
     }
+
+    public getContextualName(): string {
+        return "kakutei";
+    }
 }

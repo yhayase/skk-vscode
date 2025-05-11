@@ -92,4 +92,34 @@ export class AbbrevMode extends AbstractMidashigoMode {
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
         this.editor.clearMidashigo();
     }
+
+    public override getActiveKeys(): Set<string> {
+        const keys = new Set<string>();
+
+        // Alphabets (lower and upper)
+        for (let i = 0; i < 26; i++) {
+            keys.add(String.fromCharCode('a'.charCodeAt(0) + i));
+            keys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`);
+        }
+        // Numbers
+        for (let i = 0; i < 10; i++) {
+            keys.add(String(i));
+        }
+        // Symbols (common ones used in abbrev mode, e.g. for zip codes)
+        keys.add("-"); // Example: zip code like 123-4567
+        // Other symbols might be directly inserted.
+
+        // Special keys
+        keys.add("space");    // Trigger henkan
+        keys.add("enter");    // Fixate and newline
+        keys.add("backspace");
+        keys.add("ctrl+j");   // Fixate
+        keys.add("ctrl+g");   // Cancel
+
+        return keys;
+    }
+
+    public override getContextualName(): string {
+        return "abbrev";
+    }
 }
