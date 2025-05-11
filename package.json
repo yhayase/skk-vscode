@@ -136,7 +136,7 @@
       { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num8", "key": "8", "args": "8" },
       { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num9", "key": "9", "args": "9" },
       { "command": "skk.spaceInput", "when": "editorTextFocus && skk.activeKey.space", "key": "space" },
-      { "command": "skk.ctrlJInput", "when": "editorTextFocus && skk.activeKey.ctrl_j", "key": "ctrl+j" },
+      { "command": "skk.ctrlJInput", "when": "editorTextFocus", "key": "ctrl+j" },
       { "command": "skk.ctrlGInput", "when": "editorTextFocus && skk.activeKey.ctrl_g", "key": "ctrl+g" },
       { "command": "skk.ctrlGInput", "when": "editorTextFocus && skk.activeKey.escape", "key": "escape" },
       { "command": "skk.enterInput", "when": "editorTextFocus && skk.activeKey.enter", "key": "enter" },
