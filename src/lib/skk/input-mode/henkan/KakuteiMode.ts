@@ -86,6 +86,12 @@ export class KakuteiMode extends AbstractHenkanMode {
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {
+        // "n" のように，仮名にできるローマ字がバッファに残っている場合は，改行の前に仮名を入力する
+        const kana = this.romajiInput.findExactKanaForRomBuffer();
+        if (kana !== undefined) {
+            await context.insertStringAndShowRemaining(kana, "", false);
+        }
+
         this.romajiInput.reset();
         await context.insertStringAndShowRemaining("\n", "", false);
     }
@@ -118,42 +124,28 @@ export class KakuteiMode extends AbstractHenkanMode {
     public override getActiveKeys(): Set<string> {
         const keys = new Set<string>();
 
-        // Alphabets for Romaji input
-        for (let i = 0; i < 26; i++) {
-            keys.add(String.fromCharCode('a'.charCodeAt(0) + i));
-        }
-        // Shift + Alphabets for Midashigo trigger or special mode change (L)
-        for (let i = 0; i < 26; i++) {
-            keys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`);
-        }
+        // this mode deals with all printable ASCII characters
+        for (let i = 32; i <= 126; i++) { // ASCII printable characters
 
-        // Numbers
-        for (let i = 0; i < 10; i++) {
-            keys.add(String(i));
-        }
+            // skip upper case letters
+            if (i >= 65 && i <= 90) { continue; }
 
-        // Symbols - common ones, specific ones like '/' are handled by onSymbol
-        // For simplicity, we can list common symbols or rely on a more generic "any printable"
-        // For now, let's add some common ones explicitly.
-        // This part might need refinement based on how `when` clauses handle broad categories.
-        keys.add(".");
-        keys.add(",");
-        keys.add("/"); // Special: triggers AbbrevMode
-        keys.add("-");
-        keys.add("@");
-        // Potentially more symbols...
+            // register lower case letters and shift+lower case letters
+            if (i >= 97 && i <= 122) {
+                keys.add(String.fromCharCode(i));
+                keys.add(`shift+${String.fromCharCode(i)}`);
+                continue;
+            }
+
+            // other printable characters
+            keys.add(String.fromCharCode(i));
+        }
 
         // Special keys
-        keys.add("space");
-        keys.add("enter");
+        keys.add("enter"); // Enter
         keys.add("backspace");
         keys.add("ctrl+j");
         keys.add("ctrl+g");
-        // 'q' and 'l' are handled by AbstractKanaMode or delegated,
-        // but KakuteiMode's onLowerAlphabet handles them.
-        // 'q' is added by AbstractKanaMode.getActiveKeys().
-        // 'l' should be here as it's processed by onLowerAlphabet.
-        // keys.add("l"); // Already covered by lowercase alphabet loop
 
         return keys;
     }

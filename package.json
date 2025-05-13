@@ -141,7 +141,7 @@
       { "command": "skk.ctrlGInput", "when": "editorTextFocus && skk.activeKey.escape", "key": "escape" },
       { "command": "skk.enterInput", "when": "editorTextFocus && skk.activeKey.enter", "key": "enter" },
       { "command": "skk.backspaceInput", "when": "editorTextFocus && skk.activeKey.backspace", "key": "backspace" },
-      { "command": "skk.registerMidashigo", "when": "editorTextFocus && skk.activeKey.ctrl_alt_r", "key": "ctrl+alt+r" }
+      { "command": "skk.registerMidashigo", "when": "editorTextFocus", "key": "ctrl+alt+r" }
     ],
     "configuration": {
       "type": "object",

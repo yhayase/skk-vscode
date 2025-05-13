@@ -65,7 +65,6 @@ export class InlineHenkanMode extends AbstractHenkanMode {
             }
 
             this.showCandidate(context);
-            this.editor.notifyModeInternalStateChanged(); // Notify about candidate index change
             return;
         }
 
@@ -88,7 +87,6 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         this.prevMode.resetOkuriState();
         await this.editor.clearCandidate();
         await context.insertStringAndShowRemaining("▽" + this.origMidashigo + this.okuri + this.suffix, "", false);
-        this.editor.notifyModeInternalStateChanged(); // Notify about mode change
     }
 
     async clearMidashigoAndReturnToKakuteiMode(context: AbstractKanaMode) {
@@ -154,7 +152,6 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         this.candidateIndex += 1;
         this.showCandidate(context);
-        this.editor.notifyModeInternalStateChanged(); // Notify about candidate index change
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {
@@ -196,25 +193,24 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     public override getActiveKeys(): Set<string> {
         const keys = new Set<string>();
 
-        // Alphabets (lower and upper)
-        for (let i = 0; i < 26; i++) {
-            keys.add(String.fromCharCode('a'.charCodeAt(0) + i));
-            keys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`);
+        // this mode deals with all printable ASCII characters
+        for (let i = 32; i <= 126; i++) { // ASCII printable characters
+
+            // skip upper case letters
+            if (i >= 65 && i <= 90) { continue; }
+
+            // register lower case letters and shift+lower case letters
+            if (i >= 97 && i <= 122) {
+                keys.add(String.fromCharCode(i));
+                keys.add(`shift+${String.fromCharCode(i)}`);
+                continue;
+            }
+
+            // other printable characters
+            keys.add(String.fromCharCode(i));
         }
-        // Numbers
-        for (let i = 0; i < 10; i++) {
-            keys.add(String(i));
-        }
-        // Symbols - most symbols will fixate and then input the symbol
-        // For simplicity, list common ones.
-        keys.add(".");
-        keys.add(",");
-        keys.add("/");
-        keys.add("-");
-        // etc.
 
         // Special keys
-        keys.add("space");
         keys.add("enter");
         keys.add("backspace");
         keys.add("ctrl+j");
@@ -223,7 +219,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         return keys;
     }
 
-    public override getContextualName(): string {
+    public getContextualName(): string {
         return "inlineHenkan";
     }
 }

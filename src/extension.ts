@@ -165,23 +165,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		findInputMode().reset();
 	});
 
-    // Command for testing purposes to get context values
-    const getContextsForTest = vscode.commands.registerCommand('skk.getSkkContextsForTest', async (contextKeys: string[]) => {
-        const contextValues: { [key: string]: any } = {};
-        for (const key of contextKeys) {
-            try {
-                // Use the internal 'getContext' command to retrieve context value
-                const value = await vscode.commands.executeCommand('getContext', key);
-                contextValues[key] = value;
-            } catch (error) {
-                console.error(`SKK Test Command: Failed to get context for key "${key}":`, error);
-                contextValues[key] = `Error: ${error}`;
-            }
-        }
-        return contextValues;
-    });
-    context.subscriptions.push(getContextsForTest);
-
 	vscode.window.showInformationMessage("SKK: initialization completed");
 }
 

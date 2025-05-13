@@ -90,9 +90,6 @@ export class ZeneiMode extends AbstractInputMode {
             // For single char keys like 'a', '1', '!', it's just the char itself.
             // For 'space', it's "space".
         }
-        // Overwrite specific representations if needed (e.g. space)
-        keys.delete(" "); // remove single char space
-        keys.add("space"); // add "space" keyword
 
         // Add shift + printable characters as well, as they also result in zenkaku
         for (let i = 32; i <= 126; i++) {
@@ -117,8 +114,8 @@ export class ZeneiMode extends AbstractInputMode {
 
         keys.add("ctrl+j"); // Mode switch
         keys.add("ctrl+g"); // Does nothing, but SKK might still "consume" it
-        keys.add("enter");
-        keys.add("backspace");
+        // keys.add("enter"); // Enter or Ctrl+M are disabled. In direct input modes, they should be handled by the editor.
+        // keys.add("backspace"); // Backspace should be handled by the editor in direct input modes.
 
         return keys;
     }

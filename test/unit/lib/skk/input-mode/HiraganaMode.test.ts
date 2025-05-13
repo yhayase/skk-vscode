@@ -207,7 +207,7 @@ describe('HiraganaMode', () => {
             expect(activeKeys.has('shift+a'), "key 'shift+a'").to.be.true;
             expect(activeKeys.has('1'), "key '1'").to.be.true;
             expect(activeKeys.has('/'), "key '/'").to.be.true;
-            expect(activeKeys.has('space'), "key 'space'").to.be.true;
+            expect(activeKeys.has(' '), "key ' '").to.be.true;
             expect(activeKeys.has('enter'), "key 'enter'").to.be.true;
             expect(activeKeys.has('backspace'), "key 'backspace'").to.be.true;
             expect(activeKeys.has('ctrl+j'), "key 'ctrl+j'").to.be.true;

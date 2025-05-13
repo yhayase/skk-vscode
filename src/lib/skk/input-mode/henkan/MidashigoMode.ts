@@ -228,9 +228,6 @@ export class MidashigoMode extends AbstractMidashigoMode {
         keys.add("ctrl+j");
         keys.add("ctrl+g");
         keys.add("backspace");
-        keys.add("l"); // To AsciiMode
-        keys.add("q"); // Toggle char type
-        keys.add("shift+l"); // To ZeneiMode (L)
 
         // Keys for romaji input (alphabets)
         for (let i = 0; i < 26; i++) {
@@ -245,6 +242,8 @@ export class MidashigoMode extends AbstractMidashigoMode {
             // These are processed in onSymbol. For simplicity, we can add common ones.
             keys.add(".");
             keys.add(",");
+            keys.add("!");
+            keys.add("]");
             keys.add("!");
             keys.add(":");
             keys.add(";");
