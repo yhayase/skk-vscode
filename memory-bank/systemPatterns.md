@@ -2,7 +2,7 @@
 
 ## System Architecture
 
-The skk-vscode extension follows a layered architecture with clear separation of concerns:
+skk-vscode 拡張機能は、関心事の明確な分離を持つ階層化アーキテクチャに従います。
 
 ```
 ┌─────────────────────────────────────────┐
@@ -17,123 +17,123 @@ The skk-vscode extension follows a layered architecture with clear separation of
 └─────────────────────────────────────────┘
 ```
 
-1. **VSCode Layer** - Handles integration with VSCode APIs
-   - Implements editor interactions specific to VSCode
-   - Manages VSCode-specific dictionary loading and configuration
+1. **VSCode Layer** - VSCode API との統合を処理します
+   - VSCode に固有のエディタインタラクションを実装します
+   - VSCode 固有の辞書読み込みと設定を管理します
 
-2. **Core SKK Layer** - Contains the core SKK functionality
-   - Implements input modes and state transitions
-   - Handles conversion logic and candidate selection
-   - Manages dictionary lookups and registration
+2. **Core SKK Layer** - コア SKK 機能を含みます
+   - 入力モードと状態遷移を実装します
+   - 変換ロジックと候補選択を処理します
+   - 辞書検索と登録を管理します
 
-3. **Abstraction Layer** - Provides interfaces for editor and dictionary operations
-   - Allows for potential future adaptation to other editors
-   - Enables testing with mock implementations
+3. **Abstraction Layer** - エディタと辞書操作のためのインターフェースを提供します
+   - 将来的に他のエディタへの適応を可能にします
+   - モック実装によるテストを可能にします
 
 ## Key Technical Decisions
 
 1. **Mode-Based State Machine**
-   - The system uses a state machine pattern for input modes
-   - Each mode (Hiragana, Katakana, ASCII, etc.) is a separate class
-   - Special modes like CandidateDeletionMode handle specific interactions
-   - Mode transitions are handled through well-defined events
+   - システムは入力モードにステートマシンパターンを使用します
+   - 各モード（ひらがな、カタカナ、ASCII など）は個別のクラスです
+   - CandidateDeletionMode などの特殊なモードは特定のインタラクションを処理します
+   - モード遷移は明確に定義されたイベントを通じて処理されます
 
 2. **Editor Abstraction**
-   - The IEditor interface abstracts editor operations
-   - Allows for testing without actual VSCode dependencies
-   - Enables potential future adaptation to other editors
+   - IEditor インターフェースはエディタ操作を抽象化します
+   - 実際の VSCode 依存関係なしでのテストを可能にします
+   - 将来的に他のエディタへの適応を可能にします
 
 3. **Dictionary System**
-   - Multiple dictionary providers can be configured
-   - Dictionaries are searched in priority order
-   - User dictionary is given highest priority for lookups
+   - 複数の辞書プロバイダを設定できます
+   - 辞書は優先順位で検索されます
+   - ユーザー辞書は検索で最も高い優先順位が与えられます
 
 4. **Dictionary Management**
-   - Registration is implemented as a combination of:
-     - A specialized editor tab with a specific format
-     - Commands to open and process the registration
-     - Logic to insert the registered word back into the original context
-   - Deletion is implemented as:
-     - A specialized mode (CandidateDeletionMode) for confirmation
-     - Confirmation dialog with Y/N options
-     - Dictionary update upon confirmation
+   - 登録は以下の組み合わせとして実装されます。
+     - 特定のフォーマットを持つ専用のエディタタブ
+     - 登録を開いて処理するためのコマンド
+     - 登録された単語を元のコンテキストに挿入するロジック
+   - 削除は以下のように実装されます。
+     - 確認のための専用モード (CandidateDeletionMode)
+     - Y/N オプション付きの確認ダイアログ
+     - 確認時の辞書更新
 
 5. **Contextual Keybinding Control (Issue #55) - Implemented**
-   - Utilizes VSCode's `when` clause contexts to enable/disable keybindings.
-   - **Core SKK Layer**: Each `IInputMode` implementation now has:
-     - `getActiveKeys(): Set<string>`: Returns a set of normalized key names (e.g., "a", "ctrl+j", "space") that the mode currently handles.
-     - `getContextualName(): string`: Returns a string identifier for the mode (e.g., "ascii", "hiragana:kakutei", "midashigo").
+   - VSCode の `when` 句コンテキストを利用してキーバインドを有効/無効にします。
+   - **Core SKK Layer**: 各 `IInputMode` 実装は現在以下を持ちます。
+     - `getActiveKeys(): Set<string>`: モードが現在処理する正規化されたキー名のセット (例: "a", "ctrl+j", "space") を返します。
+     - `getContextualName(): string`: モードの文字列識別子 (例: "ascii", "hiragana:kakutei", "midashigo") を返します。
    - **VSCode Layer (`VSCodeEditor.ts`)**:
-     - Manages two main custom contexts:
-       - `skk.mode`: Set to the value from `currentMode.getContextualName()`.
-       - `skk.activeKey.[SAFE_KEY_NAME]`: Boolean, set to `true` if `SAFE_KEY_NAME` (derived from a normalized key via `keyUtils.getActiveKeyContext`) is in the current mode's `getActiveKeys()` set, `false` otherwise.
-     - `updateSkkContexts()` method updates these contexts using `vscode.commands.executeCommand('setContext', ...)`.
-     - Contexts are updated when the input mode changes (`setInputMode`) or when an input mode signals an internal state change that might affect active keys (`notifyModeInternalStateChanged`).
-   - **`package.json`**: Keybindings now use `when: "editorTextFocus && skk.activeKey.[SAFE_KEY_NAME]"` to ensure they only fire when the specific key is relevant to the current SKK state.
-   - **`keyUtils.ts`**: Provides helper functions `normalizeVscodeKey` (to standardize key names from `package.json`) and `getActiveKeyContext` (to generate safe context key suffixes from normalized key names).
-   - This approach minimizes conflicts by ensuring SKK only intercepts keys it intends to process in its current state.
+     - 2つの主要なカスタムコンテキストを管理します。
+       - `skk.mode`: `currentMode.getContextualName()` の値に設定されます。
+       - `skk.activeKey.[SAFE_KEY_NAME]`: ブール値。`SAFE_KEY_NAME` (正規化されたキーから `keyUtils.getActiveKeyContext` を介して派生) が現在のモードの `getActiveKeys()` セットに含まれている場合は `true`、それ以外の場合は `false` に設定されます。
+     - `updateSkkContexts()` メソッドは `vscode.commands.executeCommand('setContext', ...)` を使用してこれらのコンテキストを更新します。
+     - コンテキストは入力モードが変更されたとき (`setInputMode`)、または入力モードがアクティブキーに影響を与える可能性のある内部状態の変更を通知したとき (`notifyModeInternalStateChanged`) に更新されます。
+   - **`package.json`**: キーバインドは現在 `when: "editorTextFocus && skk.activeKey.[SAFE_KEY_NAME]"` を使用して、特定のキーが現在の SKK 状態に関連する場合にのみ発行されるようにします。
+   - **`keyUtils.ts`**: ヘルパー関数 `normalizeVscodeKey` (`package.json` からのキー名を標準化するため) と `getActiveKeyContext` (正規化されたキー名から安全なコンテキストキーサフィックスを生成するため) を提供します。
+   - このアプローチは、SKK が現在の状態で処理しようとするキーのみをインターセプトすることを保証することで、競合を最小限に抑えます。
 
 ## Design Patterns in Use
 
 1. **State Pattern**
-   - Input modes are implemented as states
-   - Each state handles input differently based on the current mode
-   - Transitions between states are explicit and well-defined
+   - 入力モードは状態として実装されます
+   - 各状態は現在のモードに基づいて入力を異なる方法で処理します
+   - 状態間の遷移は明示的かつ明確に定義されています
 
 2. **Strategy Pattern**
-   - Different conversion strategies based on the input context
-   - Allows for specialized handling of different conversion scenarios
+   - 入力コンテキストに基づいたさまざまな変換戦略
+   - さまざまな変換シナリオの特殊な処理を可能にします
 
 3. **Factory Pattern**
-   - Mode creation is handled through factory methods
-   - Ensures proper initialization and configuration of modes
+   - モード作成はファクトリメソッドを通じて処理されます
+   - モードの適切な初期化と設定を保証します
 
 4. **Observer Pattern**
-   - Editor events trigger appropriate mode transitions
-   - Allows for reactive handling of user input
+   - エディタイベントは適切なモード遷移をトリガーします
+   - ユーザー入力のリアクティブな処理を可能にします
 
 5. **Command Pattern**
-   - VSCode commands are used to trigger specific actions
-   - Provides a clean interface for user interactions
+   - VSCode コマンドは特定のアクションをトリガーするために使用されます
+   - ユーザーインタラクションのためのクリーンなインターフェースを提供します
 
 ## Component Relationships
 
 1. **Input Modes and Conversion**
-   - Input modes transition to conversion modes when appropriate
-   - Conversion modes handle candidate selection and confirmation
-   - After confirmation, control returns to the original input mode
+   - 入力モードは適切な場合に変換モードに移行します
+   - 変換モードは候補選択と確定を処理します
+   - 確定後、制御は元の入力モードに戻ります
 
 2. **Editor and Modes**
-   - Modes use the editor abstraction to manipulate text
-   - Editor events trigger mode transitions and actions
+   - モードはエディタ抽象化を使用してテキストを操作します
+   - エディタイベントはモード遷移とアクションをトリガーします
 
 3. **Dictionary and Conversion**
-   - Conversion modes query dictionaries for candidates
-   - Dictionary results determine the available conversion options
+   - 変換モードは候補を辞書に問い合わせます
+   - 辞書の結果が利用可能な変換オプションを決定します
 
 4. **Registration and Dictionary**
-   - Registration process adds entries to the user dictionary
-   - User dictionary entries are immediately available for future conversions
+   - 登録プロセスはユーザー辞書にエントリを追加します
+   - ユーザー辞書エントリは将来の変換ですぐに利用可能になります
 
 5. **SKK Core and VSCode Layer (for Keybinding Context) - Updated**
-   - The Core SKK Layer (current `IInputMode` instance) provides its contextual name via `getContextualName()` and its set of currently handled keys via `getActiveKeys()`.
-   - The VSCode Layer (`VSCodeEditor`):
-     - Retrieves this information from the current input mode.
-     - Updates the `skk.mode` context with the contextual name.
-     - Iterates through the active keys and previously active keys to set/unset `skk.activeKey.[SAFE_KEY_NAME]` boolean contexts.
-     - Uses `keyUtils.ts` to ensure consistency in key naming and context key generation.
-   - This allows `package.json` keybindings to be conditional on `skk.activeKey.*` without needing to explicitly check `skk.mode` in most cases, as `getActiveKeys()` is mode-dependent.
+   - コア SKK レイヤー (現在の `IInputMode` インスタンス) は、`getContextualName()` を介してコンテキスト名を提供し、`getActiveKeys()` を介して現在処理されているキーのセットを提供します。
+   - VSCode レイヤー (`VSCodeEditor`):
+     - 現在の入力モードからこの情報を取得します。
+     - `skk.mode` コンテキストをコンテキスト名で更新します。
+     - アクティブなキーと以前にアクティブだったキーを反復処理して、`skk.activeKey.[SAFE_KEY_NAME]` ブール値コンテキストを設定/解除します。
+     - キーの命名とコンテキストキー生成の一貫性を確保するために `keyUtils.ts` を使用します。
+   - これにより、`package.json` のキーバインドは、`getActiveKeys()` がモードに依存するため、ほとんどの場合 `skk.mode` を明示的にチェックする必要なく、`skk.activeKey.*` に条件付きにすることができます。
 
 ## Critical Implementation Paths
 
 1. **Input to Conversion Flow**
-   - User input in kana mode → Conversion trigger → Dictionary lookup → Candidate display → Selection → Confirmation
+   - かなモードでのユーザー入力 → 変換トリガー → 辞書検索 → 候補表示 → 選択 → 確定
 
 2. **Registration Flow**
-   - No (more) candidates found → Registration editor opens → User inputs word → Registration command → Dictionary update → Word insertion
+   - 候補が見つからない (またはこれ以上ない) → 登録エディタが開く → ユーザーが単語を入力 → 登録コマンド → 辞書更新 → 単語挿入
 
 3. **Deletion Flow**
-   - During conversion, press X → CandidateDeletionMode activated → Confirmation dialog → Y confirms deletion / N cancels → Dictionary update if confirmed
+   - 変換中に X を押す → CandidateDeletionMode がアクティブになる → 確認ダイアログ → Y で削除を確定 / N でキャンセル → 確定された場合は辞書を更新
 
 4. **Mode Transition Flow**
-   - Mode-specific key detected → Current mode cleanup → New mode initialization → Editor state update
+   - モード固有のキーが検出される → 現在のモードのクリーンアップ → 新しいモードの初期化 → エディタ状態の更新

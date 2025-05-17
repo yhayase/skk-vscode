@@ -2,169 +2,169 @@
 
 ## Current Work Focus
 
-The current development focus is on:
-- Implementing the **candidate deletion feature**
-- Completing the **dictionary registration feature**
-- **Keybinding contextualization and optimization (Issue #55) - Basic Implementation Complete**: The foundational work for fine-grained keybinding control using VSCode's `when` clause contexts is complete. This includes updates to core SKK logic, context update mechanisms in the VSCode layer, and `package.json` modifications. Remaining work involves full coverage for all modes and comprehensive testing.
+現在の開発の焦点は以下です。
+- **候補削除機能**の実装
+- **辞書登録機能**の完成
+- **キーバインドの文脈化と最適化 (Issue #55) - 基本実装完了**: VSCodeの`when`句コンテキストを使用したきめ細かいキーバインド制御の基礎作業が完了しました。これには、コアSKKロジック、VSCodeレイヤーのコンテキスト更新メカニズム、および`package.json`の変更が含まれます。残りの作業は、すべてのモードの完全なカバレッジと包括的なテストです。
 
-The candidate deletion feature allows users to delete unwanted candidates from their dictionary during conversion. This is useful for removing incorrect or outdated entries.
+候補削除機能により、ユーザーは変換中に不要な候補を辞書から削除できます。これは、誤ったエントリや古いエントリを削除するのに役立ちます。
 
-The dictionary registration feature allows users to add new word-reading pairs to their user dictionary when a conversion candidate is not found or when they want to add a new entry.
+辞書登録機能により、ユーザーは変換候補が見つからない場合や新しいエントリを追加したい場合に、新しい単語と読みのペアをユーザー辞書に追加できます。
 
 ### Registration Feature Implementation
 
-The registration feature is not implemented as a separate "mode" like the input modes, but rather as a combination of three elements:
+登録機能は、入力モードのような独立した「モード」として実装されているのではなく、次の3つの要素の組み合わせとして実装されています。
 
 1. **Registration Editor Tab**
-   - A specialized editor tab with a specific format
-   - Contains the reading and an empty field for the word
-   - Format: `読み:{reading}\n単語:`
+   - 特定のフォーマットを持つ専用のエディタタブ
+   - 読みと単語用の空のフィールドが含まれています
+   - フォーマット: `読み:{reading}\n単語:`
 
 2. **Registration Trigger**
-   - Triggered when:
-     - In InlineHenkanMode, moving past the last candidate
-     - In MenuHenkanMode, moving past the last candidate
-     - In MidashigoMode, when no candidates are found
+   - 以下の場合にトリガーされます。
+     - InlineHenkanModeで、最後の候補を過ぎて移動した場合
+     - MenuHenkanModeで、最後の候補を過ぎて移動した場合
+     - MidashigoModeで、候補が見つからなかった場合
 
 3. **Registration Command**
-   - VSCode command to process the registration
-   - Extracts reading and word from the editor
-   - Adds the entry to the user dictionary
-   - Closes the registration editor
-   - Returns focus to the original editor
-   - Inserts the registered word at the cursor position
+   - 登録を処理するためのVSCodeコマンド
+   - エディタから読みと単語を抽出します
+   - ユーザー辞書にエントリを追加します
+   - 登録エディタを閉じます
+   - 元のエディタにフォーカスを戻します
+   - 登録された単語をカーソル位置に挿入します
 
 ## Recent Changes
 
 1. **Candidate Deletion Implementation**
-   - Implemented CandidateDeletionMode for handling candidate deletion
-   - Added confirmation dialog for deletion (Y/N prompt)
-   - Implemented dictionary entry removal functionality
-   - Added support for deletion in different input contexts (hiragana, katakana, okurigana)
+   - 候補削除を処理するためのCandidateDeletionModeを実装しました
+   - 削除の確認ダイアログ（Y/Nプロンプト）を追加しました
+   - 辞書エントリ削除機能を実装しました
+   - さまざまな入力コンテキスト（ひらがな、カタカナ、送り仮名）での削除のサポートを追加しました
 
 2. **Registration Editor Opening**
-   - Implemented opening the registration editor from InlineHenkanMode
-   - Implemented opening the registration editor from MenuHenkanMode
-   - Implemented opening the registration editor from MidashigoMode
+   - InlineHenkanModeからの登録エディタのオープンを実装しました
+   - MenuHenkanModeからの登録エディタのオープンを実装しました
+   - MidashigoModeからの登録エディタのオープンを実装しました
 
 3. **Registration Content Handling**
-   - Implemented proper formatting of the registration editor content
-   - Added support for converting katakana readings to hiragana in the editor
+   - 登録エディタコンテンツの適切なフォーマットを実装しました
+   - エディタでカタカナの読みをひらがなに変換するサポートを追加しました
 
 4. **Registration Command**
-   - Implemented the registration command to add entries to the user dictionary
-   - Added logic to close the registration editor after registration
-   - Implemented focus return to the original editor
-   - Added word insertion at the cursor position after registration
+   - ユーザー辞書にエントリを追加するための登録コマンドを実装しました
+   - 登録後に登録エディタを閉じるロジックを追加しました
+   - 元のエディタへのフォーカス復帰を実装しました
+   - 登録後にカーソル位置に単語を挿入する機能を追加しました
 
 5. **Testing**
-   - Added integration tests for the candidate deletion feature
-   - Added integration tests for the registration feature
-   - Implemented tests for different registration scenarios
-   - Added tests for okurigana handling in registration and deletion
+   - 候補削除機能の統合テストを追加しました
+   - 登録機能の統合テストを追加しました
+   - さまざまな登録シナリオのテストを実装しました
+   - 登録と削除における送り仮名処理のテストを追加しました
 
 ## Next Steps
 
 **Issue #55: Keybinding Contextualization - Remaining Tasks**
--   **Complete Mode Implementation**: Ensure `getActiveKeys()` and `getContextualName()` are fully implemented for all remaining input mode classes (especially `InlineHenkanMode`, `MenuHenkanMode`, `AbbrevMode`, `CandidateDeletionMode` and any other `AbstractHenkanMode` subclasses). Add comprehensive unit tests for these.
--   **Targeted Integration Tests**: Create new integration tests specifically designed to verify:
-    -   Correctness of `skk.mode` and `skk.activeKey.*` context values across various mode transitions and states.
-    -   That keybindings are correctly enabled/disabled based on these contexts, ensuring SKK only captures keys when appropriate.
--   **Manual Testing & Debugging**: Conduct thorough manual testing across all SKK features to identify and fix any regressions or unexpected keybinding behavior.
--   **Performance Review**: Assess if the context update mechanism introduces any noticeable performance overhead, especially during rapid mode changes or typing. Optimize if necessary.
--   **Documentation**: Update any relevant developer or user documentation regarding keybinding behavior if changes are significant.
+-   **モード実装の完了**: 残りのすべての入力モードクラス（特に`InlineHenkanMode`、`MenuHenkanMode`、`AbbrevMode`、`CandidateDeletionMode`、およびその他の`AbstractHenkanMode`サブクラス）に対して`getActiveKeys()`と`getContextualName()`が完全に実装されていることを確認します。これらに包括的な単体テストを追加します。
+-   **ターゲットを絞った統合テスト**: 以下を具体的に検証するために新しい統合テストを作成します。
+    -   さまざまなモード遷移と状態における`skk.mode`および`skk.activeKey.*`コンテキスト値の正しさ。
+    -   これらのコンテキストに基づいてキーバインドが正しく有効/無効になっていること、SKKが必要な場合にのみキーをキャプチャすることを確認します。
+-   **手動テストとデバッグ**: すべてのSKK機能にわたって徹底的な手動テストを実施し、回帰や予期しないキーバインド動作を特定して修正します。
+-   **パフォーマンスレビュー**: コンテキスト更新メカニズムが、特に急速なモード変更や入力中に顕著なパフォーマンスオーバーヘッドを引き起こすかどうかを評価します。必要に応じて最適化します。
+-   **ドキュメント**: 変更が重要な場合は、キーバインドの動作に関する関連する開発者またはユーザードキュメントを更新します。
 
 **Existing Next Steps**
 1. **Candidate Deletion Enhancement**
-   - Add keyboard shortcut documentation for the deletion feature
-   - Consider adding a menu-based deletion option for multiple candidates
-   - Improve error handling for deletion operations
+   - 削除機能のキーボードショートカットのドキュメントを追加します
+   - 複数の候補に対するメニューベースの削除オプションの追加を検討します
+   - 削除操作のエラー処理を改善します
 
 2. **Registration Mode Implementation**
-   - Implement a dedicated mode for the registration editor
-   - Add specialized key handling for the registration mode
+   - 登録エディタ専用のモードを実装します
+   - 登録モード用の特殊なキー処理を追加します
 
 3. **Registration Command Enhancement**
-   - Add support for executing the registration command with a keyboard shortcut
-   - Improve error handling for invalid registration inputs
+   - キーボードショートカットで登録コマンドを実行するためのサポートを追加します
+   - 無効な登録入力に対するエラー処理を改善します
 
 4. **Refactoring**
-   - Refactor duplicate code in registration editor opening logic
-   - Improve the architecture of the registration feature
+   - 登録エディタを開くロジックの重複コードをリファクタリングします
+   - 登録機能のアーキテクチャを改善します
 
 5. **Documentation**
-   - Update documentation to include both the registration and deletion features
-   - Add usage examples for both workflows
+   - 登録機能と削除機能の両方を含むようにドキュメントを更新します
+   - 両方のワークフローの使用例を追加します
 
 ## Active Decisions and Considerations
 
 **Issue #55: Keybinding Contextualization - Key Decisions Made**
--   **Context Design Implemented**:
-    -   `skk.mode`: Uses `IInputMode.getContextualName()` (e.g., `"ascii"`, `"hiragana:kakutei"`, `"midashigo"`).
-    -   `skk.activeKey.[SAFE_KEY_NAME]`: Uses `IInputMode.getActiveKeys()` and `keyUtils.getActiveKeyContext()` to generate safe context keys (e.g., `skk.activeKey.a`, `skk.activeKey.ctrl_j`, `skk.activeKey.num0`).
--   **Key Name Normalization**: `keyUtils.ts` provides `normalizeVscodeKey` (for `package.json` `key` property to internal representation) and `getActiveKeyContext` (for internal representation to context key suffix).
--   **Context Update Mechanism**: `VSCodeEditor` handles context updates via `updateSkkContexts()`, triggered by `setInputMode()` and `notifyModeInternalStateChanged()`.
+-   **実装されたコンテキスト設計**:
+    -   `skk.mode`: `IInputMode.getContextualName()` を使用します (例: `"ascii"`、`"hiragana:kakutei"`、`"midashigo"`)。
+    -   `skk.activeKey.[SAFE_KEY_NAME]`: `IInputMode.getActiveKeys()` と `keyUtils.getActiveKeyContext()` を使用して安全なコンテキストキーを生成します (例: `skk.activeKey.a`、`skk.activeKey.ctrl_j`、`skk.activeKey.num0`)。
+-   **キー名の正規化**: `keyUtils.ts` は `normalizeVscodeKey` (`package.json` の `key` プロパティから内部表現へ) と `getActiveKeyContext` (内部表現からコンテキストキーサフィックスへ) を提供します。
+-   **コンテキスト更新メカニズム**: `VSCodeEditor` は `setInputMode()` と `notifyModeInternalStateChanged()` によってトリガーされる `updateSkkContexts()` を介してコンテキスト更新を処理します。
 
 **Issue #55: Keybinding Contextualization - Ongoing Considerations**
--   **Performance**: Continue to monitor the impact of `setContext` calls, especially with many active keys or rapid changes. The optimization to update contexts only when values change has been implemented in `VSCodeEditor.updateSkkContexts`.
--   **Coverage & Robustness**: Ensuring all modes and edge cases are correctly handled by `getActiveKeys` and `getContextualName` is critical. The list of active keys for some modes (e.g., those that throw errors for many inputs) needs to be comprehensive.
--   **Clarity of `skk.mode` values**: The composite names like `"hiragana:kakutei"` are informative but need to be consistently applied and documented.
+-   **パフォーマンス**: 特に多くのアクティブキーや急速な変更がある場合の `setContext` 呼び出しの影響を引き続き監視します。値が変更された場合にのみコンテキストを更新する最適化は `VSCodeEditor.updateSkkContexts` に実装されています。
+-   **カバレッジと堅牢性**: すべてのモードとエッジケースが `getActiveKeys` と `getContextualName` によって正しく処理されるようにすることが重要です。一部のモード (多くの入力に対してエラーをスローするモードなど) のアクティブキーのリストは包括的である必要があります。
+-   **`skk.mode` 値の明確さ**: `"hiragana:kakutei"` のような複合名は有益ですが、一貫して適用し、文書化する必要があります。
 
 1. **Candidate Deletion Workflow**
-   - Using 'X' key during conversion to trigger deletion mode
-   - Requiring explicit confirmation (Y/N) to prevent accidental deletions
-   - Considering whether to add an undo feature for deletions
+   - 変換中に「X」キーを使用して削除モードをトリガーします
+   -偶発的な削除を防ぐために明示的な確認（Y/N）を要求します
+   - 削除の取り消し機能を追加するかどうかを検討しています
 
 2. **Registration Editor Format**
-   - Using a simple text format for the registration editor
-   - Considering whether to add more structure or validation
+   - 登録エディタに単純なテキスト形式を使用します
+   - より多くの構造または検証を追加するかどうかを検討しています
 
 3. **Registration Workflow**
-   - Current workflow follows SKK conventions
-   - Evaluating if any VSCode-specific improvements could be made
+   - 現在のワークフローはSKKの慣例に従っています
+   - VSCode固有の改善が可能かどうかを評価しています
 
 4. **Performance Considerations**
-   - Monitoring the performance impact of dictionary updates
-   - Ensuring smooth user experience during registration and deletion
+   - 辞書更新のパフォーマンスへの影響を監視しています
+   - 登録および削除中のスムーズなユーザーエクスペリエンスを保証します
 
 5. **Testing Strategy**
-   - Using integration tests to verify the complete workflows
-   - Considering additional unit tests for specific components
+   - 統合テストを使用して完全なワークフローを検証します
+   - 特定のコンポーネントに対する追加の単体テストを検討しています
 
 ## Important Patterns and Preferences
 
 1. **Command-Based Interaction**
-   - Using VSCode commands for user interactions
-   - Following the established pattern of `skk.<action>` for command naming
+   - ユーザーインタラクションにVSCodeコマンドを使用します
+   - コマンド命名に確立された `skk.<action>` のパターンに従います
 
 2. **Editor Abstraction**
-   - Continuing to use the editor abstraction for all text manipulations
-   - Ensuring registration and deletion features work through the abstraction layer
+   - すべてのテキスト操作にエディタ抽象化を引き続き使用します
+   - 登録および削除機能が抽象化レイヤーを介して機能することを確認します
 
 3. **Mode-Based State Machine**
-   - Adding new modes (like CandidateDeletionMode) to handle specific interactions
-   - Maintaining clear transitions between modes
+   - 特定のインタラクションを処理するために新しいモード（CandidateDeletionModeなど）を追加します
+   - モード間の明確な遷移を維持します
 
 4. **Test-Driven Development**
-   - Implementing tests alongside or before feature implementation
-   - Using tests to verify correct behavior across different scenarios
+   - 機能実装と並行して、またはそれ以前にテストを実装します
+   - さまざまなシナリオで正しい動作を検証するためにテストを使用します
 
 ## Learnings and Project Insights
 
 1. **VSCode Editor Limitations**
-   - Working around limitations in VSCode's editor API
-   - Finding creative solutions for SKK-style interactions
+   - VSCodeのエディタAPIの制限を回避します
+   - SKKスタイルのインタラクションのための創造的な解決策を見つけます
 
 2. **State Management Complexity**
-   - Managing the complex state transitions between modes
-   - Ensuring proper cleanup and initialization during transitions
-   - Adding new modes (like CandidateDeletionMode) increases complexity but improves user experience
+   - モード間の複雑な状態遷移を管理します
+   - 遷移中の適切なクリーンアップと初期化を保証します
+   - 新しいモード（CandidateDeletionModeなど）を追加すると複雑さが増しますが、ユーザーエクスペリエンスが向上します
 
 3. **Dictionary Management**
-   - Balancing between dictionary flexibility and performance
-   - Implementing both addition and deletion operations for complete dictionary management
+   - 辞書の柔軟性とパフォーマンスのバランスを取ります
+   - 完全な辞書管理のために追加操作と削除操作の両方を実装します
 
 4. **Testing Challenges**
-   - Addressing challenges in testing asynchronous editor operations
-   - Developing reliable test patterns for VSCode extension features
-   - Creating comprehensive tests for complex user interactions
+   - 非同期エディタ操作のテストにおける課題に対処します
+   - VSCode拡張機能の信頼性の高いテストパターンを開発します
+   - 複雑なユーザーインタラクションのための包括的なテストを作成します

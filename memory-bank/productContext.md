@@ -2,58 +2,58 @@
 
 ## Why This Project Exists
 
-The skk-vscode project exists to provide a Japanese input method that:
+skk-vscode プロジェクトは、以下の日本語入力メソッドを提供するために存在します。
 
-1. **Works natively within VSCode** - Allows developers to input Japanese text without switching to external IME systems
-2. **Follows SKK conventions** - Provides a familiar experience for users of the SKK input method from Emacs
-3. **Optimizes for coding workflows** - Designed with programming tasks in mind, unlike general-purpose IMEs
+1. **VSCode 内でネイティブに動作する** - 開発者が外部 IME システムに切り替えることなく日本語テキストを入力できるようにします
+2. **SKK の慣例に従う** - Emacs の SKK 入力メソッドのユーザーに使い慣れたエクスペリエンスを提供します
+3. **コーディングワークフローに最適化** - 汎用 IME とは異なり、プログラミングタスクを念頭に置いて設計されています
 
 ## Problems It Solves
 
-1. **Context Switching** - Reduces the need to switch between VSCode and external IME systems, maintaining focus on coding tasks
-2. **IME Conflicts** - Avoids conflicts between external IME systems and VSCode keybindings
-3. **Coding-Specific Input** - Provides an input method optimized for programming contexts where Japanese text is needed
+1. **コンテキストスイッチング** - VSCode と外部 IME システム間の切り替えの必要性を減らし、コーディングタスクへの集中を維持します
+2. **IME の競合** - 外部 IME システムと VSCode キーバインド間の競合を回避します
+3. **コーディング固有の入力** - 日本語テキストが必要なプログラミングコンテキストに最適化された入力メソッドを提供します
 
 ## How It Should Work
 
-The extension should provide a seamless Japanese input experience within VSCode:
+この拡張機能は、VSCode 内でシームレスな日本語入力エクスペリエンスを提供する必要があります。
 
-1. **Mode-Based Input**
-   - Users toggle between different input modes (Hiragana, Katakana, ASCII, Zenkaku)
-   - Mode transitions follow SKK conventions (e.g., Ctrl+J to switch from ASCII to Hiragana)
+1. **モードベースの入力**
+   - ユーザーはさまざまな入力モード（ひらがな、カタカナ、ASCII、全角）を切り替えます
+   - モード遷移は SKK の慣例に従います（例: ASCII からひらがなへの切り替えは Ctrl+J）
 
 2. **Conversion Process**
-   - Romaji input is converted to kana in real-time
-   - Kana can be converted to kanji through dictionary lookups
-   - Conversion candidates are displayed inline (first 3) or in a menu (4+)
-   - Okurigana (送り仮名) handling follows SKK conventions
+   - ローマ字入力はリアルタイムでかなに変換されます
+   - かなは辞書検索によって漢字に変換できます
+   - 変換候補はインライン（最初の3つ）またはメニュー（4つ以上）で表示されます
+   - 送り仮名の処理は SKK の慣例に従います
 
 3. **Dictionary System**
-   - Multiple dictionaries can be configured and searched
-   - User dictionary allows for personalization
-   - Dictionary registration allows adding new word-reading pairs
-   - Dictionary management allows removing unwanted entries
+   - 複数の辞書を設定して検索できます
+   - ユーザー辞書でパーソナライズできます
+   - 辞書登録で新しい単語と読みのペアを追加できます
+   - 辞書管理で不要なエントリを削除できます
 
 4. **Dictionary Management Workflow**
-   - Registration:
-     - When a conversion candidate is not found, a registration editor opens
-     - Users input the desired word for the reading
-     - Upon registration, the word is added to the user dictionary and inserted at the cursor position
-   - Deletion:
-     - During conversion, users can press 'X' to enter deletion mode
-     - A confirmation prompt (Y/N) is displayed
-     - Upon confirmation, the entry is removed from the dictionary
+   - 登録:
+     - 変換候補が見つからない場合、登録エディタが開きます
+     - ユーザーは読みに対する目的の単語を入力します
+     - 登録すると、単語はユーザー辞書に追加され、カーソル位置に挿入されます
+   - 削除:
+     - 変換中に、ユーザーは「X」を押して削除モードに入ることができます
+     - 確認プロンプト（Y/N）が表示されます
+     - 確認すると、エントリは辞書から削除されます
 
 ## User Experience Goals
 
-1. **Minimal Disruption** - The input method should not interrupt the coding flow
-2. **Predictable Behavior** - Follow SKK conventions where possible for consistency
-3. **Efficiency** - Minimize keystrokes needed for common operations
-4. **Discoverability** - Make features accessible and easy to learn
-5. **Reliability** - Ensure consistent behavior across different VSCode contexts
+1. **最小限の中断** - 入力メソッドがコーディングフローを中断しないようにします
+2. **予測可能な動作** - 一貫性のために可能な限り SKK の慣例に従います
+3. **効率性** - 一般的な操作に必要なキーストロークを最小限に抑えます
+4. **発見可能性** - 機能にアクセスしやすく、学習しやすくします
+5. **信頼性** - さまざまな VSCode コンテキストで一貫した動作を保証します
 
 ## Target Users
 
-1. **Japanese-speaking developers** who use VSCode and prefer SKK-style input
-2. **Developers working on Japanese-language content** who need efficient Japanese input
-3. **Former Emacs users** familiar with DDSKK who have migrated to VSCode
+1. VSCode を使用し、SKK スタイルの入力を好む**日本語を話す開発者**
+2. 効率的な日本語入力を必要とする**日本語コンテンツに取り組む開発者**
+3. VSCode に移行した DDSKK に精通している**元 Emacs ユーザー**
