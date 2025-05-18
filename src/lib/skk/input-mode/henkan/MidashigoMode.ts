@@ -224,36 +224,24 @@ export class MidashigoMode extends AbstractMidashigoMode {
     public override getActiveKeys(): Set<string> {
         const keys = new Set<string>();
 
-        // Common keys
+       // this mode deals with all printable ASCII characters
+        for (let i = 32; i <= 126; i++) { // ASCII printable characters
+            const char = String.fromCharCode(i);
+            if ("a"<= char && char <= "z") {
+                keys.add(char);
+                keys.add("shift+" + char);
+            } else if ("A" <= char && char <= "Z") {
+                // Uppercase letters are already added by the above case
+            } else {
+                keys.add(char);
+            }
+        }
+
+        // Special keys
+        keys.add("enter");
+        keys.add("backspace");
         keys.add("ctrl+j");
         keys.add("ctrl+g");
-        keys.add("backspace");
-
-        // Keys for romaji input (alphabets)
-        for (let i = 0; i < 26; i++) {
-            keys.add(String.fromCharCode('a'.charCodeAt(0) + i)); // for gokan or okurigana
-            keys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`); // for starting okurigana or L
-        }
-
-        if (this.midashigoMode === MidashigoType.gokan) {
-            keys.add("space"); // Henkan without okurigana
-            // Symbols that trigger henkan (punctuation)
-            // "。", "、", "．", "，", "」", "』", "］", "!", "！", ":", "：", ";", "；"
-            // These are processed in onSymbol. For simplicity, we can add common ones.
-            keys.add(".");
-            keys.add(",");
-            keys.add("!");
-            keys.add("]");
-            keys.add("!");
-            keys.add(":");
-            keys.add(";");
-            // Other symbols might be part of romaji input for gokan
-        }
-        // In okurigana mode, only alphabets are typically used for okurigana romaji.
-        // Other keys like space/enter might not be directly handled or lead to henkan.
-
-        // Numbers, Enter are currently not implemented or throw error.
-        // If they were implemented, they should be added here.
 
         return keys;
     }

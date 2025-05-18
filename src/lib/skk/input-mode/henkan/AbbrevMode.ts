@@ -96,25 +96,26 @@ export class AbbrevMode extends AbstractMidashigoMode {
     public override getActiveKeys(): Set<string> {
         const keys = new Set<string>();
 
-        // Alphabets (lower and upper)
-        for (let i = 0; i < 26; i++) {
-            keys.add(String.fromCharCode('a'.charCodeAt(0) + i));
-            keys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`);
-        }
-        // Numbers
-        for (let i = 0; i < 10; i++) {
-            keys.add(String(i));
-        }
-        // Symbols (common ones used in abbrev mode, e.g. for zip codes)
-        keys.add("-"); // Example: zip code like 123-4567
-        // Other symbols might be directly inserted.
+        // Currently, we do not need to handle alphabets, numbers, and symbols especially so that the editor deals with them.
+
+        // // Alphabets (lower and upper)
+        // for (let i = 0; i < 26; i++) {
+        //     keys.add(String.fromCharCode('a'.charCodeAt(0) + i));
+        //     keys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`);
+        // }
+        // // Numbers
+        // for (let i = 0; i < 10; i++) {
+        //     keys.add(String(i));
+        // }
+        // // Symbols
+        // ...
 
         // Special keys
         keys.add("space");    // Trigger henkan
         keys.add("enter");    // Fixate and newline
-        keys.add("backspace");
         keys.add("ctrl+j");   // Fixate
         keys.add("ctrl+g");   // Cancel
+        keys.add("backspace"); // Delete left or delete midashigo marker
 
         return keys;
     }

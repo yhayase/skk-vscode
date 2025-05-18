@@ -84,31 +84,28 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
     public override getActiveKeys(): Set<string> {
         const keys = new Set<string>();
 
-        // All alphabet keys (lower and upper) as they are caught to show an error except for Y and N.
+        // All alphabet, number, and symbol keys (lower and upper) as they are caught to show an error except for Y and N.
         // Y and N are treated separately in onUpperAlphabet.
-        for (let i = 0; i < 26; i++) {
-            const charLower = String.fromCharCode('a'.charCodeAt(0) + i);
-            const charUpper = `shift+${charLower}`;
-
-            keys.add(charLower);
-            keys.add(charUpper);
+        for (let i = 32; i <= 126; i++) { // ASCII printable characters
+            const char = String.fromCharCode(i);
+            if ("a"<= char && char <= "z") {
+                keys.add(char);
+                keys.add("shift+" + char);
+            } else if ("A" <= char && char <= "Z") {
+                // Uppercase letters are already added by the above case
+            } else {
+                keys.add(char);
+            }
         }
 
-        // Other keys like space, enter, numbers, symbols also throw errors.
+        // Other keys like enter, backspace also throw errors.
         // Add them if they should be explicitly handled to show "Type Y or N".
-        keys.add("space");
         keys.add("enter");
         keys.add("backspace");
-        // Add numbers 0-9
-        for (let i = 0; i <= 9; i++) {
-            keys.add(i.toString());
-        }
-        // Common symbols that might be pressed
-        keys.add(".");
-        keys.add(",");
-        keys.add("/");
-        keys.add("ctrl+g");
         keys.add("ctrl+j");
+
+        // Add Ctrl+G and Ctrl+J to return to the previous mode.
+        keys.add("ctrl+g");
 
         return keys;
     }

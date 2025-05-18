@@ -141,27 +141,24 @@ export class MenuHenkanMode extends AbstractHenkanMode {
     public override getActiveKeys(): Set<string> {
         const keys = new Set<string>();
 
-        // Selection keys (lower and upper)
-        this.selectionKeys.forEach(key => {
-            keys.add(key);
-            keys.add(`shift+${key}`);
-        });
-
-        keys.add("x"); // Previous page or return to inline
-        keys.add("space"); // Next page or registration
-        keys.add("."); // Registration
-        keys.add("backspace"); // Previous page
-        keys.add("ctrl+g"); // Cancel
-
-        // Keys that show error messages
-        // Numbers 0-9
-        for (let i = 0; i <= 9; i++) {
-            keys.add(i.toString());
+       // this mode deals with all printable ASCII characters
+        for (let i = 32; i <= 126; i++) { // ASCII printable characters
+            const char = String.fromCharCode(i);
+            if ("a"<= char && char <= "z") {
+                keys.add(char);
+                keys.add("shift+" + char);
+            } else if ("A" <= char && char <= "Z") {
+                // Uppercase letters are already added by the above case
+            } else {
+                keys.add(char);
+            }
         }
+
+        // Special keys
         keys.add("enter");
+        keys.add("backspace");
         keys.add("ctrl+j");
-        // Other symbols might also throw errors if onSymbol is not fully implemented for them.
-        // For now, this covers explicitly handled error cases.
+        keys.add("ctrl+g");
 
         return keys;
     }

@@ -195,19 +195,15 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         // this mode deals with all printable ASCII characters
         for (let i = 32; i <= 126; i++) { // ASCII printable characters
-
-            // skip upper case letters
-            if (i >= 65 && i <= 90) { continue; }
-
-            // register lower case letters and shift+lower case letters
-            if (i >= 97 && i <= 122) {
-                keys.add(String.fromCharCode(i));
-                keys.add(`shift+${String.fromCharCode(i)}`);
-                continue;
+            const char = String.fromCharCode(i);
+            if ("a"<= char && char <= "z") {
+                keys.add(char);
+                keys.add("shift+" + char);
+            } else if ("A" <= char && char <= "Z") {
+                // Uppercase letters are already added by the above case
+            } else {
+                keys.add(char);
             }
-
-            // other printable characters
-            keys.add(String.fromCharCode(i));
         }
 
         // Special keys

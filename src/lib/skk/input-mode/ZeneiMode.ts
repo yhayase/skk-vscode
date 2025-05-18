@@ -85,37 +85,19 @@ export class ZeneiMode extends AbstractInputMode {
         const keys = new Set<string>();
         // All printable ASCII characters are handled by ZeneiMode to convert to Zenkaku
         for (let i = 32; i <= 126; i++) { // ASCII printable characters
-            keys.add(String.fromCharCode(i));
-            // Need to consider how to represent these in a normalized way for context keys
-            // For single char keys like 'a', '1', '!', it's just the char itself.
-            // For 'space', it's "space".
-        }
-
-        // Add shift + printable characters as well, as they also result in zenkaku
-        for (let i = 32; i <= 126; i++) {
             const char = String.fromCharCode(i);
-            // This is a simplification; actual shifted chars depend on layout.
-            // Assuming standard US layout for common shifted symbols like !, @, #, etc.
-            // and shifted letters A-Z.
-            // For simplicity, we'll assume that if 'a' is active, 'shift+a' might also be.
-            // However, ZeneiMode converts based on the input char, not its shifted state.
-            // So, if 'a' is pressed, it becomes 'ａ'. If 'A' (shift+a) is pressed, it becomes 'Ａ'.
-            // The current getActiveKeys model might need refinement for this.
-            // For now, let's assume all base printable keys are active.
-            // Shifted versions will be separate entries in package.json like "shift+a".
-            // So, we should add "shift+<key>" if the base key is a letter.
-            if (char >= 'a' && char <= 'z') {
+            if ('a' <= char && char <= 'z') {
+                keys.add(char);
                 keys.add(`shift+${char}`);
+            } else if ('A' <= char && char <= 'Z') {
+                // Uppsercase letters are already added by the above case
+            } else {
+                keys.add(char);
             }
-            // If the key is a number and its shifted version is a symbol (e.g. shift+1 -> !),
-            // that symbol is already covered by the loop if it's printable.
         }
 
-
-        keys.add("ctrl+j"); // Mode switch
-        keys.add("ctrl+g"); // Does nothing, but SKK might still "consume" it
-        // keys.add("enter"); // Enter or Ctrl+M are disabled. In direct input modes, they should be handled by the editor.
-        // keys.add("backspace"); // Backspace should be handled by the editor in direct input modes.
+        keys.add("ctrl+j"); // Mode switch to Hiragana mode
+        // "ctrl+g", "enter", or "backspace" are ignored by this mode. the editor must handle them.
 
         return keys;
     }
