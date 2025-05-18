@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { AbstractKanaMode } from '../AbstractKanaMode';
 import { AbstractHenkanMode } from './AbstractHenkanMode';
 import { RomajiInput } from '../../../../lib/romaji/RomajiInput';
@@ -10,9 +9,22 @@ import { IEditor } from '../../editor/IEditor';
 
 export class KakuteiMode extends AbstractHenkanMode {
     romajiInput: RomajiInput;
+    treatEnterKey: boolean = false;
 
     static create(context: AbstractKanaMode, editor: IEditor): KakuteiMode {
         return new KakuteiMode(context, editor);
+    }
+
+    private async insertKanaAndUpdateRomajiStatus(context: AbstractKanaMode , kana: string, remainingRomaji: string, isOkuri: boolean): Promise<void> {
+        if (remainingRomaji.length > 0 && !this.treatEnterKey) {
+            this.treatEnterKey = true;
+            context["editor"].notifyModeInternalStateChanged(); // Notify editor to update contexts
+        } else if (remainingRomaji.length === 0 && this.treatEnterKey) {
+            this.treatEnterKey = false;
+            context["editor"].notifyModeInternalStateChanged(); // Notify editor to update contexts
+        }
+
+        return await context.insertStringAndShowRemaining(kana, remainingRomaji, isOkuri);
     }
 
     reset(): void {
@@ -29,9 +41,9 @@ export class KakuteiMode extends AbstractHenkanMode {
             context.toggleKanaMode();
             return;
         }
-        context.insertStringAndShowRemaining(this.romajiInput.processInput(key), this.romajiInput.getRemainingRomaji(), false);
+        this.insertKanaAndUpdateRomajiStatus(context, this.romajiInput.processInput(key), this.romajiInput.getRemainingRomaji(), false);
     }
-
+    
     async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'L') {
             this.editor.setInputMode(ZeneiMode.getInstance());
@@ -42,7 +54,7 @@ export class KakuteiMode extends AbstractHenkanMode {
             // 変換できる文字があればそれを挿入する(例: "n" -> "ん")
             const kana = this.romajiInput.findExactKanaForRomBuffer();
             if (kana !== undefined) {
-                await context.insertStringAndShowRemaining(kana, "", false);
+                await this.insertKanaAndUpdateRomajiStatus(context, kana, "", false);
                 this.romajiInput.reset();
             }
         }
@@ -52,7 +64,7 @@ export class KakuteiMode extends AbstractHenkanMode {
 
     async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
         this.romajiInput.reset();
-        await context.insertStringAndShowRemaining(key, "", false);
+        await this.insertKanaAndUpdateRomajiStatus(context, key, "", false);
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
@@ -61,7 +73,7 @@ export class KakuteiMode extends AbstractHenkanMode {
         let remaining = this.romajiInput.getRemainingRomaji();
 
         // 変換できる文字があればそれを挿入する(例: "n" -> "ん")
-        await context.insertStringAndShowRemaining(kana, remaining, false).then(async () => {
+        await this.insertKanaAndUpdateRomajiStatus(context, kana, remaining, false).then(async () => {
             // 「/」が入力された場合は SKK Abbrev mode に移行する
             if (key === "/") {
                 // "/" 自体は挿入しない
@@ -74,7 +86,7 @@ export class KakuteiMode extends AbstractHenkanMode {
 
             // 変換できない場合は， remaining に入っている記号をそのまま挿入
             this.romajiInput.reset();
-            await context.insertStringAndShowRemaining(remaining, "", false);
+            await this.insertKanaAndUpdateRomajiStatus(context, remaining, "", false);
         });
     }
 
@@ -82,24 +94,24 @@ export class KakuteiMode extends AbstractHenkanMode {
         // "n" のように，仮名にできるローマ字がバッファに残っている場合は，スペースの前に仮名を入力する
         let kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
         this.romajiInput.reset();
-        await context.insertStringAndShowRemaining(kana + " ", "", false);
+        await this.insertKanaAndUpdateRomajiStatus(context, kana + " ", "", false);
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {
         // "n" のように，仮名にできるローマ字がバッファに残っている場合は，改行の前に仮名を入力する
         const kana = this.romajiInput.findExactKanaForRomBuffer();
         if (kana !== undefined) {
-            await context.insertStringAndShowRemaining(kana, "", false);
+            await this.insertKanaAndUpdateRomajiStatus(context, kana, "", false);
         }
 
         this.romajiInput.reset();
-        await context.insertStringAndShowRemaining("\n", "", false);
+        await this.insertKanaAndUpdateRomajiStatus(context, "\n", "", false);
     }
 
     async onBackspace(context: AbstractKanaMode): Promise<void> {
         if (!this.romajiInput.isEmpty()) {
             this.romajiInput.deleteLastChar();
-            await context.insertStringAndShowRemaining("", this.romajiInput.getRemainingRomaji(), false);
+            await this.insertKanaAndUpdateRomajiStatus(context, "", this.romajiInput.getRemainingRomaji(), false);
             return;
         }
 
@@ -108,12 +120,12 @@ export class KakuteiMode extends AbstractHenkanMode {
 
     async onCtrlJ(context: AbstractKanaMode): Promise<void> {
         this.romajiInput.reset();
-        await context.insertStringAndShowRemaining("", "", false);
+        await this.insertKanaAndUpdateRomajiStatus(context, "", "", false);
     }
 
     async onCtrlG(context: AbstractKanaMode): Promise<void> {
         this.romajiInput.reset();
-        await context.insertStringAndShowRemaining("", "", false);
+        await this.insertKanaAndUpdateRomajiStatus(context, "", "", false);
     }
 
     public constructor(context: AbstractKanaMode, editor: IEditor) {
@@ -124,10 +136,10 @@ export class KakuteiMode extends AbstractHenkanMode {
     public override getActiveKeys(): Set<string> {
         const keys = new Set<string>();
 
-       // this mode deals with all printable ASCII characters
+        // this mode deals with all printable ASCII characters
         for (let i = 32; i <= 126; i++) { // ASCII printable characters
             const char = String.fromCharCode(i);
-            if ("a"<= char && char <= "z") {
+            if ("a" <= char && char <= "z") {
                 keys.add(char);
                 keys.add("shift+" + char);
             } else if ("A" <= char && char <= "Z") {
@@ -138,10 +150,14 @@ export class KakuteiMode extends AbstractHenkanMode {
         }
 
         // Special keys
-        keys.add("enter");
         keys.add("backspace");
         keys.add("ctrl+j");
         keys.add("ctrl+g");
+
+        // Enter keys are only processed only if needed
+        if (this.treatEnterKey) {
+            keys.add("enter");
+        }
 
         return keys;
     }
