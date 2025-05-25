@@ -87,7 +87,7 @@ export class ZeneiMode extends AbstractInputMode {
                 keys.add(char);
                 keys.add(`shift+${char}`);
             } else if ('A' <= char && char <= 'Z') {
-                // Uppsercase letters are already added by the above case
+                // Uppercase letters are already added by the above case
             } else {
                 keys.add(char);
             }
