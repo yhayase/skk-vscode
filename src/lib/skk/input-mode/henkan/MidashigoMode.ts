@@ -229,7 +229,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
             const char = String.fromCharCode(i);
             if ("a"<= char && char <= "z") {
                 keys.add(char);
-                keys.add("shift+" + char);
+                keys.add("shift+" + char); // Use lowercase char for shift combinations
             } else if ("A" <= char && char <= "Z") {
                 // Uppercase letters are already added by the above case
             } else {
@@ -247,8 +247,10 @@ export class MidashigoMode extends AbstractMidashigoMode {
     }
 
     public override getContextualName(): string {
-        // Could be more specific like "midashigo:gokan" or "midashigo:okurigana"
-        // For now, just "midashigo"
-        return "midashigo";
+        if (this.midashigoMode === MidashigoType.gokan) {
+            return "midashigo:gokan";
+        } else {
+            return "midashigo:okurigana";
+        }
     }
 }

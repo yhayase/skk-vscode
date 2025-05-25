@@ -23,7 +23,7 @@ export class ZeneiMode extends AbstractInputMode {
 
         let rval: string = '';
         key.split('').forEach((c) => {
-            if (firstChar <= c || c <= lastChar) {
+            if (firstChar <= c && c <= lastChar) { // Corrected condition: || to &&
                 rval += ZeneiMode.zenkakuEisuuList[c.charCodeAt(0) - firstChar.charCodeAt(0)];
             } else {
                 rval += c; // return as is
@@ -35,10 +35,7 @@ export class ZeneiMode extends AbstractInputMode {
     // AsciiMode is stateless, so the singleton can be stored in a static field.
     private static instance: ZeneiMode;
     public static getInstance(): ZeneiMode {
-        if (!ZeneiMode.instance) {
-            ZeneiMode.instance = new ZeneiMode();
-        }
-        return this.instance;
+        return new ZeneiMode();
     }
 
     public async reset(): Promise<void> {

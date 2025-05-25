@@ -167,7 +167,7 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "npm run test:unit; npm run test:integration",
-    "test:unit": "npm run pretest && mocha",
+    "test:unit": "npm run pretest && mocha -R dot",
     "test:integration": "npm run pretest && node ./out/test/integration/runTest.js"
   },
   "devDependencies": {

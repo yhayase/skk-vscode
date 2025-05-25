@@ -45,10 +45,15 @@ v0.1.0 でリリースされた主な機能は以下の通りです。
    - キーバインディングを SKK コンテキストを使用するように更新し、コンテキストユーティリティを改良 (50448f7)
    - より多くのモードに対する `getActiveKeys`/`getContextualName` の実装 (23546e8)
    - 文脈キーバインディングのための `getActiveKeys` を入力モードに追加 (6805829)
+   - **`MidashigoMode` の `getContextualName` を内部状態に応じて詳細化 (例: `midashigo:gokan`) し、関連テストを修正・追加。 (今回の作業)**
+   - **`AbbrevMode` の `getActiveKeys` のテストを設計意図に合わせて修正。 (今回の作業)**
+   - **`HiraganaMode` の `getActiveKeys` のテストを `KakuteiMode` の `treatEnterKey` の状態を考慮して修正・追加。 (今回の作業)**
+   - **`MenuHenkanMode`, `InlineHenkanMode`, `CandidateDeletionMode` の `getActiveKeys` のテストを追加し、既存の実装が設計意図と整合していることを確認。 (今回の作業)**
+   - **`MidashigoMode` の `getActiveKeys` のキー定義 (`shift+<小文字>`) を明確化し、関連テストを修正・追加。 (今回の作業)**
 
 2. **ドキュメントと進捗管理 (Post v0.1.0)**
    - プロジェクトドキュメントの日本語化、進捗管理の更新 (084d7d3)
-   - Issue #55 の進捗に関する記憶バンクと Next-ToDo の更新 (e3dc5e0, 35cc6fd)
+   - Issue #55 の進捗に関する記憶バンクと Next-ToDo の更新 (e3dc5e0, 35cc6fd, 今回の作業による更新)
 
 3. **v0.1.0 リリースまでの主な変更点**
     - **Abbrev モードからの辞書登録エディタ起動時の挙動修正** (d407946, a3167c2)
@@ -64,7 +69,10 @@ v0.1.0 でリリースされた主な機能は以下の通りです。
 ## Next Steps
 
 **Issue #55: Keybinding Contextualization - Remaining Tasks**
--   **モード実装の完了**: 残りのすべての入力モードクラス（特に`InlineHenkanMode`、`MenuHenkanMode`、`AbbrevMode`、`CandidateDeletionMode`、およびその他の`AbstractHenkanMode`サブクラス）に対して`getActiveKeys()`と`getContextualName()`が完全に実装されていることを確認します。これらに包括的な単体テストを追加します。
+-   **モード実装の完了とテスト拡充 (進行中)**:
+    -   **`KakuteiMode`**: `getActiveKeys()` の網羅性確認とテスト (特に `treatEnterKey` の状態変化に応じた挙動)。
+    -   **基本入力モード (`AsciiMode`, `HiraganaMode`, `KatakanaMode`, `ZeneiMode`)**: `getActiveKeys()` / `getContextualName()` の網羅性確認とテスト (必要に応じて)。 `HiraganaMode` の `getActiveKeys` は `KakuteiMode` に依存するため、`KakuteiMode` のテストと合わせて確認。
+    -   全ての入力モードクラスについて、`getActiveKeys()` と `getContextualName()` がモードの全ての内部状態と取りうるキー操作を正確に反映していることを確認し、単体テストで網羅する。
 -   **ターゲットを絞った統合テスト**: 以下を具体的に検証するために新しい統合テストを作成します。
     -   さまざまなモード遷移と状態における`skk.mode`および`skk.activeKey.*`コンテキスト値の正しさ。
     -   これらのコンテキストに基づいてキーバインドが正しく有効/無効になっていること、SKKが必要な場合にのみキーをキャプチャすることを確認します。

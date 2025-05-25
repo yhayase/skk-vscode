@@ -192,4 +192,57 @@ describe('CandidateDeletionMode', () => {
             }
         });
     });
+
+    describe('getActiveKeys', () => {
+        let deletionMode: CandidateDeletionMode;
+        let mockEditor: MockEditor;
+        let context: AbstractKanaMode;
+        let candidate: Candidate;
+        let prevMode: InlineHenkanMode;
+
+        beforeEach(() => {
+            mockEditor = new MockEditor();
+            context = new HiraganaMode();
+            candidate = new Candidate('単語', undefined);
+            const entry = new Entry('よみ', [candidate], '');
+            const midashigoMode = new MidashigoMode(context, mockEditor);
+            prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'よみ', '', entry, '');
+            deletionMode = new CandidateDeletionMode(context, mockEditor, prevMode, 'よみ', candidate);
+        });
+
+        it('should return a set containing all printable ASCII, enter, backspace, ctrl+j, ctrl+g', () => {
+            const activeKeys = deletionMode.getActiveKeys();
+            const expectedKeys = new Set<string>();
+
+            // Add all printable ASCII characters
+            for (let i = 32; i <= 126; i++) {
+                const char = String.fromCharCode(i);
+                if ("a" <= char && char <= "z") {
+                    expectedKeys.add(char);
+                    expectedKeys.add("shift+" + char); 
+                } else if ("A" <= char && char <= "Z") {
+                    // Assumed covered by shift+lowercase
+                } else {
+                    expectedKeys.add(char);
+                }
+            }
+            // Special keys
+            expectedKeys.add("enter");
+            expectedKeys.add("backspace");
+            expectedKeys.add("ctrl+j");
+            expectedKeys.add("ctrl+g");
+            
+            // Verify all expected keys are present
+            for (const key of expectedKeys) {
+                expect(activeKeys.has(key), `activeKeys should contain '${key}'`).to.be.true;
+            }
+            
+            // Verify no unexpected keys are present
+            for (const key of activeKeys) {
+                expect(expectedKeys.has(key), `activeKeys should not contain unexpected key '${key}'`).to.be.true;
+            }
+            
+            expect(activeKeys.size).to.equal(expectedKeys.size, "activeKeys and expectedKeys should have the same size");
+        });
+    });
 });

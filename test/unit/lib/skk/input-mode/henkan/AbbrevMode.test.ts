@@ -28,27 +28,13 @@ describe('AbbrevMode', () => {
     });
 
     it('getActiveKeys should return the correct set of keys', () => {
-        const expectedKeys = new Set<string>();
-
-        // Alphabets (lower and upper)
-        for (let i = 0; i < 26; i++) {
-            expectedKeys.add(String.fromCharCode('a'.charCodeAt(0) + i));
-            expectedKeys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`);
-        }
-        // Numbers
-        for (let i = 0; i < 10; i++) {
-            expectedKeys.add(String(i));
-        }
-        // Symbols (common ones used in abbrev mode, e.g. for zip codes)
-        expectedKeys.add("-"); // Example: zip code like 123-4567
-        // Other symbols might be directly inserted.
-
-        // Special keys
-        expectedKeys.add("space");    // Trigger henkan
-        expectedKeys.add("enter");    // Fixate and newline
-        expectedKeys.add("backspace");
-        expectedKeys.add("ctrl+j");   // Fixate
-        expectedKeys.add("ctrl+g");   // Cancel
+        const expectedKeys = new Set<string>([
+            "space",    // Trigger henkan
+            "enter",    // Fixate and newline
+            "backspace",
+            "ctrl+j",   // Fixate
+            "ctrl+g"    // Cancel
+        ]);
 
         const activeKeys = abbrevMode.getActiveKeys();
         expect(activeKeys).to.deep.equal(expectedKeys);

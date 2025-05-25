@@ -67,4 +67,8 @@ describe('AsciiMode', () => {
         const activeKeys = asciiMode.getActiveKeys();
         expect(activeKeys).to.deep.equal(new Set(["ctrl+j"]));
     });
+
+    it('getContextualName should return "ascii"', () => {
+        expect(asciiMode.getContextualName()).to.equal("ascii");
+    });
 });
