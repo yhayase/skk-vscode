@@ -171,25 +171,25 @@
     "test:integration": "npm run pretest && node ./out/test/integration/runTest.js"
   },
   "devDependencies": {
+    "@microsoft/vscode-file-downloader-api": "^1.0.1",
+    "@types/async-lock": "^1.4.1",
     "@types/chai": "^4.3.16",
     "@types/mocha": "^10.0.7",
     "@types/node": "18.x",
     "@types/vscode": "^1.88.0",
-    "@types/wanakana": "5.3.0",
-    "@types/async-lock": "^1.4.1",
-    "@typescript-eslint/eslint-plugin": "^6.7.3",
-    "@typescript-eslint/parser": "^6.7.3",
+    "@types/wanakana": "^5.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
     "@vscode/test-electron": "^2.3.4",
-    "@microsoft/vscode-file-downloader-api": "^1.0.1",
     "chai": "^4.4.1",
-    "eslint": "^8.50.0",
-    "glob": "^10.3.3",
-    "mocha": "^10.5.1",
+    "eslint": "^9.0.0",
+    "glob": "^11.0.2",
+    "mocha": "^11.5.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2"
   },
   "dependencies": {
     "async-lock": "^1.4.1",
-    "wanakana": "5.3.0"
+    "wanakana": "^5.3.1"
   }
 }
