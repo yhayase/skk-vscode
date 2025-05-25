@@ -189,4 +189,33 @@ export class InlineHenkanMode extends AbstractHenkanMode {
             return wanakana.isKatakana(char) ? wanakana.toHiragana(char) : char;
         }).join("") + this.okuriAlphabet;
     }
+
+    public override getActiveKeys(): Set<string> {
+        const keys = new Set<string>();
+
+        // this mode deals with all printable ASCII characters
+        for (let i = 32; i <= 126; i++) { // ASCII printable characters
+            const char = String.fromCharCode(i);
+            if ("a"<= char && char <= "z") {
+                keys.add(char);
+                keys.add("shift+" + char);
+            } else if ("A" <= char && char <= "Z") {
+                // Uppercase letters are already added by the above case
+            } else {
+                keys.add(char);
+            }
+        }
+
+        // Special keys
+        keys.add("enter");
+        keys.add("backspace");
+        keys.add("ctrl+j");
+        keys.add("ctrl+g");
+
+        return keys;
+    }
+
+    public getContextualName(): string {
+        return "inlineHenkan";
+    }
 }

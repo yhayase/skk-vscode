@@ -166,19 +166,28 @@ suite('辞書登録単語挿入機能において', async () => {
                         disposable2.dispose();
 
                         assert.equal(editor.document, document);
-                        const disposable3 = vscode.workspace.onDidChangeTextDocument(async e => {
-                            // ignore other document changes
-                            if (e.document !== document) {
-                                return;
-                            }
 
-                            // 元のエディタの内容が登録した単語+送りがなになっていたならば、テストを成功させる
-                            if (document.getText() === expected) {
-                                clearTimeout(failTimer); // clear the fail timer
-                                disposable3.dispose(); // dispose the event listener
-                                resolve();
-                            }
+                        // Wait for the document text to become the expected value
+                        await new Promise<void>((resolveTextChange, rejectTextChange) => {
+                            const textChangeFailTimer = setTimeout(() => {
+                                rejectTextChange(new Error(`document.getText() is expeted to be ${expected} but it is ${document?.getText()} after editor became active`));
+                            }, 1000); // Shorter timeout for text change
+
+                            const disposable3 = vscode.workspace.onDidChangeTextDocument(e => {
+                                if (e.document !== document) {
+                                    return;
+                                }
+
+                                if (document.getText() === expected) {
+                                    clearTimeout(textChangeFailTimer);
+                                    disposable3.dispose();
+                                    resolveTextChange();
+                                }
+                            });
                         });
+
+                        clearTimeout(failTimer); // clear the main fail timer
+                        resolve(); // Resolve the main test promise
 
                     });
 

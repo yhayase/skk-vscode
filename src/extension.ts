@@ -42,7 +42,19 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Initialize jisyo
 	await jisyo.init(context.globalState, context.globalStorageUri);
 
-	// vscode.window.showInformationMessage("SKK: start");
+	// SKKキーバインドcontextの初期洗い替え
+    VSCodeEditor.updateSkkContexts(vscode.window.activeTextEditor).catch(err => {
+        console.error("SKK: Initial context update failed", err);
+    });
+
+    // エディタ切替時にもcontext洗い替え
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            VSCodeEditor.updateSkkContexts(editor).catch(err => {
+                console.error("SKK: Context update on editor change failed", err);
+            });
+        })
+    );
 
 	let previousTextEditor = vscode.window.activeTextEditor;
 	let previousSelections = vscode.window.activeTextEditor?.selections;
@@ -162,5 +174,3 @@ export function updateCursorMoveTimestamp() {
 
 // This method is called when your extension is deactivated
 export function deactivate() { }
-
-

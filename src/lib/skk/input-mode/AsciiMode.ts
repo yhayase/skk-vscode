@@ -49,4 +49,14 @@ export class AsciiMode extends AbstractInputMode {
     public async symbolInput(key: string): Promise<void> {
         await this.editor.insertOrReplaceSelection(key);
     }
+
+    public override getActiveKeys(): Set<string> {
+        // In AsciiMode, SKK should only explicitly handle ctrl+j for mode switching.
+        // Other keys should be passed through to VSCode's default handling or other extensions.
+        return new Set<string>(["ctrl+j"]);
+    }
+
+    public getContextualName(): string {
+        return "ascii";
+    }
 }

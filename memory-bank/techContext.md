@@ -3,96 +3,97 @@
 ## Technologies Used
 
 1. **TypeScript**
-   - Primary development language
-   - Provides type safety and modern JavaScript features
-   - Used for all extension code
+   - 主要な開発言語
+   - 型安全性と最新のJavaScript機能を提供
+   - すべての拡張機能コードに使用
 
 2. **VSCode Extension API**
-   - Used for integration with VSCode editor
-   - Provides editor manipulation capabilities
-   - Handles command registration and execution
+   - VSCodeエディタとの統合に使用
+   - エディタ操作機能を提供
+   - コマンドの登録と実行を処理
 
 3. **Node.js**
-   - Runtime environment for the extension
-   - Used for file system operations (dictionary loading)
+   - 拡張機能のランタイム環境
+   - ファイルシステム操作（辞書読み込み）に使用
 
 4. **Mocha & Chai**
-   - Testing frameworks used for unit and integration tests
-   - Enables test-driven development approach
+   - ユニットテストおよび統合テストに使用されるテストフレームワーク
+   - テスト駆動開発アプローチを可能にする
 
 ## Development Setup
 
 1. **Project Structure**
-   - `/src`: Source code
-     - `/extension.ts`: Extension entry point
-     - `/VSCodeEditor.ts`: VSCode-specific editor implementation
-     - `/VSCodeJisyoProvider.ts`: VSCode-specific dictionary provider
-     - `/lib/skk/`: Core SKK functionality
-       - `/input-mode/`: Input mode implementations
-       - `/input-mode/henkan/`: Conversion mode implementations
-       - `/jisyo/`: Dictionary-related implementations
-       - `/editor/`: Editor abstraction layer
-   - `/test`: Test code
-     - `/unit`: Unit tests
-     - `/integration`: Integration tests
+   - `/src`: ソースコード
+     - `/extension.ts`: 拡張機能のエントリポイント
+     - `/VSCodeEditor.ts`: VSCode固有のエディタ実装
+     - `/VSCodeJisyoProvider.ts`: VSCode固有の辞書プロバイダ
+     - `/lib/skk/`: コアSKK機能
+       - `/input-mode/`: 入力モード実装
+       - `/input-mode/henkan/`: 変換モード実装
+       - `/jisyo/`: 辞書関連の実装
+       - `/editor/`: エディタ抽象化レイヤー
+   - `/test`: テストコード
+     - `/unit`: ユニットテスト
+     - `/integration`: 統合テスト
 
 2. **Build System**
-   - Uses webpack for bundling
-   - TypeScript compilation configured in tsconfig.json
-   - Separate tsconfig.build.json for production builds
+   - バンドルにはwebpackを使用
+   - TypeScriptコンパイルはtsconfig.jsonで設定
+   - 本番ビルド用に個別のtsconfig.build.json
 
 3. **Testing Environment**
-   - Unit tests for core functionality
-   - Integration tests for VSCode-specific features
-   - E2E tests for complete workflows
+   - コア機能のユニットテスト
+   - VSCode固有機能の統合テスト
+   - 完全なワークフローのE2Eテスト
 
 ## Technical Constraints
 
 1. **VSCode Extension Limitations**
-   - Limited UI customization capabilities
-   - Restricted access to editor internals
-   - Performance considerations for extension code
+   - UIカスタマイズ機能の制限
+   - エディタ内部へのアクセス制限
+   - 拡張機能コードのパフォーマンスに関する考慮事項
 
 2. **Dictionary Performance**
-   - Large dictionaries must be loaded and searched efficiently
-   - Memory usage must be managed carefully
+   - 大規模な辞書を効率的に読み込み、検索する必要がある
+   - メモリ使用量を慎重に管理する必要がある
 
 3. **Input Handling**
-   - Must work with VSCode's input system
-   - Need to handle key events appropriately
-   - Potential conflicts with other extensions or VSCode keybindings
+   - VSCodeの入力システムと連携する必要がある
+   - キーイベントを適切に処理する必要がある
+   - 他の拡張機能やVSCodeのキーバインドとの潜在的な競合
 
 ## Dependencies
 
 1. **Core Dependencies**
    - VSCode Extension API
-   - Node.js standard library
+   - Node.js標準ライブラリ
 
 2. **Development Dependencies**
    - TypeScript
    - Webpack
    - ESLint
-   - Mocha & Chai for testing
+   - Mocha & Chai (テスト用)
 
 ## Tool Usage Patterns
 
 1. **VSCode Commands**
-   - Extension functionality is exposed through VSCode commands
-   - Commands are registered in the extension activation
-   - Commands follow the pattern `skk.<action>Input` for consistency
+   - 拡張機能の機能はVSCodeコマンドを通じて公開される
+   - コマンドは拡張機能のアクティベーション時に登録される
+   - コマンドは一貫性のために `skk.<action>Input` のパターンに従う
 
 2. **Editor Manipulation**
-   - Text insertion and deletion through the editor abstraction
-   - Position tracking for cursor and selection management
-   - Decoration handling for visual feedback
+   - エディタ抽象化によるテキストの挿入と削除
+   - カーソルと選択範囲管理のための位置追跡
+   - 視覚的なフィードバックのための装飾処理
 
 3. **Dictionary Access**
-   - Dictionary providers implement the IJisyoProvider interface
-   - Dictionary entries are cached for performance
-   - User dictionary is persisted between sessions
+   - 辞書プロバイダはIJisyoProviderインターフェースを実装
+   - 辞書エントリはパフォーマンスのためにキャッシュされる
+   - ユーザー辞書はセッション間で永続化される
+   - 辞書操作には検索、登録、削除が含まれる
 
 4. **Testing Approach**
-   - Unit tests for core logic
-   - Integration tests for VSCode-specific functionality
-   - E2E tests for complete workflows
-   - Test-driven development for new features
+   - コアロジックのユニットテスト
+   - VSCode固有機能の統合テスト
+   - 完全なワークフローのE2Eテスト
+   - 新機能のためのテスト駆動開発

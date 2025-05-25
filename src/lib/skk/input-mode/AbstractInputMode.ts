@@ -17,4 +17,8 @@ export abstract class AbstractInputMode implements IInputMode {
     abstract backspaceInput(): Promise<void>;
     abstract numberInput(key: string): Promise<void>;
     abstract symbolInput(key: string): Promise<void>;
+    public getActiveKeys(): Set<string> {
+        return new Set<string>(); // Default: no keys are active by SKK
+    }
+    public abstract getContextualName(): string;
 }

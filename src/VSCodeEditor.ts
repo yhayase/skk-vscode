@@ -10,10 +10,13 @@ import { VSCodeJisyoProvider } from './VSCodeJisyoProvider';
 import { AbstractKanaMode } from './lib/skk/input-mode/AbstractKanaMode';
 import { KakuteiMode } from './lib/skk/input-mode/henkan/KakuteiMode';
 
+import { getActiveKeyContext } from './lib/util/keyUtils'; // Import the utility
+
 export class VSCodeEditor implements IEditor {
     private midashigoStart: vscode.Position | undefined = undefined;
-    private static inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
-    private static registrationModeOrigin: WeakMap<vscode.TextDocument, [VSCodeEditor, vscode.TextDocument, vscode.Position, ]> = new WeakMap();
+    private static readonly inputModeMap: WeakMap<vscode.TextDocument, IInputMode> = new WeakMap();
+    private static readonly registrationModeOrigin: WeakMap<vscode.TextDocument, [VSCodeEditor, vscode.TextDocument, vscode.Position, ]> = new WeakMap();
+    private static readonly knownSkkActiveKeys: Set<string> = new Set<string>(); // 追加
 
     private readonly remainingRomajiDecorationType: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
         after: {
@@ -585,6 +588,7 @@ export class VSCodeEditor implements IEditor {
             throw Error("No active text editor");
         }
         VSCodeEditor.inputModeMap.set(editor.document, mode);
+        this.notifyModeInternalStateChanged(); // Update contexts when mode changes
     }
 
     getCurrentInputMode(): IInputMode {
@@ -594,9 +598,50 @@ export class VSCodeEditor implements IEditor {
         }
         let mode = VSCodeEditor.inputModeMap.get(editor.document);
         if (mode === undefined) {
-            mode = AsciiMode.getInstance();
-            VSCodeEditor.inputModeMap.set(editor.document, mode);
+            // Set AsciiMode as the default and trigger context update
+            const defaultMode = AsciiMode.getInstance();
+            this.setInputMode(defaultMode); // This will call notifyModeInternalStateChanged
+            return defaultMode;
         }
         return mode;
+    }
+
+    /**
+     * SKKキーバインドcontextの洗い替え方式による更新
+     * @param editor アクティブなエディタ（undefined可）
+     */
+    public static async updateSkkContexts(editor: vscode.TextEditor | undefined): Promise<void> {
+        let currentMode: IInputMode;
+        if (editor && VSCodeEditor.inputModeMap.has(editor.document)) {
+            currentMode = VSCodeEditor.inputModeMap.get(editor.document)!;
+        } else {
+            currentMode = AsciiMode.getInstance();
+        }
+
+        const modeName = currentMode.getContextualName();
+        const activeKeys = currentMode.getActiveKeys();
+
+        // skk.mode contextを更新
+        await vscode.commands.executeCommand('setContext', 'skk.mode', modeName);
+
+        // 既知の全キーについて、activeでなければfalseに
+        for (const knownKey of VSCodeEditor.knownSkkActiveKeys) {
+            if (!activeKeys.has(knownKey)) {
+                await vscode.commands.executeCommand('setContext', getActiveKeyContext(knownKey), false);
+            }
+        }
+        // 現在activeなキーはtrueにし、knownSkkActiveKeysに追加
+        for (const newKey of activeKeys) {
+            await vscode.commands.executeCommand('setContext', getActiveKeyContext(newKey), true);
+            VSCodeEditor.knownSkkActiveKeys.add(newKey);
+        }
+    }
+
+    // Implementation for IEditor
+    public async notifyModeInternalStateChanged(): Promise<void> {
+        // staticなupdateSkkContextsを呼ぶ
+        VSCodeEditor.updateSkkContexts(vscode.window.activeTextEditor).catch(err => {
+            console.error("SKK: Failed to update contexts", err);
+        });
     }
 }

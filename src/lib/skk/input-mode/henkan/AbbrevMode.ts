@@ -92,4 +92,22 @@ export class AbbrevMode extends AbstractMidashigoMode {
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
         this.editor.clearMidashigo();
     }
+
+    public override getActiveKeys(): Set<string> {
+        const keys = new Set<string>();
+
+        // Currently, we do not need to handle alphabets, numbers, and symbols especially so that the editor deals with them.
+        // Special keys
+        keys.add("space");    // Trigger henkan
+        keys.add("enter");    // Fixate and newline
+        keys.add("ctrl+j");   // Fixate
+        keys.add("ctrl+g");   // Cancel
+        keys.add("backspace"); // Delete left or delete midashigo marker
+
+        return keys;
+    }
+
+    public override getContextualName(): string {
+        return "abbrev";
+    }
 }

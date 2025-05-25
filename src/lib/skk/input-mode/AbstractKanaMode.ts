@@ -10,12 +10,14 @@ import { KakuteiMode } from './henkan/KakuteiMode';
  */
 export abstract class AbstractKanaMode extends AbstractInputMode {
     protected abstract nextMode(): IInputMode;
+    protected abstract getKanaModeBaseName(): string; // e.g., "hiragana", "katakana"
     abstract newRomajiInput(): RomajiInput;
 
     private henkanMode: AbstractHenkanMode = new KakuteiMode(this, this.editor);
 
     setHenkanMode(henkanMode: AbstractHenkanMode) {
         this.henkanMode = henkanMode;
+        this.editor.notifyModeInternalStateChanged(); // Notify editor to update contexts
     }
 
     async insertStringAndShowRemaining(str: string, remaining: string, isOkuri: boolean): Promise<void> {
@@ -75,5 +77,33 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
 
     public async symbolInput(key: string): Promise<void> {
         await this.henkanMode.onSymbol(this, key);
+    }
+
+    public override getActiveKeys(): Set<string> {
+        // Get keys from the current henkanMode (e.g., KakuteiMode, MidashigoMode)
+        const activeKeys = new Set(this.henkanMode.getActiveKeys());
+
+        // Add keys that AbstractKanaMode itself handles directly
+        // 'q' for toggling kana mode (hiragana <-> katakana)
+        activeKeys.add("q"); 
+        // 'l' for switching to AsciiMode (handled by henkanMode.onLowerAlphabet, but 'l' itself is a trigger)
+        // It's better if henkanMode's getActiveKeys includes 'l' if it's special.
+        // For now, let's assume henkanMode (specifically KakuteiMode or MidashigoMode)
+        // will list all alphabet keys if it's expecting romaji input.
+
+        // Ctrl+J is handled by henkanMode.onCtrlJ, so it should be in henkanMode.getActiveKeys()
+        // Ctrl+G is handled by henkanMode.onCtrlG, so it should be in henkanMode.getActiveKeys()
+        // Space, Enter, Backspace are also delegated.
+
+        // Keys for romaji input (a-z) are implicitly active if henkanMode expects them.
+        // This means henkanMode.getActiveKeys() should return them.
+        // For example, KakuteiMode should return all alphabet keys, numbers, symbols etc.
+        // that it can process to form kana.
+
+        return activeKeys;
+    }
+
+    public override getContextualName(): string {
+        return `${this.getKanaModeBaseName()}:${this.henkanMode.getContextualName()}`;
     }
 }

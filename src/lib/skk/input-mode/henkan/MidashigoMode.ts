@@ -118,6 +118,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         }
 
         this.midashigoMode = MidashigoType.okurigana;
+        this.editor.notifyModeInternalStateChanged(); // Notify editor about state change
 
 
         // ローマ字の変換を行う。
@@ -187,6 +188,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
             await context.insertStringAndShowRemaining("", this.romajiInput.getRemainingRomaji(), false);
             if (this.romajiInput.isEmpty()) {
                 this.midashigoMode = MidashigoType.gokan;
+                this.editor.notifyModeInternalStateChanged(); // Notify editor about state change
             }
             return;
         }
@@ -218,5 +220,37 @@ export class MidashigoMode extends AbstractMidashigoMode {
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
         await this.editor.clearMidashigo();
     }
-}
 
+    public override getActiveKeys(): Set<string> {
+        const keys = new Set<string>();
+
+       // this mode deals with all printable ASCII characters
+        for (let i = 32; i <= 126; i++) { // ASCII printable characters
+            const char = String.fromCharCode(i);
+            if ("a"<= char && char <= "z") {
+                keys.add(char);
+                keys.add("shift+" + char); // Use lowercase char for shift combinations
+            } else if ("A" <= char && char <= "Z") {
+                // Uppercase letters are already added by the above case
+            } else {
+                keys.add(char);
+            }
+        }
+
+        // Special keys
+        keys.add("enter");
+        keys.add("backspace");
+        keys.add("ctrl+j");
+        keys.add("ctrl+g");
+
+        return keys;
+    }
+
+    public override getContextualName(): string {
+        if (this.midashigoMode === MidashigoType.gokan) {
+            return "midashigo:gokan";
+        } else {
+            return "midashigo:okurigana";
+        }
+    }
+}

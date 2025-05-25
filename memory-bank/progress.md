@@ -2,116 +2,191 @@
 
 ## What Works
 
-### Core Input Functionality
-- [x] Hiragana mode (ひらがなモード)
-- [x] Katakana mode (カタカナモード)
-- [x] ASCII mode (半角英数モード)
-- [x] Zenkaku mode (全角英数モード)
-- [x] Abbrev mode (スラッシュ記号で英数字での見出し語検索)
-- [x] Mode transitions following SKK conventions
+### コア入力機能
+- [x] ひらがなモード
+- [x] カタカナモード
+- [x] 半角英数モード
+- [x] 全角英数モード
+- [x] スラッシュ記号で英数字での見出し語検索
+- [x] SKKの規約に従ったモード遷移
 
-### Conversion Functionality
-- [x] Basic kana-to-kanji conversion
-- [x] Inline display of first 3 candidates
-- [x] Menu display for additional candidates
-- [x] Okurigana (送り仮名) handling
-- [x] Candidate selection and confirmation
-- [x] Candidate prioritization based on selection history
+### 変換機能
+- [x] 基本的なかな漢字変換
+- [x] 最初の3候補のインライン表示
+- [x] 追加候補のメニュー表示
+- [x] 送り仮名の処理
+- [x] 候補の選択と確定
+- [x] 選択履歴に基づく候補の優先順位付け
+- [x] 確認ダイアログ付きの候補削除
 
-### Dictionary System
-- [x] Multiple dictionary support
-- [x] Dictionary configuration through settings
-- [x] Postal code dictionary support
-- [x] Dictionary search in priority order
+### 辞書管理
+- [x] 複数辞書のサポート
+- [x] 設定を通じた辞書の構成
+- [x] 郵便番号辞書のサポート
+- [x] 優先順位順の辞書検索
+- [x] 確認ダイアログ付きの候補削除
+- [x] 辞書操作の統合テスト
 
-### Registration Feature (In Progress)
-- [x] Opening registration editor from InlineHenkanMode
-- [x] Opening registration editor from MenuHenkanMode
-- [x] Opening registration editor from MidashigoMode
-- [x] Proper formatting of registration editor content
-- [x] Converting katakana readings to hiragana in the editor
-- [x] Registration command to add entries to the user dictionary
-- [x] Closing registration editor after registration
-- [x] Returning focus to the original editor
-- [x] Inserting registered word at cursor position
-- [x] Integration tests for registration feature
-- [ ] Dedicated mode for registration editor
-- [ ] Keyboard shortcut for registration command
+### 登録機能（進行中）
+- [x] InlineHenkanModeからの登録エディタのオープン
+- [x] MenuHenkanModeからの登録エディタのオープン
+- [x] MidashigoModeからの登録エディタのオープン
+- [x] 登録エディタコンテンツの適切なフォーマット
+- [x] エディタ内でのカタカナ読みのひらがなへの変換
+- [x] ユーザー辞書へのエントリ追加のための登録コマンド
+- [x] 登録後の登録エディタのクローズ
+- [x] 元のエディタへのフォーカスの戻し
+- [x] カーソル位置への登録単語の挿入
+- [x] 登録機能の統合テスト
+- [ ] 登録エディタ専用モード
+- [ ] 登録コマンドのためのキーボードショートカット
 
-## What's Left to Build
+### キーバインディングの文脈化（Issue #55） - 基本実装
+- [x] アクティブキー（`getActiveKeys`）と文脈名（`getContextualName`）を定義するための`lib/skk`モードのコアロジック（キー モード全体に部分的に実装）。
+- [x] `VSCodeEditor`が`skk.mode`と`skk.activeKey.*`コンテキストを管理および設定するように更新されました。
+- [x] これらの新しいコンテキストを使用するように`package.json`キーバインディングが更新されました。
+- [x] キー名の正規化とコンテキストキーの生成のための`keyUtils.ts`のヘルパー ユーティリティ。
+- [x] 一部のモードでの`getActiveKeys`の単体テスト。
+- [x] **`MidashigoMode` の `getContextualName` が内部状態を反映するように修正し、テストを追加 (今回の作業)。**
+- [x] **`AbbrevMode`, `HiraganaMode` の `getActiveKeys` に関する既存テストを設計意図に合わせて修正 (今回の作業)。**
+- [x] **`MidashigoMode`, `MenuHenkanMode`, `InlineHenkanMode`, `CandidateDeletionMode` に `getActiveKeys` の単体テストを追加し、実装との整合性を確認 (今回の作業)。**
+- [x] 既存の統合テストは、これらの変更で合格します。
 
-### Registration Feature Completion
-- [ ] Implement dedicated registration mode
-- [ ] Add specialized key handling for registration mode
-- [ ] Improve error handling for invalid registration inputs
-- [ ] Refactor duplicate code in registration editor opening logic
-- [ ] Update documentation for registration feature
+## 構築されていないもの
 
-### Additional Features
-- [ ] Improved candidate display for long lines
-- [ ] Enhanced dictionary management
-- [ ] Performance optimizations for large dictionaries
-- [ ] Additional customization options
+### 候補削除の強化
+- [ ] 削除機能のキーボードショートカットのドキュメントを追加
 
-### Quality Improvements
-- [ ] Additional test coverage
-- [ ] Documentation updates
-- [ ] Performance profiling and optimization
-- [ ] Accessibility improvements
+### 登録機能の完成
+- [ ] 専用の登録モードを実装する
+- [ ] 登録モード用の特殊なキー処理を追加
+- [ ] 無効な登録入力に対するエラー処理を改善する
+- [ ] 登録エディタオープニングロジックの重複コードをリファクタリング
+- [ ] 登録機能のドキュメントを更新する
+
+### キーバインディングの文脈化 (Issue #55) - 残りのタスク
+- [~] すべての入力モードクラスとその内部状態に対して `getActiveKeys()` と `getContextualName()` の実装を完了します (**変換系モードについては、今回の作業で単体テストによる網羅性確認と必要な修正が完了。残りは基本入力モードとKakuteiMode**)。
+- [x] すべてのモードの `getActiveKeys()` と `getContextualName()` の包括的な単体テストを追加します (**変換系モードについては、今回の作業でテスト追加・修正が完了。残りは基本入力モードとKakuteiMode**)。
+- [ ] `skk.mode` と `skk.activeKey.*` コンテキスト値の検証、およびそれらのキーバインディング アクティベーションへの影響を特に確認するための新しい統合テストを作成します。
+- [ ] すべてのモードとシナリオでのキーバインディング動作の徹底的な手動テストとデバッグを実施します。
+- [ ] コンテキスト更新メカニズムのパフォーマンスレビュー。
+
+### 追加機能
+- [ ] 変換候補メニュー表示の改善
+- [ ] 強化された辞書管理
+- [ ] 設定メニューの実装
+- [ ] 
+
+### 品質向上
+- [ ] 結合テスト (拡張機能テスト) が非同期処理が原因で flaky である問題の解決
+- [ ] 結合テストと単体テストの役割分担の改善
+  - [ ] 変換モード自体の振舞いを単体テストで実施する
+  - [ ] キーバインディングの文脈化のテストも単体テストで実施する
+  - [ ] 重要なユーザ体験の部分のみ、結合テストで実現する
+- [ ] テストカバレッジの向上
+- [ ] ドキュメントの更新
+- [ ] パフォーマンスプロファイリングと最適化
+
 
 ## Current Status
 
-### Version
-- Current version: 0.0.2
-- Next planned version: 0.0.3 (with registration feature)
+### バージョン
+- 現在のバージョン: 0.1.0 (ff8a909, 4 weeks ago)
+- 次の予定バージョン: 未定 (Issue #55 のキーバインディングの文脈化の完了が優先)
 
-### Development Status
-- Active development on registration feature
-- Core functionality is stable and working
-- Testing is ongoing for new features
+### 開発状況
+- **Issue #55 (キーバインディングの文脈化) の修正と改善が進行中 (e7f2d0b, bdde373, ee32377, 9e04ffc, 50448f7, 23546e8, 6805829)。**
+- コア機能は安定しており、動作しています。
+- 既存の統合テストは、最近の変更で合格します。
+- ドキュメントの日本語化と進捗管理の更新 (084d7d3)。
 
-### Known Issues
-- Conversion candidate menu is displayed at the beginning of the line, which can be problematic for long lines
-- No dedicated mode for registration editor yet
-- Some code duplication in registration editor opening logic
+### 既知の問題
+- 変換候補メニューが行の先頭に表示され、長い行の場合に問題を引き起こす可能性があります。
+- まだ専用の登録エディタモードがありません。
+- 登録エディタオープニングロジックの一部にコードの重複があります。
+- まだ候補削除の元に戻す機能がありません。
+- Issue #55 に関連するキーバインディングの文脈化は、まだ完全にはすべてのモードとシナリオをカバーしていません。
 
-## Evolution of Project Decisions
+## プロジェクト決定の進化
 
-### Initial Design (v0.0.1)
-- Focus on core input and conversion functionality
-- Simple dictionary system with single dictionary
-- Basic mode transitions
+### v0.0.1 (初期設計)
+- コア入力および変換機能に重点を置きました。
+- 単一辞書によるシンプルな辞書システムを実装しました。
+- 基本的なモード遷移を実装しました。
+- (関連コミット: 970b76e まで)
 
-### Current Design (v0.0.2)
-- Added multiple dictionary support
-- Implemented Abbrev mode for postal code lookup
-- Enhanced conversion candidate handling
-- Started work on registration feature
+### v0.0.2 (複数辞書サポートと Abbrev モードの実装)
+- 複数辞書のサポートを追加しました (f86a32d, 519ea80)。
+- 郵便番号検索を含む、abbrev モードを実装しました (c435244, d93353b)。
+- バージョン 0.0.2 をリリースしました (99e17a5)。
+- (関連コミット: 99e17a5 まで)
 
-### Future Direction
-- Complete registration feature with dedicated mode
-- Improve user experience for candidate selection
-- Enhance dictionary management
-- Consider additional SKK features from DDSKK
+### v0.1.0 (辞書管理、パフォーマンス改善、細かな挙動修正)
+- **辞書登録機能**を実装しました (cf4b49c, 6c472cb, dec833c, b56098c, d407946 など)。
+  - 新規エントリの登録 (6c472cb)。
+  - 登録エディタの改善 (dec833c, b56098c)。
+  - Abbrev モードからの登録の修正 (d407946, a3167c2)。
+  - 登録後の単語挿入 (caccb18, b5e6fec)。
+- **候補削除機能**を実装しました (59522b4, 65d7833, 5df5f79, 3decfce, 2c22ab2)。
+  - ユーザー辞書からの候補削除 (59522b4)。
+  - インライン確認ダイアログ (65d7833)。
+- **パフォーマンスの改善**を行いました。
+  - 拡張機能アクティベーションのパフォーマンス改善 (04e6aa4)。
+  - SKK 辞書のキャッシングメカニズムのリファクタリング (c3910db)。
+- **ローマ字変換や見出し語変換にかかわる細かな挙動の修正**を行いました。
+  - 送り仮名あり見出し語変換から見出し語モードに戻る際の不整合修正 (1a559da, d6b0119)。
+  - 送り仮名ローマ字削除後の不整合修正 (1168d86, 0be9ada)。
+  - 未確定ローマ字 "n" と大文字子音の組み合わせの挙動調整 (b79cbae, c150a38, 2c76227)。
+  - 確定モードでの残存ローマ字処理の改善 (a4e1f39, cb72e6a)。
+- **テストの拡充とリファクタリング**を行いました。
+  - 辞書登録機能のテスト (56992e1, 3d83161, 8d44d3b)。
+  - 候補削除機能のテスト (3decfce)。
+  - テストディレクトリの移動 (af3641f, 249684c)。
+  - エディタ抽象化レイヤーのリファクタリング (f96ad43, 5960bf5)。
+- バージョン 0.1.0 をリリースしました (ff8a909)。
+- (関連コミット: ff8a909 まで)
 
-## Milestone Progress
+### Post-v0.1.0 (キーバインディングの文脈化 - Issue #55)
+- **キーバインディングの文脈化 (Issue #55)** に取り組みました。
+  - `getActiveKeys` と `getContextualName` を入力モードに追加 (6805829, 23546e8)。
+  - `package.json` のキーバインディングを SKK コンテキストを使用するように更新 (50448f7)。
+  - `keyUtils` の改善 (9e04ffc)。
+  - SKK キーバインディングコンテキスト管理のリファクタリング (bdde373)。
+  - `ctrl+j` キーバインディング条件の修正 (ee32377)。
+  - 文脈キーバインディングの修正 (e7f2d0b)。
+- ドキュメントの日本語化と進捗管理の更新 (084d7d3)。
 
-### Milestone 1: Basic Input (Completed)
-- Implemented core input modes
-- Added basic conversion functionality
-- Released as v0.0.1
+### 今後の方向性
+- Issue #55 (キーバインディングの文脈化) の完全な実装とテスト。
+- 接頭語・接尾語入力の実現。
+- 変換メニューの表示方法検討。
+- azik などの多様なローマ字入力への対応。
+- 既存機能の改善 (候補削除の強化、登録機能の完成など)。
 
-### Milestone 2: Enhanced Dictionary Support (Completed)
-- Added multiple dictionary support
-- Implemented Abbrev mode
-- Released as v0.0.2
+## マイルストーンの進捗
 
-### Milestone 3: Registration Feature (In Progress)
-- Implementing dictionary registration
-- Adding tests for registration workflow
-- Planned for v0.0.3
+### マイルストーン 1: 基本入力 (完了)
+- コア入力モードを実装しました。
+- 基本的な変換機能を追加しました。
+- v0.0.1 としてリリースしました。
 
-### Milestone 4: Refinement (Planned)
-- Improve user experience
-- Enhance performance
-- Add additional customization options
+### マイルストーン 2: 強化された辞書サポート (完了)
+- 複数辞書のサポートを追加しました。
+- 略語モードを実装しました。
+- v0.0.2 としてリリースしました。
+
+### マイルストーン 3: 辞書管理と初期キーバインディングの堅牢性 (完了)
+- 辞書登録機能を実装しました。
+- 候補削除機能を実装しました。
+- パフォーマンス改善と細かな挙動修正を行いました。
+- v0.1.0 としてリリースしました。
+
+### マイルストーン 4: キーバインディングの文脈化 (Issue #55) (進行中)
+- **コンテキストキーバインディング (Issue #55) の基本実装と修正が進行中です。**
+- キーバインディングと辞書操作のテストを追加 (Issue #55 の進行中)。
+- 次のリリースバージョンは未定です。
+
+### マイルストーン 5: 洗練 (予定)
+- ユーザーエクスペリエンスの向上。
+- パフォーマンスの向上。
+- 追加のカスタマイズオプションの追加。

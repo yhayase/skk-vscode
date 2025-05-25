@@ -23,7 +23,7 @@ export class ZeneiMode extends AbstractInputMode {
 
         let rval: string = '';
         key.split('').forEach((c) => {
-            if (firstChar <= c || c <= lastChar) {
+            if (firstChar <= c && c <= lastChar) { // Corrected condition: || to &&
                 rval += ZeneiMode.zenkakuEisuuList[c.charCodeAt(0) - firstChar.charCodeAt(0)];
             } else {
                 rval += c; // return as is
@@ -35,10 +35,7 @@ export class ZeneiMode extends AbstractInputMode {
     // AsciiMode is stateless, so the singleton can be stored in a static field.
     private static instance: ZeneiMode;
     public static getInstance(): ZeneiMode {
-        if (!ZeneiMode.instance) {
-            ZeneiMode.instance = new ZeneiMode();
-        }
-        return this.instance;
+        return new ZeneiMode();
     }
 
     public async reset(): Promise<void> {
@@ -79,5 +76,30 @@ export class ZeneiMode extends AbstractInputMode {
 
     public async symbolInput(key: string): Promise<void> {
         await this.editor.insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(key));
+    }
+
+    public override getActiveKeys(): Set<string> {
+        const keys = new Set<string>();
+        // All printable ASCII characters are handled by ZeneiMode to convert to Zenkaku
+        for (let i = 32; i <= 126; i++) { // ASCII printable characters
+            const char = String.fromCharCode(i);
+            if ('a' <= char && char <= 'z') {
+                keys.add(char);
+                keys.add(`shift+${char}`);
+            } else if ('A' <= char && char <= 'Z') {
+                // Uppercase letters are already added by the above case
+            } else {
+                keys.add(char);
+            }
+        }
+
+        keys.add("ctrl+j"); // Mode switch to Hiragana mode
+        // "ctrl+g", "enter", or "backspace" are ignored by this mode. the editor must handle them.
+
+        return keys;
+    }
+
+    public getContextualName(): string {
+        return "zenei";
     }
 }
