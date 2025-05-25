@@ -97,19 +97,6 @@ export class AbbrevMode extends AbstractMidashigoMode {
         const keys = new Set<string>();
 
         // Currently, we do not need to handle alphabets, numbers, and symbols especially so that the editor deals with them.
-
-        // // Alphabets (lower and upper)
-        // for (let i = 0; i < 26; i++) {
-        //     keys.add(String.fromCharCode('a'.charCodeAt(0) + i));
-        //     keys.add(`shift+${String.fromCharCode('a'.charCodeAt(0) + i)}`);
-        // }
-        // // Numbers
-        // for (let i = 0; i < 10; i++) {
-        //     keys.add(String(i));
-        // }
-        // // Symbols
-        // ...
-
         // Special keys
         keys.add("space");    // Trigger henkan
         keys.add("enter");    // Fixate and newline
