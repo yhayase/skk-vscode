@@ -530,7 +530,6 @@
     "@types/mocha": "^10.0.7",
     "@types/node": "^22.15.21",
     "@types/vscode": "^1.88.0",
-    "@types/wanakana": "^5.3.0",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
     "@vscode/test-electron": "^2.3.4",
