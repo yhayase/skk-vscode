@@ -70,78 +70,431 @@
       }
     ],
     "keybindings": [
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.a", "key": "a", "args": "a" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.b", "key": "b", "args": "b" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.c", "key": "c", "args": "c" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.d", "key": "d", "args": "d" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.e", "key": "e", "args": "e" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.f", "key": "f", "args": "f" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.g", "key": "g", "args": "g" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.h", "key": "h", "args": "h" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.i", "key": "i", "args": "i" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.j", "key": "j", "args": "j" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.k", "key": "k", "args": "k" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.l", "key": "l", "args": "l" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.m", "key": "m", "args": "m" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.n", "key": "n", "args": "n" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.o", "key": "o", "args": "o" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.p", "key": "p", "args": "p" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.q", "key": "q", "args": "q" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.r", "key": "r", "args": "r" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.s", "key": "s", "args": "s" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.t", "key": "t", "args": "t" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.u", "key": "u", "args": "u" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.v", "key": "v", "args": "v" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.w", "key": "w", "args": "w" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.x", "key": "x", "args": "x" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.y", "key": "y", "args": "y" },
-      { "command": "skk.lowerAlphabetInput", "when": "editorTextFocus && skk.activeKey.z", "key": "z", "args": "z" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_a", "key": "shift+a", "args": "A" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_b", "key": "shift+b", "args": "B" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_c", "key": "shift+c", "args": "C" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_d", "key": "shift+d", "args": "D" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_e", "key": "shift+e", "args": "E" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_f", "key": "shift+f", "args": "F" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_g", "key": "shift+g", "args": "G" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_h", "key": "shift+h", "args": "H" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_i", "key": "shift+i", "args": "I" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_j", "key": "shift+j", "args": "J" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_k", "key": "shift+k", "args": "K" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_l", "key": "shift+l", "args": "L" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_m", "key": "shift+m", "args": "M" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_n", "key": "shift+n", "args": "N" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_o", "key": "shift+o", "args": "O" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_p", "key": "shift+p", "args": "P" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_q", "key": "shift+q", "args": "Q" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_r", "key": "shift+r", "args": "R" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_s", "key": "shift+s", "args": "S" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_t", "key": "shift+t", "args": "T" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_u", "key": "shift+u", "args": "U" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_v", "key": "shift+v", "args": "V" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_w", "key": "shift+w", "args": "W" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_x", "key": "shift+x", "args": "X" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_y", "key": "shift+y", "args": "Y" },
-      { "command": "skk.upperAlphabetInput", "when": "editorTextFocus && skk.activeKey.shift_z", "key": "shift+z", "args": "Z" },
-      { "command": "skk.symbolInput", "when": "editorTextFocus && skk.activeKey.dot", "key": ".", "args": "." },
-      { "command": "skk.symbolInput", "when": "editorTextFocus && skk.activeKey.comma", "key": ",", "args": "," },
-      { "command": "skk.symbolInput", "when": "editorTextFocus && skk.activeKey.slash", "key": "/", "args": "/" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num0", "key": "0", "args": "0" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num1", "key": "1", "args": "1" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num2", "key": "2", "args": "2" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num3", "key": "3", "args": "3" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num4", "key": "4", "args": "4" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num5", "key": "5", "args": "5" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num6", "key": "6", "args": "6" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num7", "key": "7", "args": "7" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num8", "key": "8", "args": "8" },
-      { "command": "skk.numberInput", "when": "editorTextFocus && skk.activeKey.num9", "key": "9", "args": "9" },
-      { "command": "skk.spaceInput", "when": "editorTextFocus && skk.activeKey.space", "key": "space" },
-      { "command": "skk.ctrlJInput", "when": "editorTextFocus", "key": "ctrl+j" },
-      { "command": "skk.ctrlGInput", "when": "editorTextFocus && skk.activeKey.ctrl_g", "key": "ctrl+g" },
-      { "command": "skk.ctrlGInput", "when": "editorTextFocus && skk.activeKey.escape", "key": "escape" },
-      { "command": "skk.enterInput", "when": "editorTextFocus && skk.activeKey.enter", "key": "enter" },
-      { "command": "skk.backspaceInput", "when": "editorTextFocus && skk.activeKey.backspace", "key": "backspace" },
-      { "command": "skk.registerMidashigo", "when": "editorTextFocus", "key": "ctrl+alt+r" }
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.a",
+        "key": "a",
+        "args": "a"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.b",
+        "key": "b",
+        "args": "b"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.c",
+        "key": "c",
+        "args": "c"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.d",
+        "key": "d",
+        "args": "d"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.e",
+        "key": "e",
+        "args": "e"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.f",
+        "key": "f",
+        "args": "f"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.g",
+        "key": "g",
+        "args": "g"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.h",
+        "key": "h",
+        "args": "h"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.i",
+        "key": "i",
+        "args": "i"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.j",
+        "key": "j",
+        "args": "j"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.k",
+        "key": "k",
+        "args": "k"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.l",
+        "key": "l",
+        "args": "l"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.m",
+        "key": "m",
+        "args": "m"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.n",
+        "key": "n",
+        "args": "n"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.o",
+        "key": "o",
+        "args": "o"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.p",
+        "key": "p",
+        "args": "p"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.q",
+        "key": "q",
+        "args": "q"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.r",
+        "key": "r",
+        "args": "r"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.s",
+        "key": "s",
+        "args": "s"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.t",
+        "key": "t",
+        "args": "t"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.u",
+        "key": "u",
+        "args": "u"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.v",
+        "key": "v",
+        "args": "v"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.w",
+        "key": "w",
+        "args": "w"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.x",
+        "key": "x",
+        "args": "x"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.y",
+        "key": "y",
+        "args": "y"
+      },
+      {
+        "command": "skk.lowerAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.z",
+        "key": "z",
+        "args": "z"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_a",
+        "key": "shift+a",
+        "args": "A"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_b",
+        "key": "shift+b",
+        "args": "B"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_c",
+        "key": "shift+c",
+        "args": "C"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_d",
+        "key": "shift+d",
+        "args": "D"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_e",
+        "key": "shift+e",
+        "args": "E"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_f",
+        "key": "shift+f",
+        "args": "F"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_g",
+        "key": "shift+g",
+        "args": "G"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_h",
+        "key": "shift+h",
+        "args": "H"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_i",
+        "key": "shift+i",
+        "args": "I"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_j",
+        "key": "shift+j",
+        "args": "J"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_k",
+        "key": "shift+k",
+        "args": "K"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_l",
+        "key": "shift+l",
+        "args": "L"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_m",
+        "key": "shift+m",
+        "args": "M"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_n",
+        "key": "shift+n",
+        "args": "N"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_o",
+        "key": "shift+o",
+        "args": "O"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_p",
+        "key": "shift+p",
+        "args": "P"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_q",
+        "key": "shift+q",
+        "args": "Q"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_r",
+        "key": "shift+r",
+        "args": "R"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_s",
+        "key": "shift+s",
+        "args": "S"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_t",
+        "key": "shift+t",
+        "args": "T"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_u",
+        "key": "shift+u",
+        "args": "U"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_v",
+        "key": "shift+v",
+        "args": "V"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_w",
+        "key": "shift+w",
+        "args": "W"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_x",
+        "key": "shift+x",
+        "args": "X"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_y",
+        "key": "shift+y",
+        "args": "Y"
+      },
+      {
+        "command": "skk.upperAlphabetInput",
+        "when": "editorTextFocus && skk.activeKey.shift_z",
+        "key": "shift+z",
+        "args": "Z"
+      },
+      {
+        "command": "skk.symbolInput",
+        "when": "editorTextFocus && skk.activeKey.dot",
+        "key": ".",
+        "args": "."
+      },
+      {
+        "command": "skk.symbolInput",
+        "when": "editorTextFocus && skk.activeKey.comma",
+        "key": ",",
+        "args": ","
+      },
+      {
+        "command": "skk.symbolInput",
+        "when": "editorTextFocus && skk.activeKey.slash",
+        "key": "/",
+        "args": "/"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num0",
+        "key": "0",
+        "args": "0"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num1",
+        "key": "1",
+        "args": "1"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num2",
+        "key": "2",
+        "args": "2"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num3",
+        "key": "3",
+        "args": "3"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num4",
+        "key": "4",
+        "args": "4"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num5",
+        "key": "5",
+        "args": "5"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num6",
+        "key": "6",
+        "args": "6"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num7",
+        "key": "7",
+        "args": "7"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num8",
+        "key": "8",
+        "args": "8"
+      },
+      {
+        "command": "skk.numberInput",
+        "when": "editorTextFocus && skk.activeKey.num9",
+        "key": "9",
+        "args": "9"
+      },
+      {
+        "command": "skk.spaceInput",
+        "when": "editorTextFocus && skk.activeKey.space",
+        "key": "space"
+      },
+      {
+        "command": "skk.ctrlJInput",
+        "when": "editorTextFocus",
+        "key": "ctrl+j"
+      },
+      {
+        "command": "skk.ctrlGInput",
+        "when": "editorTextFocus && skk.activeKey.ctrl_g",
+        "key": "ctrl+g"
+      },
+      {
+        "command": "skk.ctrlGInput",
+        "when": "editorTextFocus && skk.activeKey.escape",
+        "key": "escape"
+      },
+      {
+        "command": "skk.enterInput",
+        "when": "editorTextFocus && skk.activeKey.enter",
+        "key": "enter"
+      },
+      {
+        "command": "skk.backspaceInput",
+        "when": "editorTextFocus && skk.activeKey.backspace",
+        "key": "backspace"
+      },
+      {
+        "command": "skk.registerMidashigo",
+        "when": "editorTextFocus",
+        "key": "ctrl+alt+r"
+      }
     ],
     "configuration": {
       "type": "object",
@@ -175,7 +528,7 @@
     "@types/async-lock": "^1.4.1",
     "@types/chai": "^4.3.16",
     "@types/mocha": "^10.0.7",
-    "@types/node": "18.x",
+    "@types/node": "^22.15.21",
     "@types/vscode": "^1.88.0",
     "@types/wanakana": "^5.3.0",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
