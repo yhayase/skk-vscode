@@ -18,6 +18,12 @@ jobs:
       with:
         node-version: '22.x'
         cache: 'npm'
+        
+    - name: Setup Xvfb
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb
+        Xvfb :99 -screen 0 1024x768x24 &
 
     - name: Install Dependencies
       run: npm install
@@ -29,6 +35,15 @@ jobs:
       run: npm run test:unit
 
     - name: Run Integration Tests
-      run: npm run test:integration
+      run: xvfb-run -a npm run test:integration || (echo "Integration test failed. Check detailed logs above."; exit 1)
       env:
         ELECTRON_DISABLE_SANDBOX: 1
+        DISPLAY: ':99'
+    - name: Debug on Failure
+      if: failure()
+      run: |
+        echo "Integration Tests failed. Detailed logs should be above."
+        xvfb-run -a npm run test:integration -- --verbose
+      env:
+        ELECTRON_DISABLE_SANDBOX: 1
+        DISPLAY: ':99'
