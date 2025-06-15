@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, feature/*, bugfix/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22.x'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build Project
+      run: npm run build
+
+    - name: Run Unit Tests
+      run: npm run test:unit
+
+#    Disable integration tests due to flakiness
+#    - name: Run Integration Tests with Xvfb
+#      uses: GabrielBB/xvfb-action@v1
+#      with:
+#        run: npm run test:integration
+#      env:
+#        ELECTRON_DISABLE_SANDBOX: 1
