@@ -229,10 +229,10 @@ export class MidashigoMode extends AbstractMidashigoMode {
     public override getActiveKeys(): Set<string> {
         const keys = new Set<string>();
 
-       // this mode deals with all printable ASCII characters
+        // this mode deals with all printable ASCII characters
         for (let i = 32; i <= 126; i++) { // ASCII printable characters
             const char = String.fromCharCode(i);
-            if ("a"<= char && char <= "z") {
+            if ("a" <= char && char <= "z") {
                 keys.add(char);
                 keys.add("shift+" + char); // Use lowercase char for shift combinations
             } else if ("A" <= char && char <= "Z") {
@@ -247,6 +247,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         keys.add("backspace");
         keys.add("ctrl+j");
         keys.add("ctrl+g");
+        keys.add("greater"); // Added for prefix conversion
 
         return keys;
     }
