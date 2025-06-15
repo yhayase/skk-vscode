@@ -142,28 +142,33 @@ export class MidashigoMode extends AbstractMidashigoMode {
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
-        // まずはローマ字テーブルを見て、かなや記号に変換できるならば変換する
+        // ローマ字テーブルを参照し、かなや記号に変換可能な場合に変換を行う
         const kana = this.romajiInput.processInput(key);
 
-        // 以下の記号のいずれかが入力された場合には、その記号を入力するとともに，記号以前の部分について変換を始める
-        // 。、．，」』］!！:：;；
+        // 変換可能な文字があれば挿入して終了
+        if (kana.length > 0) {
+            const remaining = this.romajiInput.getRemainingRomaji();
+            await context.insertStringAndShowRemaining(kana, remaining, false);
+            return;
+        }
 
-        // "n," と入力された場合，kana が "ん、" となる．そのため、最後の1文字で変換を開始するかを決定する
+        // 特定の記号が入力された場合、記号以前の部分を変換開始し、記号を挿入
+        const punctuationMarks = new Set(["。", "、", "．", "，", "」", "』", "］", "!", "！", ":", "：", ";", "；"]);
         const lastKana = kana[kana.length - 1];
-
-        if (new Set(["。", "、", "．", "，", "」", "』", "］", "!", "！", ":", "：", ";", "；"]).has(lastKana)) {
-            // 最後の1文字を除いた kana を挿入
+        if (punctuationMarks.has(lastKana)) {
             this.romajiInput.reset();
             await context.insertStringAndShowRemaining(kana.slice(0, -1), "", false);
-            
             await this.henkan(context, "", lastKana);
             return;
         }
 
-        // 変換できる文字があればそれを挿入して終了
-        if (kana.length > 0) {
-            const remaining = this.romajiInput.getRemainingRomaji();
-            await context.insertStringAndShowRemaining(kana, remaining, false);
+        // 接頭辞入力のための「>」の処理
+        if (key === '>') {
+            const midashigo = this.editor.extractMidashigo();
+            if (midashigo && midashigo.length > 0) {
+                await context.insertStringAndShowRemaining('>', '', false);
+                await this.henkan(context, "");
+            }
             return;
         }
 

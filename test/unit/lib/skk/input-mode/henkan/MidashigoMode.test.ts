@@ -57,6 +57,9 @@ describe('MidashigoMode', () => {
             mockEditor.getJisyoProvider().registerCandidate('か', {
                 word: '可',
             });
+            mockEditor.getJisyoProvider().registerCandidate('だい>', {
+                word: '大',
+            });
         });
 
         it('should enter okurigana mode on uppercase input', async () => {
@@ -71,6 +74,16 @@ describe('MidashigoMode', () => {
             await midashigoMode.onLowerAlphabet(context, 'a');
             await midashigoMode.onSpace(context);
             expect(context["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
+            expect(mockEditor.getCurrentText()).to.equal('▼可');
+        });
+
+        it('should start henkan on prefix symbol ">"', async () => {    
+            await midashigoMode.onLowerAlphabet(context, 'd');
+            await midashigoMode.onLowerAlphabet(context, 'a');
+            await midashigoMode.onLowerAlphabet(context, 'i');
+            await midashigoMode.onSymbol(context, '>');
+            expect(context["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
+            expect(mockEditor.getCurrentText()).to.equal('▼大');
         });
     });
 
