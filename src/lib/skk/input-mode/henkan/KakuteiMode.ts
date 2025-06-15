@@ -15,7 +15,7 @@ export class KakuteiMode extends AbstractHenkanMode {
         return new KakuteiMode(context, editor);
     }
 
-    private async insertKanaAndUpdateRomajiStatus(context: AbstractKanaMode , kana: string, remainingRomaji: string, isOkuri: boolean): Promise<void> {
+    private async insertKanaAndUpdateRomajiStatus(context: AbstractKanaMode, kana: string, remainingRomaji: string, isOkuri: boolean): Promise<void> {
         if (remainingRomaji.length > 0 && !this.treatEnterKey) {
             this.treatEnterKey = true;
             context["editor"].notifyModeInternalStateChanged(); // Notify editor to update contexts
@@ -43,7 +43,7 @@ export class KakuteiMode extends AbstractHenkanMode {
         }
         this.insertKanaAndUpdateRomajiStatus(context, this.romajiInput.processInput(key), this.romajiInput.getRemainingRomaji(), false);
     }
-    
+
     async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'L') {
             this.editor.setInputMode(ZeneiMode.getInstance());
@@ -68,6 +68,19 @@ export class KakuteiMode extends AbstractHenkanMode {
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
+        // 「@」が入力された場合は SKK Abbrev mode に移行し、today を入力した状態にする
+        if (key === "@") {
+            // "@" 自体は挿入しない
+            this.romajiInput.reset();
+            const abbrevMode = new AbbrevMode(context, this.editor);
+            context.setHenkanMode(abbrevMode);
+            // Workaround: setHenkanMode による画面表示が完了するまで待つ
+            await new Promise(resolve => setTimeout(resolve, 50));
+            // private メソッドにアクセスするため、as any でキャストする
+            (abbrevMode as any)._henkanInternal(context, "today");
+            return;
+        }
+
         // まずはローマ字テーブルを見て、かなや記号に変換できるならば変換する
         let kana = this.romajiInput.processInput(key);
         let remaining = this.romajiInput.getRemainingRomaji();
@@ -81,8 +94,6 @@ export class KakuteiMode extends AbstractHenkanMode {
                 context.setHenkanMode(new AbbrevMode(context, this.editor));
                 return;
             }
-
-            // TODO: @ が単体で入力された場合などの特殊な処理を記述する
 
             // 変換できない場合は， remaining に入っている記号をそのまま挿入
             this.romajiInput.reset();

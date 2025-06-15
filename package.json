@@ -491,6 +491,12 @@
         "key": "backspace"
       },
       {
+        "command": "skk.symbolInput",
+        "when": "editorTextFocus && skk.activeKey.at",
+        "key": "shift+2",
+        "args": "@"
+      },
+      {
         "command": "skk.registerMidashigo",
         "when": "editorTextFocus",
         "key": "ctrl+alt+r"

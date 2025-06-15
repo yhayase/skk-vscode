@@ -3,6 +3,8 @@ import { AbstractKanaMode } from "../AbstractKanaMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { InlineHenkanMode } from "./InlineHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
+import { Candidate } from "../../jisyo/candidate";
+import { Entry } from "../../jisyo/entry";
 
 export class AbbrevMode extends AbstractMidashigoMode {
     constructor(context: AbstractKanaMode, editor: IEditor) {
@@ -17,6 +19,36 @@ export class AbbrevMode extends AbstractMidashigoMode {
         // do nothing
     }
 
+    private async _henkanInternal(context: AbstractKanaMode, midashigo: string): Promise<void> {
+        if (midashigo.length === 0) {
+            context.setHenkanMode(KakuteiMode.create(context, this.editor));
+            return;
+        }
+
+        const jisyoCandidates = await this.editor.getJisyoProvider().lookupCandidates(midashigo);
+        if (jisyoCandidates === undefined) {
+            await this.editor.openRegistrationEditor(midashigo, "");
+            return;
+        }
+
+        // 見出し語が 'today' の場合、現在の日付を変換候補として追加
+        let candidates = jisyoCandidates.getRawCandidateList() as Candidate[];
+        if (midashigo.toLowerCase() === 'today') {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            const day = now.getDay();
+            const dayStr = ['日', '月', '火', '水', '木', '金', '土'][day];
+            const dateStr = `${year}年${month}月${date}日(${dayStr})`;
+            const dateCandidate = new Candidate(dateStr);
+            candidates = [dateCandidate, ...candidates];
+        }
+
+        const entry =  new Entry(midashigo, candidates, "");
+        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, "", entry, "", ""));
+    }
+
     private async henkan(context: AbstractKanaMode): Promise<void> {
         const midashigo = this.editor.extractMidashigo();
         if (!midashigo || midashigo.length === 0) {
@@ -24,12 +56,8 @@ export class AbbrevMode extends AbstractMidashigoMode {
             return;
         }
 
-        const jisyoCandidates = await this.editor.getJisyoProvider().lookupCandidates(midashigo);
-        if (jisyoCandidates=== undefined) {
-            await this.editor.openRegistrationEditor(midashigo, "");
-            return;
-        }
-        context.setHenkanMode(new InlineHenkanMode(context, this.editor, this, midashigo, "", jisyoCandidates, "", ""));
+        await this._henkanInternal(context, midashigo);
+        return;
     }
 
     async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
