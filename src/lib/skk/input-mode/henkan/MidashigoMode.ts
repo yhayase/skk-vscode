@@ -142,15 +142,22 @@ export class MidashigoMode extends AbstractMidashigoMode {
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
-        // ローマ字テーブルを参照し、かなや記号に変換可能な場合に変換を行う
-        const kana = this.romajiInput.processInput(key);
+        // 接頭辞入力のための「>」の処理
+        if (key === '>') {
+            // "n" のように，仮名にできるローマ字がバッファに残っている場合は，仮名を入力してから変換を開始する
+            const kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
+            this.romajiInput.reset();
+            await context.insertStringAndShowRemaining(kana + key, "", false);
 
-        // 変換可能な文字があれば挿入して終了
-        if (kana.length > 0) {
-            const remaining = this.romajiInput.getRemainingRomaji();
-            await context.insertStringAndShowRemaining(kana, remaining, false);
+            const midashigo = this.editor.extractMidashigo();
+            if (midashigo && midashigo.length > 0) {
+                await this.henkan(context, "");
+            }
             return;
         }
+
+        // ローマ字テーブルを参照し、かなや記号に変換可能な場合に変換を行う
+        const kana = this.romajiInput.processInput(key);
 
         // 特定の記号が入力された場合、記号以前の部分を変換開始し、記号を挿入
         const punctuationMarks = new Set(["。", "、", "．", "，", "」", "』", "］", "!", "！", ":", "：", ";", "；"]);
@@ -162,17 +169,12 @@ export class MidashigoMode extends AbstractMidashigoMode {
             return;
         }
 
-        // 接頭辞入力のための「>」の処理
-        if (key === '>') {
-            const midashigo = this.editor.extractMidashigo();
-            if (midashigo && midashigo.length > 0) {
-                await context.insertStringAndShowRemaining('>', '', false);
-                await this.henkan(context, "");
-            }
+        // それ以外の場合は、かなをそのまま挿入
+        if (kana.length > 0) {
+            const remaining = this.romajiInput.getRemainingRomaji();
+            await context.insertStringAndShowRemaining(kana, remaining, false);
             return;
         }
-
-        throw new Error("Method not implemented.");
     }
 
     async onSpace(context: AbstractKanaMode): Promise<void> {
@@ -201,7 +203,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         switch (await this.editor.deleteLeft()) {
             case DeleteLeftResult.markerDeleted:
             case DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted:
-            context.setHenkanMode(KakuteiMode.create(context, this.editor));
+                context.setHenkanMode(KakuteiMode.create(context, this.editor));
                 break;
             case DeleteLeftResult.otherCharacterDeleted:
                 // do nothing

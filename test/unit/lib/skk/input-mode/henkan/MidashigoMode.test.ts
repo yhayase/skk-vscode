@@ -288,7 +288,7 @@ describe('MidashigoMode', () => {
             mockEditor.setInputMode(context);
         });
 
-        it('should return a set containing all printable ASCII, enter, backspace, ctrl+j, ctrl+g', () => {
+        it('should return a set containing all printable ASCII, enter, backspace, ctrl+j, ctrl+g, greater', () => {
             const activeKeys = midashigoMode.getActiveKeys();
             const expectedBaseKeys = new Set<string>();
 
@@ -304,6 +304,8 @@ describe('MidashigoMode', () => {
                     expectedBaseKeys.add(char);
                 }
             }
+            expectedBaseKeys.add("greater"); // For '>' symbol
+
             // Special keys
             expectedBaseKeys.add("enter");
             expectedBaseKeys.add("backspace");
