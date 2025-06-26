@@ -78,8 +78,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        await this.fixateCandidate(context);
-        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        await this.fixateAndGoKakuteiMode(context);
         await context.lowerAlphabetInput(key);
     }
 
@@ -119,15 +118,13 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        await this.fixateCandidate(context);
-        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        await this.fixateAndGoKakuteiMode(context);
         await context.upperAlphabetInput(key);
     }
 
     async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        await this.fixateCandidate(context);
-        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        await this.fixateAndGoKakuteiMode(context);
         await context.numberInput(key);
     }
 
@@ -140,10 +137,8 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         }
 
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        await this.fixateCandidate(context).then(() => {
-            context.setHenkanMode(KakuteiMode.create(context, this.editor));
-            context.symbolInput(key);
-        });
+        await this.fixateAndGoKakuteiMode(context);
+        await context.symbolInput(key);
     }
 
     async onSpace(context: AbstractKanaMode): Promise<void> {
