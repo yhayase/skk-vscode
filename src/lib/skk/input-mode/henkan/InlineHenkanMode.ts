@@ -8,6 +8,7 @@ import { KakuteiMode } from "./KakuteiMode";
 import { MenuHenkanMode } from "./MenuHenkanMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { CandidateDeletionMode } from './CandidateDeletionMode';
+import { MidashigoMode } from './MidashigoMode'; // 追加
 import wanakana = require('wanakana');
 
 export class InlineHenkanMode extends AbstractHenkanMode {
@@ -131,6 +132,13 @@ export class InlineHenkanMode extends AbstractHenkanMode {
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
+        if (key === '>') {
+            await this.fixateCandidate(context);
+            const midashigoMode = await MidashigoMode.create(context, this.editor, '', '>');
+            context.setHenkanMode(midashigoMode);
+            return;
+        }
+
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
         await this.fixateCandidate(context).then(() => {
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
@@ -205,6 +213,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
                 keys.add(char);
             }
         }
+        keys.add("greater"); // '>' symbol
 
         // Special keys
         keys.add("enter");

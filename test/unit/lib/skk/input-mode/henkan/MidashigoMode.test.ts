@@ -10,10 +10,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
         });
 
         it('should convert romaji to hiragana in midashigo', async () => {
@@ -46,10 +46,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
 
             context.setHenkanMode(midashigoMode);
             midashigoMode.onLowerAlphabet(context, '');
@@ -92,10 +92,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
             context.setHenkanMode(midashigoMode);
             mockEditor.setInputMode(context);
             mockEditor.getJisyoProvider().registerCandidate('かk', {
@@ -121,10 +121,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
 
             context.setHenkanMode(midashigoMode);
             mockEditor.setInputMode(context);
@@ -161,10 +161,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
 
             context.setHenkanMode(midashigoMode);
             midashigoMode.onLowerAlphabet(context, '');
@@ -189,10 +189,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
             context.setHenkanMode(midashigoMode);
             mockEditor.setInputMode(context);
         });
@@ -217,16 +217,16 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             // Initialize MidashigoMode without any initial input for these tests
             // to ensure a clean state for observing gokan/okurigana transitions.
-            midashigoMode = new MidashigoMode(context, mockEditor, ''); 
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
             context.setHenkanMode(midashigoMode);
             // It's important that the mockEditor's input mode is also set to the context (AbstractKanaMode)
             // which then delegates to the henkanMode (MidashigoMode in this case).
-            mockEditor.setInputMode(context); 
+            mockEditor.setInputMode(context);
         });
 
         it('should return "midashigo:gokan" initially', () => {
@@ -275,15 +275,51 @@ describe('MidashigoMode', () => {
         });
     });
 
-    describe('getActiveKeys', () => {
-        let midashigoMode: MidashigoMode;
+    describe('constructor', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
         beforeEach(() => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+        });
+
+        it('should initialize with an empty midashigo by default', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
+            expect(mockEditor.getCurrentText()).to.equal('▽');
+        });
+
+        it('should initialize with initial romaji input', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor, 'a');
+            expect(mockEditor.getCurrentText()).to.equal('▽あ');
+        });
+
+        it('should initialize with initial yomi input', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor, '', '>');
+            expect(mockEditor.getCurrentText()).to.equal('▽>');
+        });
+
+        it('should initialize with both initial romaji and yomi input', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor, 'i', 'だ');
+            expect(mockEditor.getCurrentText()).to.equal('▽だい');
+        });
+
+        it('should initialize with both initial partial romaji and yomi input', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor, 's', 'か');
+            expect(mockEditor.getCurrentText()).to.equal('▽か');
+            expect(mockEditor.getRemainingRomaji()).to.equal('s', 'should have remaining romaji');
+        });
+    });
+
+    describe('getActiveKeys', () => {
+        let midashigoMode: MidashigoMode;
+        let mockEditor: MockEditor;
+        let context: AbstractKanaMode;
+
+        beforeEach(async () => {
+            mockEditor = new MockEditor();
+            context = new HiraganaMode();
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
             context.setHenkanMode(midashigoMode);
             mockEditor.setInputMode(context);
         });

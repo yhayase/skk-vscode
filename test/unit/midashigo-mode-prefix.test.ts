@@ -8,7 +8,7 @@ describe('MidashigoMode Prefix Conversion', () => {
     let editor: MockEditor;
     let context: any;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         editor = new MockEditor();
         // モックコンテキストの設定
         context = {
@@ -29,7 +29,7 @@ describe('MidashigoMode Prefix Conversion', () => {
                 };
             }
         } as AbstractKanaMode;
-        midashigoMode = new MidashigoMode(context, editor, '');
+        midashigoMode = await MidashigoMode.create(context, editor, '');
     });
 
     it('should detect ">" input and handle prefix conversion', async () => {

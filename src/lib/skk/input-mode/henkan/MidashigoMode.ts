@@ -18,13 +18,19 @@ export class MidashigoMode extends AbstractMidashigoMode {
     private romajiInput: RomajiInput;
     private midashigoMode: MidashigoType = MidashigoType.gokan;
 
-    constructor(context: AbstractKanaMode, editor: IEditor, initialRomajiInput: string = "") {
+    private constructor(context: AbstractKanaMode, editor: IEditor) {
         super("▽", editor);
         this.romajiInput = context.newRomajiInput();
+    }
 
-        const insertStr = "▽" + this.romajiInput.processInput(initialRomajiInput.toLowerCase());
-        this.editor.setMidashigoStartToCurrentPosition();
-        context.insertStringAndShowRemaining(insertStr, this.romajiInput.getRemainingRomaji(), false);
+    public static async create(context: AbstractKanaMode, editor: IEditor, initialRomajiInput: string = "", initialYomiInput: string = ""): Promise<MidashigoMode> {
+        const mode = new MidashigoMode(context, editor);
+
+        const insertStr = `▽${initialYomiInput}${mode.romajiInput.processInput(initialRomajiInput.toLowerCase())}`;
+        mode.editor.setMidashigoStartToCurrentPosition();
+        await context.insertStringAndShowRemaining(insertStr, mode.romajiInput.getRemainingRomaji(), false);
+
+        return mode;
     }
 
     resetOkuriState(): void {

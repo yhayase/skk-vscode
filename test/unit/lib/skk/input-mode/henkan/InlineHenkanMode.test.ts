@@ -15,7 +15,7 @@ describe('InlineHenkanMode', () => {
         let entry: Entry;
         let prevMode: MidashigoMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             const candidates = [
@@ -25,7 +25,7 @@ describe('InlineHenkanMode', () => {
                 new Candidate('候補4', undefined),
             ];
             entry = new Entry('test', candidates, '');
-            prevMode = new MidashigoMode(context, mockEditor);
+            prevMode = await MidashigoMode.create(context, mockEditor);
             inlineHenkanMode = new InlineHenkanMode(context, mockEditor, prevMode, 'み', 'み', entry, '');
 
             context.setHenkanMode(inlineHenkanMode);
@@ -62,7 +62,7 @@ describe('InlineHenkanMode', () => {
         let entry: Entry;
         let prevMode: MidashigoMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             const candidates = [
@@ -70,7 +70,7 @@ describe('InlineHenkanMode', () => {
                 new Candidate('候補2', undefined),
             ];
             entry = new Entry('てすと', candidates, '');
-            prevMode = new MidashigoMode(context, mockEditor, "tesuto");
+            prevMode = await MidashigoMode.create(context, mockEditor, "tesuto");
             inlineHenkanMode = new InlineHenkanMode(context, mockEditor, prevMode, 'てすと', '', entry, '');
 
             mockEditor.setInputMode(context);
@@ -106,7 +106,7 @@ describe('InlineHenkanMode', () => {
         let entry: Entry;
         let prevMode: MidashigoMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             const candidates = [
@@ -114,7 +114,7 @@ describe('InlineHenkanMode', () => {
                 new Candidate('候補2', undefined),
             ];
             entry = new Entry('test', candidates, '');
-            prevMode = new MidashigoMode(context, mockEditor, 'a');
+            prevMode = await MidashigoMode.create(context, mockEditor, 'a');
             inlineHenkanMode = new InlineHenkanMode(context, mockEditor, prevMode, 'み', '', entry, '');
 
             mockEditor.setInputMode(context);
@@ -150,7 +150,7 @@ describe('InlineHenkanMode', () => {
         let entry: Entry;
         let prevMode: MidashigoMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             const candidates = [
@@ -158,7 +158,7 @@ describe('InlineHenkanMode', () => {
                 new Candidate('候補2', undefined),
             ];
             entry = new Entry('test', candidates, '');
-            prevMode = new MidashigoMode(context, mockEditor, 'a');
+            prevMode = await MidashigoMode.create(context, mockEditor, 'a');
         });
 
         it('should handle suffix in fixation', async () => {
@@ -175,12 +175,12 @@ describe('InlineHenkanMode', () => {
         let entry: Entry;
         let prevMode: MidashigoMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            const candidates = [ new Candidate('候補1', undefined) ];
+            const candidates = [new Candidate('候補1', undefined)];
             entry = new Entry('test', candidates, '');
-            prevMode = new MidashigoMode(context, mockEditor);
+            prevMode = await MidashigoMode.create(context, mockEditor);
             inlineHenkanMode = new InlineHenkanMode(context, mockEditor, prevMode, 'み', 'み', entry, '');
         });
 
@@ -193,30 +193,74 @@ describe('InlineHenkanMode', () => {
                 const char = String.fromCharCode(i);
                 if ("a" <= char && char <= "z") {
                     expectedKeys.add(char);
-                    expectedKeys.add("shift+" + char); 
+                    expectedKeys.add("shift+" + char);
                 } else if ("A" <= char && char <= "Z") {
                     // Assumed covered by shift+lowercase
                 } else {
                     expectedKeys.add(char);
                 }
             }
+            expectedKeys.add("greater"); // '>' symbol for suffix handling
+
             // Special keys
             expectedKeys.add("enter");
             expectedKeys.add("backspace");
             expectedKeys.add("ctrl+j");
             expectedKeys.add("ctrl+g");
-            
+
             // Verify all expected keys are present
             for (const key of expectedKeys) {
                 expect(activeKeys.has(key), `activeKeys should contain '${key}'`).to.be.true;
             }
-            
+
             // Verify no unexpected keys are present
             for (const key of activeKeys) {
                 expect(expectedKeys.has(key), `activeKeys should not contain unexpected key '${key}'`).to.be.true;
             }
-            
+
             expect(activeKeys.size).to.equal(expectedKeys.size, "activeKeys and expectedKeys should have the same size");
         });
+    });
+});
+
+
+describe('suffix prefix input', () => {
+    let inlineHenkanMode: InlineHenkanMode;
+    let mockEditor: MockEditor;
+    let context: HiraganaMode; // 型を HiraganaMode に変更
+    let entry: Entry;
+    let prevMode: MidashigoMode;
+
+    beforeEach(async () => { // async に変更
+        mockEditor = new MockEditor();
+        context = new HiraganaMode(); // HiraganaMode のインスタンスを生成
+        const candidates = [
+            new Candidate('小林', undefined),
+        ];
+        entry = new Entry('こばやし', candidates, '');
+        prevMode = await MidashigoMode.create(context, mockEditor, "kobayashi");
+        inlineHenkanMode = new InlineHenkanMode(context, mockEditor, prevMode, '小林', '', entry, '');
+
+        mockEditor.setInputMode(context);
+        context.setHenkanMode(inlineHenkanMode);
+    });
+
+    it('should fixate candidate and switch to midashigo mode with ">" on ">" key', async () => {
+        // 操作
+        await inlineHenkanMode.onSymbol(context, '>');
+
+        // 検証
+        // 1. 候補が確定されているか
+        expect(mockEditor.getFixatedCandidate()).to.equal('小林');
+
+        // 2. モードが MidashigoMode に戻っているか
+        expect(context["henkanMode"]).to.be.an.instanceOf(MidashigoMode);
+
+        // 3. MidashigoMode の見出し語が ">" に設定されているか
+        // MidashigoMode のコンストラクタが呼ばれるように InlineHenkanMode を修正する必要がある
+        // 現状の prevMode を再利用する実装では、コンストラクタは呼ばれない
+        // なので、InlineHenkanMode の実装を修正する必要がある
+        // ここでは、テストが失敗することを確認する
+        expect(mockEditor.getCurrentText()).to.include('▽>'); // MidashigoMode が ">" を表示することを確認
     });
 });

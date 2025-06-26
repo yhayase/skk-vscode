@@ -46,11 +46,11 @@ describe('KatakanaMode', () => {
         expect(mockEditor.getCurrentText()).to.equal('ッカ');
     });
 
-    it('should start henkan mode with capital letter', () => {
-        katakanaMode.upperAlphabetInput('K');
-        katakanaMode.lowerAlphabetInput('a');
-        katakanaMode.lowerAlphabetInput('t');
-        katakanaMode.lowerAlphabetInput('a');
+    it('should start henkan mode with capital letter', async () => {
+        await katakanaMode.upperAlphabetInput('K');
+        await katakanaMode.lowerAlphabetInput('a');
+        await katakanaMode.lowerAlphabetInput('t');
+        await katakanaMode.lowerAlphabetInput('a');
         expect(mockEditor.getMidashigo()).to.equal('カタ');
     });
 
