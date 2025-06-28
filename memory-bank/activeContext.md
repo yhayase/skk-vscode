@@ -1,27 +1,25 @@
 # Active Context
 
 ## 現在の作業フォーカス
-- SKKの接頭辞入力機能の実装が完了し、テストも成功している。
-- 関連する変更をGitにコミット済み。
-- 今後のリファクタリングの是非を検討中。
-- `onNumber` と `onEnter` メソッドの `Method not implemented` エラーについて、ユーザーは修正済みと認識しているが、コード上はまだ残っている。
+- SKKの接頭辞・接尾辞入力機能の実装が完了し、テストも成功している。
+- 関連する変更はGitにコミット済み。
+- 次に取り組むべきタスクを検討中。
 
 ## 最近の変更
-- `MidashigoMode.ts` に接頭辞変換機能を追加。
-- 関連するユニットテストを `MidashigoMode.test.ts` に追加。
-- `Next-ToDo.md` を現在の作業状況に合わせて更新。
-- 接頭辞変換機能の実装をコミット (`feat: Implement prefix conversion feature`)。
+- `InlineHenkanMode.ts` に接尾辞変換機能を追加。
+- 関連するユニットテストを `InlineHenkanMode.test.ts` に追加。
+- `MidashigoMode.ts` のPromiseチェーンをasync/awaitにリファクタリング。
+- 接尾辞変換機能の実装をコミット。
 
 ## 次のステップ
-- 提案されたリファクタリング案について、ユーザーと検討し、実施するかどうかを決定する。
-- `onNumber` と `onEnter` メソッドの `Method not implemented` の状態について、ユーザーと認識を合わせる。
-- 接尾辞入力機能の実装に着手する。
+- `onNumber` と `onEnter` メソッドの `Method not implemented` エラーの修正。
+- コード品質向上のためのリファクタリング。
+- 新機能の企画・開発。
 - `progress.md` を現在の状況に合わせて更新する。
 
 ## アクティブな決定と考慮事項
-- 接頭辞変換機能は主要な部分が完了し、テストもパスしている。
-- リファクタリングはコード品質向上のためであり、機能的な要件ではない。
-- `onNumber` と `onEnter` の `Method not implemented` は、ユーザーの認識とコードの状態に乖離があるため、確認が必要。
+- 接頭辞・接尾辞変換機能は主要な部分が完了し、テストもパスしている。
+- `onNumber` と `onEnter` の `Method not implemented` は、ユーザーの認識とコードの状態に乖離があるため、確認・修正が必要。
 
 ## 重要なパターンと設定
 - 接頭辞入力：見出し語モードで「>」が入力された際に、「>」つきの見出し語を検索。
