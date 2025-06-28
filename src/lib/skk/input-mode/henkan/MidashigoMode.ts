@@ -69,9 +69,8 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
     async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'l') {
-            this.editor.fixateMidashigo().then(() => {
-                this.editor.setInputMode(AsciiMode.getInstance());
-            });
+            await this.editor.fixateMidashigo();
+            this.editor.setInputMode(AsciiMode.getInstance());
             return;
         }
 
@@ -106,9 +105,8 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
     async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'L') {
-            this.editor.fixateMidashigo().then(() => {
-                this.editor.setInputMode(ZeneiMode.getInstance());
-            });
+            await this.editor.fixateMidashigo();
+            this.editor.setInputMode(ZeneiMode.getInstance());
             return;
         }
 
