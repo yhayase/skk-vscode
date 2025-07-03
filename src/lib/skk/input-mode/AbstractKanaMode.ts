@@ -23,7 +23,6 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
     async insertStringAndShowRemaining(str: string, remaining: string, isOkuri: boolean): Promise<void> {
         await this.editor.insertOrReplaceSelection(str);
         this.editor.showRemainingRomaji(remaining, isOkuri, 0);
-        return Promise.resolve();
     }
 
     public async reset(): Promise<void> {

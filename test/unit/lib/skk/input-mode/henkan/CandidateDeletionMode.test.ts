@@ -17,13 +17,13 @@ describe('CandidateDeletionMode', () => {
         let candidate: Candidate;
         let prevMode: InlineHenkanMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
 
             candidate = new Candidate('単語', undefined);
             const entry = new Entry('よみ', [candidate], '');
-            const midashigoMode = new MidashigoMode(context, mockEditor);
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'よみ', '', entry, '');
             deletionMode = new CandidateDeletionMode(context, mockEditor, prevMode, 'よみ', candidate);
 
@@ -43,13 +43,13 @@ describe('CandidateDeletionMode', () => {
         let candidate: Candidate;
         let prevMode: InlineHenkanMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
 
             candidate = new Candidate('単語', undefined);
             const entry = new Entry('よみ', [candidate], '');
-            const midashigoMode = new MidashigoMode(context, mockEditor);
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'よみ', '', entry, '');
             deletionMode = new CandidateDeletionMode(context, mockEditor, prevMode, 'よみ', candidate);
 
@@ -125,13 +125,13 @@ describe('CandidateDeletionMode', () => {
         let candidate: Candidate;
         let prevMode: InlineHenkanMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
 
             candidate = new Candidate('test', undefined);
             const entry = new Entry('test', [candidate], '');
-            const midashigoMode = new MidashigoMode(context, mockEditor);
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'み', 'み', entry, '');
             deletionMode = new CandidateDeletionMode(context, mockEditor, prevMode, 'key', candidate);
 
@@ -200,12 +200,12 @@ describe('CandidateDeletionMode', () => {
         let candidate: Candidate;
         let prevMode: InlineHenkanMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             candidate = new Candidate('単語', undefined);
             const entry = new Entry('よみ', [candidate], '');
-            const midashigoMode = new MidashigoMode(context, mockEditor);
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'よみ', '', entry, '');
             deletionMode = new CandidateDeletionMode(context, mockEditor, prevMode, 'よみ', candidate);
         });

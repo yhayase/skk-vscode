@@ -16,7 +16,7 @@ describe('MenuHenkanMode', () => {
         let entry: Entry;
         let prevMode: InlineHenkanMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             // 各テストケース実行前に毎回実行される初期化
             mockEditor = new MockEditor();
             context = new HiraganaMode();
@@ -33,7 +33,7 @@ describe('MenuHenkanMode', () => {
                 new Candidate('候補10', undefined),
             ];
             entry = new Entry('test', candidates, '');
-            const midashigoMode = new MidashigoMode(context, mockEditor);
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'み', 'み', entry, '');
             menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '', '');
         });
@@ -65,7 +65,7 @@ describe('MenuHenkanMode', () => {
         let entry: Entry;
         let prevMode: InlineHenkanMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             const candidates = [
@@ -74,7 +74,7 @@ describe('MenuHenkanMode', () => {
                 new Candidate('候補3', undefined),
             ];
             entry = new Entry('test', candidates, '');
-            const midashigoMode = new MidashigoMode(context, mockEditor);
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'み', 'み', entry, '');
             menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '', '');
             context.setHenkanMode(menuHenkanMode);
@@ -106,7 +106,7 @@ describe('MenuHenkanMode', () => {
         let entry: Entry;
         let prevMode: InlineHenkanMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             const candidates = [
@@ -115,7 +115,7 @@ describe('MenuHenkanMode', () => {
                 new Candidate('候補3', undefined),
             ];
             entry = new Entry('test', candidates, '');
-            const midashigoMode = new MidashigoMode(context, mockEditor, 'kanji');
+            const midashigoMode = await MidashigoMode.create(context, mockEditor, 'kanji');
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'かんじ', '', entry, '');
             menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '', '');
         });
@@ -150,7 +150,7 @@ describe('MenuHenkanMode', () => {
         let entry: Entry;
         let prevMode: InlineHenkanMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             const candidates = [
@@ -159,7 +159,7 @@ describe('MenuHenkanMode', () => {
                 new Candidate('候補3', undefined),
             ];
             entry = new Entry('test', candidates, '');
-            const midashigoMode = new MidashigoMode(context, mockEditor);
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'み', 'み', entry, '');
             menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '', '');
         });
@@ -188,12 +188,12 @@ describe('MenuHenkanMode', () => {
         let entry: Entry;
         let prevMode: InlineHenkanMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             const candidates = [ new Candidate('候補1', undefined) ];
             entry = new Entry('test', candidates, '');
-            const midashigoMode = new MidashigoMode(context, mockEditor);
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'み', 'み', entry, '');
             menuHenkanMode = new MenuHenkanMode(context, mockEditor, prevMode, entry, 0, '', '');
         });

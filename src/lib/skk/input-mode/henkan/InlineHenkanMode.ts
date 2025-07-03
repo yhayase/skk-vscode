@@ -8,6 +8,7 @@ import { KakuteiMode } from "./KakuteiMode";
 import { MenuHenkanMode } from "./MenuHenkanMode";
 import { AbstractMidashigoMode } from "./AbstractMidashigoMode";
 import { CandidateDeletionMode } from './CandidateDeletionMode';
+import { MidashigoMode } from './MidashigoMode'; // 追加
 import wanakana = require('wanakana');
 
 export class InlineHenkanMode extends AbstractHenkanMode {
@@ -77,8 +78,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        await this.fixateCandidate(context);
-        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        await this.fixateAndGoKakuteiMode(context);
         await context.lowerAlphabetInput(key);
     }
 
@@ -118,24 +118,27 @@ export class InlineHenkanMode extends AbstractHenkanMode {
 
         // other keys
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        await this.fixateCandidate(context);
-        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        await this.fixateAndGoKakuteiMode(context);
         await context.upperAlphabetInput(key);
     }
 
     async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        await this.fixateCandidate(context);
-        context.setHenkanMode(KakuteiMode.create(context, this.editor));
+        await this.fixateAndGoKakuteiMode(context);
         await context.numberInput(key);
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
+        if (key === '>') {
+            await this.fixateCandidate(context);
+            const midashigoMode = await MidashigoMode.create(context, this.editor, '', '>');
+            context.setHenkanMode(midashigoMode);
+            return;
+        }
+
         this.jisyoEntry.onCandidateSelected(this.editor.getJisyoProvider(), this.candidateIndex);
-        await this.fixateCandidate(context).then(() => {
-            context.setHenkanMode(KakuteiMode.create(context, this.editor));
-            context.symbolInput(key);
-        });
+        await this.fixateAndGoKakuteiMode(context);
+        await context.symbolInput(key);
     }
 
     async onSpace(context: AbstractKanaMode): Promise<void> {
@@ -205,6 +208,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
                 keys.add(char);
             }
         }
+        keys.add("greater"); // '>' symbol
 
         // Special keys
         keys.add("enter");

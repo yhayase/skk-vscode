@@ -152,6 +152,15 @@ export class MockEditor implements IEditor {
     private jisyoProvider: IJisyoProvider;
     private registrationYomi: string|undefined = undefined;
 
+    // 追加: テスト用のセッター
+    public setCurrentText(text: string): void {
+        this.currentText = text;
+    }
+
+    public setCursorPosition(position: IPosition): void {
+        this.cursorPosition = position;
+    }
+
     constructor() {
         // まずEditorFactoryを初期化
         EditorFactory.setInstance(this);

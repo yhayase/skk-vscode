@@ -51,8 +51,8 @@ describe('KakuteiMode', () => {
             context.setHenkanMode(kakuteiMode);
         });
 
-        it('should enter midashigo mode on uppercase input', () => {
-            kakuteiMode.onUpperAlphabet(context, 'K');
+        it('should enter midashigo mode on uppercase input', async () => {
+            await kakuteiMode.onUpperAlphabet(context, 'K');
             expect(context["henkanMode"].constructor.name).to.equal('MidashigoMode');
         });
 

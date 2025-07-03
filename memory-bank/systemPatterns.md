@@ -1,139 +1,25 @@
-# System Patterns: skk-vscode
+# System Patterns
 
-## System Architecture
+## システムアーキテクチャ
+- SKK入力システムは、複数の入力モード（かな入力モード、変換モード、見出し語モードなど）を持つ状態機械として設計されています。
+- 各モードは特定の入力処理を担当し、ユーザー入力に応じてモード間を遷移します。
+- 主要なモードには、KakuteiMode（確定モード）、MidashigoMode（見出し語モード）、InlineHenkanMode（インライン変換モード）などがあります。
 
-skk-vscode 拡張機能は、関心事の明確な分離を持つ階層化アーキテクチャに従います。
+## 主要な技術的決定
+- 接頭辞入力機能は、見出し語モードで「>」が入力された際に、「>」つきの見出し語を検索する処理を追加することで実装します。
+- 接尾辞入力機能は、InlineHenkanModeで候補が表示されている状態で「>」が入力された際に、現在の候補を確定させ、かな入力の見出し語モードに遷移し、「▽>」状態を表示することで実装します。
+- 既存のモード遷移ロジックを活用し、必要に応じて新しいモードや処理を追加するアプローチを採用します。
 
-```
-┌─────────────────────────────────────────┐
-│              VSCode Layer               │
-│  (VSCodeEditor, VSCodeJisyoProvider)    │
-├─────────────────────────────────────────┤
-│              Core SKK Layer             │
-│  (Input Modes, Conversion, Dictionary)  │
-├─────────────────────────────────────────┤
-│            Abstraction Layer            │
-│         (IEditor, IJisyoProvider)       │
-└─────────────────────────────────────────┘
-```
+## 使用中のデザインパターン
+- 状態パターン：各入力モードを状態として表現し、状態間の遷移を管理することで、複雑な入力処理を整理しています。
+- シングルトンパターン：一部のモード（例：AsciiMode、ZeneiMode）では、シングルトンインスタンスを使用して一貫した状態を保っています。
 
-1. **VSCode Layer** - VSCode API との統合を処理します
-   - VSCode に固有のエディタインタラクションを実装します
-   - VSCode 固有の辞書読み込みと設定を管理します
+## コンポーネントの関係
+- KakuteiMode：基本的なかな入力と確定処理を担当し、大文字入力でMidashigoModeに遷移します。
+- MidashigoMode：見出し語の入力処理を担当し、接頭辞入力の処理が追加される予定です。
+- InlineHenkanMode：変換候補の表示と確定処理を担当し、接尾辞入力のための「>」処理が追加される予定です。
+- AbbrevMode：特定の記号（例：「/」）入力後の見出し語モードを担当します。
 
-2. **Core SKK Layer** - コア SKK 機能を含みます
-   - 入力モードと状態遷移を実装します
-   - 変換ロジックと候補選択を処理します
-   - 辞書検索と登録を管理します
-
-3. **Abstraction Layer** - エディタと辞書操作のためのインターフェースを提供します
-   - 将来的に他のエディタへの適応を可能にします
-   - モック実装によるテストを可能にします
-
-## Key Technical Decisions
-
-1. **Mode-Based State Machine**
-   - システムは入力モードにステートマシンパターンを使用します
-   - 各モード（ひらがな、カタカナ、ASCII など）は個別のクラスです
-   - CandidateDeletionMode などの特殊なモードは特定のインタラクションを処理します
-   - モード遷移は明確に定義されたイベントを通じて処理されます
-
-2. **Editor Abstraction**
-   - IEditor インターフェースはエディタ操作を抽象化します
-   - 実際の VSCode 依存関係なしでのテストを可能にします
-   - 将来的に他のエディタへの適応を可能にします
-
-3. **Dictionary System**
-   - 複数の辞書プロバイダを設定できます
-   - 辞書は優先順位で検索されます
-   - ユーザー辞書は検索で最も高い優先順位が与えられます
-
-4. **Dictionary Management**
-   - 登録は以下の組み合わせとして実装されます。
-     - 特定のフォーマットを持つ専用のエディタタブ
-     - 登録を開いて処理するためのコマンド
-     - 登録された単語を元のコンテキストに挿入するロジック
-   - 削除は以下のように実装されます。
-     - 確認のための専用モード (CandidateDeletionMode)
-     - Y/N オプション付きの確認ダイアログ
-     - 確認時の辞書更新
-
-5. **Contextual Keybinding Control (Issue #55) - Implemented**
-   - VSCode の `when` 句コンテキストを利用してキーバインドを有効/無効にします。
-   - **Core SKK Layer**: 各 `IInputMode` 実装は現在以下を持ちます。
-     - `getActiveKeys(): Set<string>`: モードが現在処理する正規化されたキー名のセット (例: "a", "ctrl+j", "space") を返します。
-     - `getContextualName(): string`: モードの文字列識別子 (例: "ascii", "hiragana:kakutei", "midashigo") を返します。
-   - **VSCode Layer (`VSCodeEditor.ts`)**:
-     - 2つの主要なカスタムコンテキストを管理します。
-       - `skk.mode`: `currentMode.getContextualName()` の値に設定されます。
-       - `skk.activeKey.[SAFE_KEY_NAME]`: ブール値。`SAFE_KEY_NAME` (正規化されたキーから `keyUtils.getActiveKeyContext` を介して派生) が現在のモードの `getActiveKeys()` セットに含まれている場合は `true`、それ以外の場合は `false` に設定されます。
-     - `updateSkkContexts()` メソッドは `vscode.commands.executeCommand('setContext', ...)` を使用してこれらのコンテキストを更新します。
-     - コンテキストは入力モードが変更されたとき (`setInputMode`)、または入力モードがアクティブキーに影響を与える可能性のある内部状態の変更を通知したとき (`notifyModeInternalStateChanged`) に更新されます。
-   - **`package.json`**: キーバインドは現在 `when: "editorTextFocus && skk.activeKey.[SAFE_KEY_NAME]"` を使用して、特定のキーが現在の SKK 状態に関連する場合にのみ発行されるようにします。
-   - **`keyUtils.ts`**: ヘルパー関数 `normalizeVscodeKey` (`package.json` からのキー名を標準化するため) と `getActiveKeyContext` (正規化されたキー名から安全なコンテキストキーサフィックスを生成するため) を提供します。
-   - このアプローチは、SKK が現在の状態で処理しようとするキーのみをインターセプトすることを保証することで、競合を最小限に抑えます。
-
-## Design Patterns in Use
-
-1. **State Pattern**
-   - 入力モードは状態として実装されます
-   - 各状態は現在のモードに基づいて入力を異なる方法で処理します
-   - 状態間の遷移は明示的かつ明確に定義されています
-
-2. **Strategy Pattern**
-   - 入力コンテキストに基づいたさまざまな変換戦略
-   - さまざまな変換シナリオの特殊な処理を可能にします
-
-3. **Factory Pattern**
-   - モード作成はファクトリメソッドを通じて処理されます
-   - モードの適切な初期化と設定を保証します
-
-4. **Observer Pattern**
-   - エディタイベントは適切なモード遷移をトリガーします
-   - ユーザー入力のリアクティブな処理を可能にします
-
-5. **Command Pattern**
-   - VSCode コマンドは特定のアクションをトリガーするために使用されます
-   - ユーザーインタラクションのためのクリーンなインターフェースを提供します
-
-## Component Relationships
-
-1. **Input Modes and Conversion**
-   - 入力モードは適切な場合に変換モードに移行します
-   - 変換モードは候補選択と確定を処理します
-   - 確定後、制御は元の入力モードに戻ります
-
-2. **Editor and Modes**
-   - モードはエディタ抽象化を使用してテキストを操作します
-   - エディタイベントはモード遷移とアクションをトリガーします
-
-3. **Dictionary and Conversion**
-   - 変換モードは候補を辞書に問い合わせます
-   - 辞書の結果が利用可能な変換オプションを決定します
-
-4. **Registration and Dictionary**
-   - 登録プロセスはユーザー辞書にエントリを追加します
-   - ユーザー辞書エントリは将来の変換ですぐに利用可能になります
-
-5. **SKK Core and VSCode Layer (for Keybinding Context) - Updated**
-   - コア SKK レイヤー (現在の `IInputMode` インスタンス) は、`getContextualName()` を介してコンテキスト名を提供し、`getActiveKeys()` を介して現在処理されているキーのセットを提供します。
-   - VSCode レイヤー (`VSCodeEditor`):
-     - 現在の入力モードからこの情報を取得します。
-     - `skk.mode` コンテキストをコンテキスト名で更新します。
-     - アクティブなキーと以前にアクティブだったキーを反復処理して、`skk.activeKey.[SAFE_KEY_NAME]` ブール値コンテキストを設定/解除します。
-     - キーの命名とコンテキストキー生成の一貫性を確保するために `keyUtils.ts` を使用します。
-   - これにより、`package.json` のキーバインドは、`getActiveKeys()` がモードに依存するため、ほとんどの場合 `skk.mode` を明示的にチェックする必要なく、`skk.activeKey.*` に条件付きにすることができます。
-
-## Critical Implementation Paths
-
-1. **Input to Conversion Flow**
-   - かなモードでのユーザー入力 → 変換トリガー → 辞書検索 → 候補表示 → 選択 → 確定
-
-2. **Registration Flow**
-   - 候補が見つからない (またはこれ以上ない) → 登録エディタが開く → ユーザーが単語を入力 → 登録コマンド → 辞書更新 → 単語挿入
-
-3. **Deletion Flow**
-   - 変換中に X を押す → CandidateDeletionMode がアクティブになる → 確認ダイアログ → Y で削除を確定 / N でキャンセル → 確定された場合は辞書を更新
-
-4. **Mode Transition Flow**
-   - モード固有のキーが検出される → 現在のモードのクリーンアップ → 新しいモードの初期化 → エディタ状態の更新
+## 重要な実装パス
+- 接頭辞入力：MidashigoModeまたは関連モードでの「>」入力処理を拡張し、辞書検索ロジックを調整する。
+- 接尾辞入力：InlineHenkanModeの`onSymbol`メソッド内で「>」入力時の候補確定とモード遷移処理を追加する。
