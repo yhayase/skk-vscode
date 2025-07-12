@@ -130,6 +130,19 @@ describe('MidashigoMode', () => {
             mockEditor.setInputMode(context);
         });
 
+        it('should handle number input', async () => {
+            await midashigoMode.onNumber(context, '1');
+            expect(mockEditor.getCurrentText()).to.equal('▽1');
+        });
+
+        it('should fixate midashigo and insert newline on Enter', async () => {
+            await midashigoMode.onLowerAlphabet(context, 'k');
+            await midashigoMode.onLowerAlphabet(context, 'a');
+            await midashigoMode.onEnter(context);
+            expect(mockEditor.getCurrentText()).to.equal('か\n');
+            expect(context["henkanMode"].constructor.name).to.equal('KakuteiMode');
+        });
+
         it('should clear midashigo on Ctrl+G', async () => {
             await midashigoMode.onLowerAlphabet(context, 'k');
             await midashigoMode.onLowerAlphabet(context, 'a');

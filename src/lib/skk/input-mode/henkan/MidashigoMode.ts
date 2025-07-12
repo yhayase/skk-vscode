@@ -142,7 +142,9 @@ export class MidashigoMode extends AbstractMidashigoMode {
     }
 
     async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
-        throw new Error("Method not implemented.");
+        const kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
+        this.romajiInput.reset();
+        await context.insertStringAndShowRemaining(kana + key, "", false);
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
@@ -190,7 +192,12 @@ export class MidashigoMode extends AbstractMidashigoMode {
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {
-        throw new Error("Method not implemented.");
+        this.romajiInput.reset();
+
+        // delete heading ▽ and fix the remaining text
+        await this.editor.fixateMidashigo();
+        await this.editor.insertOrReplaceSelection('\n');
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
     }
 
     async onBackspace(context: AbstractKanaMode): Promise<void> {
