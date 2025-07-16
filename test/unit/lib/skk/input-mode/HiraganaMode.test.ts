@@ -50,12 +50,12 @@ describe('HiraganaMode', () => {
         expect(mockEditor.getCurrentText()).to.equal('っか');
     });
 
-    it('should start henkan mode with capital letter', () => {
-        hiraganaMode.upperAlphabetInput('K');
-        hiraganaMode.lowerAlphabetInput('a');
-        hiraganaMode.lowerAlphabetInput('n');
-        hiraganaMode.lowerAlphabetInput('j');
-        hiraganaMode.lowerAlphabetInput('i');
+    it('should start henkan mode with capital letter', async () => {
+        await hiraganaMode.upperAlphabetInput('K');
+        await hiraganaMode.lowerAlphabetInput('a');
+        await hiraganaMode.lowerAlphabetInput('n');
+        await hiraganaMode.lowerAlphabetInput('j');
+        await hiraganaMode.lowerAlphabetInput('i');
         expect(mockEditor.getMidashigo()).to.equal('かんじ');
     });
 

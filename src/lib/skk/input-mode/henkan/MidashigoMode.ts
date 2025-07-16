@@ -18,13 +18,19 @@ export class MidashigoMode extends AbstractMidashigoMode {
     private romajiInput: RomajiInput;
     private midashigoMode: MidashigoType = MidashigoType.gokan;
 
-    constructor(context: AbstractKanaMode, editor: IEditor, initialRomajiInput: string = "") {
+    private constructor(context: AbstractKanaMode, editor: IEditor) {
         super("▽", editor);
         this.romajiInput = context.newRomajiInput();
+    }
 
-        const insertStr = "▽" + this.romajiInput.processInput(initialRomajiInput.toLowerCase());
-        this.editor.setMidashigoStartToCurrentPosition();
-        context.insertStringAndShowRemaining(insertStr, this.romajiInput.getRemainingRomaji(), false);
+    public static async create(context: AbstractKanaMode, editor: IEditor, initialRomajiInput: string = "", initialYomiInput: string = ""): Promise<MidashigoMode> {
+        const mode = new MidashigoMode(context, editor);
+
+        const insertStr = `▽${initialYomiInput}${mode.romajiInput.processInput(initialRomajiInput.toLowerCase())}`;
+        mode.editor.setMidashigoStartToCurrentPosition();
+        await context.insertStringAndShowRemaining(insertStr, mode.romajiInput.getRemainingRomaji(), false);
+
+        return mode;
     }
 
     resetOkuriState(): void {
@@ -63,9 +69,8 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
     async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'l') {
-            this.editor.fixateMidashigo().then(() => {
-                this.editor.setInputMode(AsciiMode.getInstance());
-            });
+            await this.editor.fixateMidashigo();
+            this.editor.setInputMode(AsciiMode.getInstance());
             return;
         }
 
@@ -100,9 +105,8 @@ export class MidashigoMode extends AbstractMidashigoMode {
 
     async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
         if (key === 'L') {
-            this.editor.fixateMidashigo().then(() => {
-                this.editor.setInputMode(ZeneiMode.getInstance());
-            });
+            await this.editor.fixateMidashigo();
+            this.editor.setInputMode(ZeneiMode.getInstance());
             return;
         }
 
@@ -138,36 +142,45 @@ export class MidashigoMode extends AbstractMidashigoMode {
     }
 
     async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
-        throw new Error("Method not implemented.");
+        const kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
+        this.romajiInput.reset();
+        await context.insertStringAndShowRemaining(kana + key, "", false);
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
-        // まずはローマ字テーブルを見て、かなや記号に変換できるならば変換する
+        // 接頭辞入力のための「>」の処理
+        if (key === '>') {
+            // "n" のように，仮名にできるローマ字がバッファに残っている場合は，仮名を入力してから変換を開始する
+            const kana = this.romajiInput.findExactKanaForRomBuffer() ?? "";
+            this.romajiInput.reset();
+            await context.insertStringAndShowRemaining(kana + key, "", false);
+
+            const midashigo = this.editor.extractMidashigo();
+            if (midashigo && midashigo.length > 0) {
+                await this.henkan(context, "");
+            }
+            return;
+        }
+
+        // ローマ字テーブルを参照し、かなや記号に変換可能な場合に変換を行う
         const kana = this.romajiInput.processInput(key);
 
-        // 以下の記号のいずれかが入力された場合には、その記号を入力するとともに，記号以前の部分について変換を始める
-        // 。、．，」』］!！:：;；
-
-        // "n," と入力された場合，kana が "ん、" となる．そのため、最後の1文字で変換を開始するかを決定する
+        // 特定の記号が入力された場合、記号以前の部分を変換開始し、記号を挿入
+        const punctuationMarks = new Set(["。", "、", "．", "，", "」", "』", "］", "!", "！", ":", "：", ";", "；"]);
         const lastKana = kana[kana.length - 1];
-
-        if (new Set(["。", "、", "．", "，", "」", "』", "］", "!", "！", ":", "：", ";", "；"]).has(lastKana)) {
-            // 最後の1文字を除いた kana を挿入
+        if (punctuationMarks.has(lastKana)) {
             this.romajiInput.reset();
             await context.insertStringAndShowRemaining(kana.slice(0, -1), "", false);
-            
             await this.henkan(context, "", lastKana);
             return;
         }
 
-        // 変換できる文字があればそれを挿入して終了
+        // それ以外の場合は、かなをそのまま挿入
         if (kana.length > 0) {
             const remaining = this.romajiInput.getRemainingRomaji();
             await context.insertStringAndShowRemaining(kana, remaining, false);
             return;
         }
-
-        throw new Error("Method not implemented.");
     }
 
     async onSpace(context: AbstractKanaMode): Promise<void> {
@@ -179,7 +192,12 @@ export class MidashigoMode extends AbstractMidashigoMode {
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {
-        throw new Error("Method not implemented.");
+        this.romajiInput.reset();
+
+        // delete heading ▽ and fix the remaining text
+        await this.editor.fixateMidashigo();
+        await this.editor.insertOrReplaceSelection('\n');
+        context.setHenkanMode(KakuteiMode.create(context, this.editor));
     }
 
     async onBackspace(context: AbstractKanaMode): Promise<void> {
@@ -196,7 +214,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         switch (await this.editor.deleteLeft()) {
             case DeleteLeftResult.markerDeleted:
             case DeleteLeftResult.markerNotFoundAndOtherCharacterDeleted:
-            context.setHenkanMode(KakuteiMode.create(context, this.editor));
+                context.setHenkanMode(KakuteiMode.create(context, this.editor));
                 break;
             case DeleteLeftResult.otherCharacterDeleted:
                 // do nothing
@@ -224,10 +242,10 @@ export class MidashigoMode extends AbstractMidashigoMode {
     public override getActiveKeys(): Set<string> {
         const keys = new Set<string>();
 
-       // this mode deals with all printable ASCII characters
+        // this mode deals with all printable ASCII characters
         for (let i = 32; i <= 126; i++) { // ASCII printable characters
             const char = String.fromCharCode(i);
-            if ("a"<= char && char <= "z") {
+            if ("a" <= char && char <= "z") {
                 keys.add(char);
                 keys.add("shift+" + char); // Use lowercase char for shift combinations
             } else if ("A" <= char && char <= "Z") {
@@ -242,6 +260,7 @@ export class MidashigoMode extends AbstractMidashigoMode {
         keys.add("backspace");
         keys.add("ctrl+j");
         keys.add("ctrl+g");
+        keys.add("greater"); // Added for prefix conversion
 
         return keys;
     }

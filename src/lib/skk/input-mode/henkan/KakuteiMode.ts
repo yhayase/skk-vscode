@@ -58,7 +58,7 @@ export class KakuteiMode extends AbstractHenkanMode {
                 this.romajiInput.reset();
             }
         }
-        const midashigoMode = new MidashigoMode(context, this.editor, this.romajiInput.getRemainingRomaji() + key);
+        const midashigoMode = await MidashigoMode.create(context, this.editor, this.romajiInput.getRemainingRomaji() + key);
         context.setHenkanMode(midashigoMode);
     }
 

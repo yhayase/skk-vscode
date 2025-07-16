@@ -3,6 +3,8 @@ import { MidashigoMode, MidashigoType } from '../../../../../../src/lib/skk/inpu
 import { MockEditor } from '../../../../mocks/MockEditor';
 import { AbstractKanaMode } from '../../../../../../src/lib/skk/input-mode/AbstractKanaMode';
 import { HiraganaMode } from '../../../../../../src/lib/skk/input-mode/HiraganaMode';
+import { InlineHenkanMode } from '../../../../../../src/lib/skk/input-mode/henkan/InlineHenkanMode';
+import { Candidate } from '../../../../../../src/lib/skk/jisyo/candidate';
 
 describe('MidashigoMode', () => {
     describe('basic input handling', () => {
@@ -10,10 +12,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
         });
 
         it('should convert romaji to hiragana in midashigo', async () => {
@@ -46,16 +48,19 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
 
             context.setHenkanMode(midashigoMode);
             midashigoMode.onLowerAlphabet(context, '');
 
             mockEditor.getJisyoProvider().registerCandidate('か', {
                 word: '可',
+            });
+            mockEditor.getJisyoProvider().registerCandidate('だい>', {
+                word: '大',
             });
         });
 
@@ -71,6 +76,16 @@ describe('MidashigoMode', () => {
             await midashigoMode.onLowerAlphabet(context, 'a');
             await midashigoMode.onSpace(context);
             expect(context["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
+            expect(mockEditor.getCurrentText()).to.equal('▼可');
+        });
+
+        it('should start henkan on prefix symbol ">"', async () => {    
+            await midashigoMode.onLowerAlphabet(context, 'd');
+            await midashigoMode.onLowerAlphabet(context, 'a');
+            await midashigoMode.onLowerAlphabet(context, 'i');
+            await midashigoMode.onSymbol(context, '>');
+            expect(context["henkanMode"].constructor.name).to.equal('InlineHenkanMode');
+            expect(mockEditor.getCurrentText()).to.equal('▼大');
         });
     });
 
@@ -79,10 +94,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
             context.setHenkanMode(midashigoMode);
             mockEditor.setInputMode(context);
             mockEditor.getJisyoProvider().registerCandidate('かk', {
@@ -108,13 +123,26 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
 
             context.setHenkanMode(midashigoMode);
             mockEditor.setInputMode(context);
+        });
+
+        it('should handle number input', async () => {
+            await midashigoMode.onNumber(context, '1');
+            expect(mockEditor.getCurrentText()).to.equal('▽1');
+        });
+
+        it('should fixate midashigo and insert newline on Enter', async () => {
+            await midashigoMode.onLowerAlphabet(context, 'k');
+            await midashigoMode.onLowerAlphabet(context, 'a');
+            await midashigoMode.onEnter(context);
+            expect(mockEditor.getCurrentText()).to.equal('か\n');
+            expect(context["henkanMode"].constructor.name).to.equal('KakuteiMode');
         });
 
         it('should clear midashigo on Ctrl+G', async () => {
@@ -148,10 +176,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
 
             context.setHenkanMode(midashigoMode);
             midashigoMode.onLowerAlphabet(context, '');
@@ -176,10 +204,10 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
             context.setHenkanMode(midashigoMode);
             mockEditor.setInputMode(context);
         });
@@ -204,16 +232,16 @@ describe('MidashigoMode', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
-        beforeEach(() => {
+        beforeEach(async () => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
             // Initialize MidashigoMode without any initial input for these tests
             // to ensure a clean state for observing gokan/okurigana transitions.
-            midashigoMode = new MidashigoMode(context, mockEditor, ''); 
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
             context.setHenkanMode(midashigoMode);
             // It's important that the mockEditor's input mode is also set to the context (AbstractKanaMode)
             // which then delegates to the henkanMode (MidashigoMode in this case).
-            mockEditor.setInputMode(context); 
+            mockEditor.setInputMode(context);
         });
 
         it('should return "midashigo:gokan" initially', () => {
@@ -262,20 +290,56 @@ describe('MidashigoMode', () => {
         });
     });
 
-    describe('getActiveKeys', () => {
-        let midashigoMode: MidashigoMode;
+    describe('constructor', () => {
         let mockEditor: MockEditor;
         let context: AbstractKanaMode;
 
         beforeEach(() => {
             mockEditor = new MockEditor();
             context = new HiraganaMode();
-            midashigoMode = new MidashigoMode(context, mockEditor, '');
+        });
+
+        it('should initialize with an empty midashigo by default', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor);
+            expect(mockEditor.getCurrentText()).to.equal('▽');
+        });
+
+        it('should initialize with initial romaji input', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor, 'a');
+            expect(mockEditor.getCurrentText()).to.equal('▽あ');
+        });
+
+        it('should initialize with initial yomi input', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor, '', '>');
+            expect(mockEditor.getCurrentText()).to.equal('▽>');
+        });
+
+        it('should initialize with both initial romaji and yomi input', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor, 'i', 'だ');
+            expect(mockEditor.getCurrentText()).to.equal('▽だい');
+        });
+
+        it('should initialize with both initial partial romaji and yomi input', async () => {
+            const midashigoMode = await MidashigoMode.create(context, mockEditor, 's', 'か');
+            expect(mockEditor.getCurrentText()).to.equal('▽か');
+            expect(mockEditor.getRemainingRomaji()).to.equal('s', 'should have remaining romaji');
+        });
+    });
+
+    describe('getActiveKeys', () => {
+        let midashigoMode: MidashigoMode;
+        let mockEditor: MockEditor;
+        let context: AbstractKanaMode;
+
+        beforeEach(async () => {
+            mockEditor = new MockEditor();
+            context = new HiraganaMode();
+            midashigoMode = await MidashigoMode.create(context, mockEditor, '');
             context.setHenkanMode(midashigoMode);
             mockEditor.setInputMode(context);
         });
 
-        it('should return a set containing all printable ASCII, enter, backspace, ctrl+j, ctrl+g', () => {
+        it('should return a set containing all printable ASCII, enter, backspace, ctrl+j, ctrl+g, greater', () => {
             const activeKeys = midashigoMode.getActiveKeys();
             const expectedBaseKeys = new Set<string>();
 
@@ -287,10 +351,13 @@ describe('MidashigoMode', () => {
                     expectedBaseKeys.add("shift+" + char); // Expect shift + lowercase char
                 } else if ("A" <= char && char <= "Z") {
                     // Already covered by shift+lower
-                } else {
+                }
+else {
                     expectedBaseKeys.add(char);
                 }
             }
+            expectedBaseKeys.add("greater"); // For '>' symbol
+
             // Special keys
             expectedBaseKeys.add("enter");
             expectedBaseKeys.add("backspace");
@@ -320,6 +387,62 @@ describe('MidashigoMode', () => {
             
             const okuriganaKeys = midashigoMode.getActiveKeys();
             expect(okuriganaKeys).to.deep.equal(gokanKeys);
+        });
+    });
+
+    describe('MidashigoMode Prefix Conversion', () => {
+        let midashigoMode: MidashigoMode;
+        let editor: MockEditor;
+        let context: any;
+    
+        beforeEach(async () => {
+            editor = new MockEditor();
+            // 辞書にテストデータを登録
+            await editor.getJisyoProvider().registerCandidate('だい>', new Candidate('大', ''));
+    
+            context = {
+                insertStringAndShowRemaining: async (text: string, remaining: string, isOkuri: boolean) => {
+                    // モック実装
+                },
+                setHenkanMode: (mode: any) => {
+                    // このテストケースでスパイされる
+                },
+                newRomajiInput: () => {
+                    return {
+                        processInput: (char: string) => '',
+                        reset: () => { },
+                        getRemainingRomaji: () => '',
+                        findExactKanaForRomBuffer: () => 'だい',
+                        deleteLastChar: () => { },
+                        isEmpty: () => false,
+                        convertKanaToHiragana: (s: string) => s
+                    };
+                }
+            } as AbstractKanaMode;
+            midashigoMode = await MidashigoMode.create(context, editor, '', 'だい');
+        });
+    
+        it('should detect ">" input and transition to InlineHenkanMode with correct candidates', async () => {
+            let capturedMode: InlineHenkanMode | undefined;
+            context.setHenkanMode = (mode: any) => {
+                capturedMode = mode;
+            };
+            editor.extractMidashigo = () => 'だい>'; // Ensure extractMidashigo returns 'だい>'
+    
+            await midashigoMode.onSymbol(context, '>');
+    
+            expect(capturedMode).to.be.instanceOf(InlineHenkanMode);
+            if (capturedMode) {
+                const entry = await capturedMode['jisyoEntry'];
+                expect(entry.getCandidateList()[0].word).to.equal('大');
+            }
+            expect(editor.getCurrentText()).to.equal('▼大');
+        });
+    
+        it('should include ">" as an active key', () => {
+            // テストケース：getActiveKeys メソッドが「>」をアクティブキーとして返すことを検証
+            const activeKeys = midashigoMode.getActiveKeys();
+            expect(activeKeys.has('>')).to.be.true;
         });
     });
 });
