@@ -500,6 +500,49 @@ else {
             // but we can check if transition happened for 'ん>'
             expect(capturedMode).to.be.instanceOf(InlineHenkanMode);
         });
+
+        it('should discard incomplete romaji input (like "k") when ">" is pressed', async () => {
+            // Case: Input "k" ">" -> "k" should be discarded, only ">" remains/inserted.
+            
+            // Setup a context with a stateful RomajiInput mock for this test
+            let mockRomajiBuffer = '';
+            context.newRomajiInput = () => {
+                return {
+                    processInput: (char: string) => {
+                        mockRomajiBuffer += char;
+                        return '';
+                    },
+                    reset: () => { mockRomajiBuffer = ''; },
+                    getRemainingRomaji: () => mockRomajiBuffer,
+                    findExactKanaForRomBuffer: () => undefined, // 'k' returns undefined
+                    deleteLastChar: () => { mockRomajiBuffer = mockRomajiBuffer.slice(0, -1); },
+                    isEmpty: () => mockRomajiBuffer.length === 0,
+                    convertKanaToHiragana: (s: string) => s
+                } as any;
+            };
+
+            // Reset editor state
+            midashigoMode = await MidashigoMode.create(context, editor, '', '');
+            
+            // Mock "k" in buffer
+            midashigoMode['romajiInput'].processInput('k'); 
+            // Assert buffer has 'k'
+            expect(midashigoMode['romajiInput'].getRemainingRomaji()).to.equal('k');
+
+            // Spy on context.insertStringAndShowRemaining
+            let insertedStr = '';
+            context.insertStringAndShowRemaining = async (str: string, remaining: string, isOkuri: boolean) => {
+                insertedStr = str;
+            };
+
+            await midashigoMode.onSymbol(context, '>');
+
+            // Expect "k" to be gone, only ">" inserted
+            // findExactKanaForRomBuffer() for "k" returns undefined -> ""
+            // kana + key -> "" + ">" -> ">"
+            expect(insertedStr).to.equal('>');
+            expect(midashigoMode['romajiInput'].getRemainingRomaji()).to.equal('');
+        });
     
         it('should include ">" as an active key', () => {
             // テストケース：getActiveKeys メソッドが「>」をアクティブキーとして返すことを検証
