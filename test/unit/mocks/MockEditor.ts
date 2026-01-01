@@ -558,7 +558,7 @@ export class MockEditor implements IEditor {
         return this.currentText.slice(range.start.character, range.end.character);
     }
 
-    async openRegistrationEditor(yomi: string): Promise<void> {
+    async openRegistrationEditor(yomi: string, okuri: string): Promise<void> {
         this.wasRegistrationEditorOpened_ = true;
         this.registrationYomi = yomi;
     }

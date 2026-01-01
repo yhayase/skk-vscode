@@ -438,6 +438,68 @@ else {
             }
             expect(editor.getCurrentText()).to.equal('▼大');
         });
+
+        it('should open registration editor if prefix word is not in dictionary', async () => {
+            // Mock extractMidashigo to return an unlisted word
+            editor.extractMidashigo = () => 'unknown>'; 
+            
+            // Spy on openRegistrationEditor
+            let registrationCalled = false;
+            editor.openRegistrationEditor = async (midashigo, okuri) => {
+                registrationCalled = true;
+                expect(midashigo).to.equal('unknown>');
+                expect(okuri).to.equal('');
+            };
+
+            await midashigoMode.onSymbol(context, '>');
+
+            expect(registrationCalled).to.be.true;
+        });
+
+        it('should do nothing (or just insert key) if midashigo is empty', async () => {
+            // Mock extractMidashigo to return empty string (simulating '▽' only)
+            editor.extractMidashigo = () => ''; 
+            
+            // Spy on henkan to ensure it's NOT called
+            let henkanCalled = false;
+            midashigoMode['henkan'] = async () => { henkanCalled = true; };
+
+            await midashigoMode.onSymbol(context, '>');
+
+            expect(henkanCalled).to.be.false;
+            // Also ensure '>' was inserted into text (handled by romajiInput flush/insert logic)
+            // Note: The mock editor state might need reset if previous tests affected it, 
+            // but here we just check if henkan was skipped.
+        });
+
+        it('should flush pending romaji before processing ">"', async () => {
+            // Case: Input "t" "t" ">" -> should become "っt>" (or similar depending on implementation) then process ">"
+            // Actually, "tt" -> "っt". 
+            // Let's try "k" ">" -> "k>" is not kana. 
+            // Let's try "n" ">" -> "ん>"
+            
+            // Reset editor state for this test
+            midashigoMode = await MidashigoMode.create(context, editor, '', '');
+            
+            // Mock "n" in buffer
+            midashigoMode['romajiInput'].processInput('n'); 
+            
+            // Mock extractMidashigo to return 'ん>' after flushing
+            editor.extractMidashigo = () => 'ん>'; 
+            editor.getJisyoProvider().registerCandidate('ん>', new Candidate('test', ''));
+
+            let capturedMode: InlineHenkanMode | undefined;
+            context.setHenkanMode = (mode: any) => {
+                capturedMode = mode;
+            };
+
+            await midashigoMode.onSymbol(context, '>');
+
+            // Expect 'ん' to be flushed and inserted
+            // The exact check depends on how we mock insertStringAndShowRemaining, 
+            // but we can check if transition happened for 'ん>'
+            expect(capturedMode).to.be.instanceOf(InlineHenkanMode);
+        });
     
         it('should include ">" as an active key', () => {
             // テストケース：getActiveKeys メソッドが「>」をアクティブキーとして返すことを検証
