@@ -1,14 +1,15 @@
 import * as assert from 'assert';
 import { expect } from 'chai';
 import * as vscode from 'vscode';
+import { closeAllEditorsAndWait, openNewUntitledFileAndWait } from '../testHelper';
 
 suite('入力モード切り替えにおいて', () => {
     setup('新しい空のエディタを開く', async () => {
-        await vscode.commands.executeCommand('workbench.action.files.newUntitledFile');
+        await openNewUntitledFileAndWait();
     });
 
     teardown('エディタを全て閉じる', async () => {
-        await vscode.commands.executeCommand('workbench.action.closeAllEditors');
+        await closeAllEditorsAndWait();
     });
 
     test('初期状態のエディタは空である', () => {
@@ -18,18 +19,22 @@ suite('入力モード切り替えにおいて', () => {
     test('初期状態のエディタは ascii モードであり、アルファベットの入力がそのままエディタに出力される', async () => {
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         return new Promise(async (resolve, reject) => {
-            const disposable = vscode.workspace.onDidChangeTextDocument(e => {
-                disposable.dispose();
-                try {
-                    expect(e.document.getText()).to.equal("a");
-                    resolve();
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            try {
+                const disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                    disposable.dispose();
+                    try {
+                        expect(e.document.getText()).to.equal("a");
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-            // ascii モードで a を入力して、 onDidChangeTextDocument イベントを発生させる
-            await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+                // ascii モードで a を入力して、 onDidChangeTextDocument イベントを発生させる
+                await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -39,19 +44,22 @@ suite('入力モード切り替えにおいて', () => {
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         return new Promise(async (resolve, reject) => {
-            const disposable = vscode.workspace.onDidChangeTextDocument(e => {
-                disposable.dispose();
-                try {
-                    // assert.equal(document.getText(), "あ");
-                    expect(e.document.getText()).to.equal("あ");
-                    resolve();
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            try {
+                const disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                    disposable.dispose();
+                    try {
+                        expect(e.document.getText()).to.equal("あ");
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-            // ひらがなモードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
-            await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+                // ひらがなモードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
+                await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -63,18 +71,22 @@ suite('入力モード切り替えにおいて', () => {
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         return new Promise(async (resolve, reject) => {
-            const disposable = vscode.workspace.onDidChangeTextDocument(e => {
-                disposable.dispose();
-                try {
-                    expect(e.document.getText()).to.equal("a");
-                    resolve();
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            try {
+                const disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                    disposable.dispose();
+                    try {
+                        expect(e.document.getText()).to.equal("a");
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-            // ascii モードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
-            await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+                // ascii モードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
+                await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -86,18 +98,22 @@ suite('入力モード切り替えにおいて', () => {
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         return new Promise(async (resolve, reject) => {
-            const disposable = vscode.workspace.onDidChangeTextDocument(e => {
-                disposable.dispose();
-                try {
-                    expect(e.document.getText()).to.equal("ア");
-                    resolve();
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            try {
+                const disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                    disposable.dispose();
+                    try {
+                        expect(e.document.getText()).to.equal("ア");
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-            // カタカナモードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
-            await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+                // カタカナモードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
+                await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -112,18 +128,22 @@ suite('入力モード切り替えにおいて', () => {
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         return new Promise(async (resolve, reject) => {
-            const disposable = vscode.workspace.onDidChangeTextDocument(e => {
-                disposable.dispose();
-                try {
-                    expect(e.document.getText()).to.equal("あ");
-                    resolve();
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            try {
+                const disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                    disposable.dispose();
+                    try {
+                        expect(e.document.getText()).to.equal("あ");
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-            // ひらがなモードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
-            await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+                // ひらがなモードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
+                await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -135,18 +155,22 @@ suite('入力モード切り替えにおいて', () => {
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         return new Promise(async (resolve, reject) => {
-            const disposable = vscode.workspace.onDidChangeTextDocument(e => {
-                disposable.dispose();
-                try {
-                    expect(e.document.getText()).to.equal("ａ");
-                    resolve();
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            try {
+                const disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                    disposable.dispose();
+                    try {
+                        expect(e.document.getText()).to.equal("ａ");
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-            // 全英モードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
-            await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+                // 全英モードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
+                await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -160,18 +184,22 @@ suite('入力モード切り替えにおいて', () => {
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         return new Promise(async (resolve, reject) => {
-            const disposable = vscode.workspace.onDidChangeTextDocument(e => {
-                disposable.dispose();
-                try {
-                    expect(e.document.getText()).to.equal("ａ");
-                    resolve();
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            try {
+                const disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                    disposable.dispose();
+                    try {
+                        expect(e.document.getText()).to.equal("ａ");
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-            // 全英モードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
-            await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+                // 全英モードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
+                await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -185,18 +213,22 @@ suite('入力モード切り替えにおいて', () => {
 
         // 直前のコマンドによるエディタの変更が終了するまで待って assert を実行する
         return new Promise(async (resolve, reject) => {
-            const disposable = vscode.workspace.onDidChangeTextDocument(e => {
-                disposable.dispose();
-                try {
-                    expect(e.document.getText()).to.equal("あ");
-                    resolve();
-                } catch (e) {
-                    reject(e);
-                }
-            });
+            try {
+                const disposable = vscode.workspace.onDidChangeTextDocument(e => {
+                    disposable.dispose();
+                    try {
+                        expect(e.document.getText()).to.equal("あ");
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
 
-            // ひらがなモードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
-            await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+                // ひらがなモードで a を入力することで、 onDidChangeTextDocument イベントを発生させる
+                await vscode.commands.executeCommand("skk.lowerAlphabetInput", "a");
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 });

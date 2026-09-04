@@ -1,35 +1,31 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { expect } from 'chai';
+import { closeAllEditorsAndWait, openNewUntitledFileAndWait } from '../testHelper';
 
 suite('文章の変換において', async () => {
     setup('新しい空のエディタを開く', async () => {
-        await vscode.commands.executeCommand('workbench.action.files.newUntitledFile');
-        await vscode.commands.executeCommand('skk.nop'); // skk 拡張を有効にするための何もしないコマンド呼び出し
+        await openNewUntitledFileAndWait();
     });
 
     teardown('エディタを閉じる', async () => {
-        await vscode.commands.executeCommand('workbench.action.closeAllEditors');
+        await closeAllEditorsAndWait();
     });
 
     async function input(char: string) {
         expect(char.length).to.equal(1);
         if (char === ' ') {
-            vscode.commands.executeCommand('skk.spaceInput');
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await vscode.commands.executeCommand('skk.spaceInput');
         } else if (char === '\n') {
-            vscode.commands.executeCommand('skk.enterInput');
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await vscode.commands.executeCommand('skk.enterInput');
         } else if (char === '\r') {
-            vscode.commands.executeCommand('skk.ctrlJInput');
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await vscode.commands.executeCommand('skk.ctrlJInput');
         } else if (char === char.toUpperCase()) {
-            vscode.commands.executeCommand('skk.upperAlphabetInput', char);
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await vscode.commands.executeCommand('skk.upperAlphabetInput', char);
         } else {
-            vscode.commands.executeCommand('skk.lowerAlphabetInput', char);
-            await new Promise(resolve => setTimeout(resolve, (char === 'q') ? 50 : 30));
+            await vscode.commands.executeCommand('skk.lowerAlphabetInput', char);
         }
+        await new Promise(resolve => setTimeout(resolve, 25));
     }
 
     test('長い入力を正しく変換できる', async () => {
@@ -38,7 +34,6 @@ suite('文章の変換において', async () => {
 
         // ひらがなモードに切り替える
         await vscode.commands.executeCommand('skk.ctrlJInput');
-        await new Promise(resolve => setTimeout(resolve, 30));
 
         // 以下のパターンを含む文を入力する
         // * 送りあり → 次に大文字

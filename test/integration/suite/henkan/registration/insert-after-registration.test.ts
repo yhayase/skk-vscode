@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { getGlobalJisyo } from '../../../../../src/lib/skk/jisyo/jisyo';
 import { expect } from 'chai';
+import { closeAllEditorsAndWait, openNewUntitledFileAndWait, waitForDocumentEquals } from '../../testHelper';
 
 suite('辞書登録単語挿入機能において', async () => {
     const unexistYomi = 'りですごじめわゅょぼざうにろせふよふ';
@@ -10,22 +11,15 @@ suite('辞書登録単語挿入機能において', async () => {
     const okuriganaAlphabetVowel = 'a';
 
     setup('新しい空のエディタを開き、見出し語が登録されていない状態にする', async () => {
-        await vscode.commands.executeCommand('workbench.action.files.newUntitledFile');
-        await vscode.commands.executeCommand('skk.nop'); // skk 拡張を有効にするための何もしないコマンド呼び出し
+        await openNewUntitledFileAndWait();
 
         const globalJisyo = getGlobalJisyo();
         globalJisyo?.delete(unexistYomi);
         globalJisyo?.delete(unexistYomi + okuriganaAlphabetConsonant);
-
-        // エディタが開かれるまで待機する
-        while (!vscode.window.activeTextEditor) {
-            await new Promise(resolve => setTimeout(resolve, 10));
-        }
     });
 
     teardown('エディタを閉じ、登録された不要な見出し語を削除する', async () => {
-        await vscode.commands.executeCommand('workbench.action.closeAllEditors');
-        await vscode.commands.executeCommand('skk.nop'); // skk 拡張を有効にするための何もしないコマンド呼び出し
+        await closeAllEditorsAndWait();
 
         const globalJisyo = getGlobalJisyo();
         globalJisyo?.delete(unexistYomi);
@@ -49,65 +43,61 @@ suite('辞書登録単語挿入機能において', async () => {
 
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise(async (resolve, reject) => {
-            const disposable1 = vscode.window.onDidChangeActiveTextEditor(async editor => {
-                if (editor === undefined) {
-                    return;
-                }
-                disposable1.dispose();
-                const registrationDocument = editor?.document;
-                try {
-                    // 辞書登録エディタが開かれていることを確認
-                    expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}\n単語:`);
+            try {
+                const disposable1 = vscode.window.onDidChangeActiveTextEditor(async editor => {
+                    if (editor === undefined) {
+                        return;
+                    }
+                    disposable1.dispose();
+                    const registrationDocument = editor?.document;
+                    try {
+                        // 辞書登録エディタが開かれていることを確認
+                        expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}\n単語:`);
 
-                    await editor.edit(editBuilder => {
-                        // append unexistWord to the end of the document
-                        const lastLine = registrationDocument.lineAt(registrationDocument.lineCount - 1);
-                        const lastChar = lastLine.range.end.character;
-                        editBuilder.insert(lastLine.range.end, unexistWord);
-                    });
+                        await editor.edit(editBuilder => {
+                            // append unexistWord to the end of the document
+                            const lastLine = registrationDocument.lineAt(registrationDocument.lineCount - 1);
+                            editBuilder.insert(lastLine.range.end, unexistWord);
+                        });
 
-                    // 少しだけ待つ
-                    // await new Promise(resolve => setTimeout(resolve, 20));
+                        expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}\n単語:${unexistWord}`);
 
-                    expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}\n単語:${unexistWord}`);
+                        const failTimer = setTimeout(() => {
+                            // 3秒経過しても unexistWord がエディタに挿入されなかった場合、テストを失敗させる
+                            reject(new Error(`document.getText() is expeted to be ${unexistWord} but it is ${document?.getText()}`));
+                        }, 3000);
 
-                    const failTimer = setTimeout(() => {
-                        // 1秒経過しても unexistWord がエディタに挿入されなかった場合、テストを失敗させる
-                        reject(new Error(`document.getText() is expeted to be ${unexistWord} but it is ${document?.getText()}`));
-                    }, 1000);
-
-                    // 登録コマンド実行後、元のエディタに戻り、登録した単語が挿入されたことを確認
-                    const disposable2 = vscode.window.onDidChangeActiveTextEditor(async editor => {
-                        if (editor === undefined) {
-                            return;
-                        }
-                        disposable2.dispose();
-
-                        assert.equal(editor.document, document);
-                        const disposable3 = vscode.workspace.onDidChangeTextDocument(async e => {
-                            // ignore other document changes
+                        // 登録コマンド実行後、元のエディタに戻り、登録した単語が挿入されたことを確認
+                        const disposable2 = vscode.workspace.onDidChangeTextDocument(async e => {
                             if (e.document !== document) {
                                 return;
                             }
 
-                            // 元のエディタの内容が登録した単語になっていたならば、テストを成功させる
                             if (document.getText() === expected) {
-                                clearTimeout(failTimer); // clear the fail timer
+                                clearTimeout(failTimer);
+                                disposable2.dispose();
                                 resolve();
                             }
                         });
 
-                    });
+                        // 辞書登録コマンドを実行
+                        await vscode.commands.executeCommand('skk.registerMidashigo');
 
-                    // 辞書登録コマンドを実行
-                    await vscode.commands.executeCommand('skk.registerMidashigo');
-                } catch (error) {
-                    reject(error);
-                }
-            });
+                        if (document?.getText() === expected) {
+                            clearTimeout(failTimer);
+                            disposable2.dispose();
+                            resolve();
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
 
-            // スペースキーを入力して、辞書登録エディタを開く
-            await vscode.commands.executeCommand('skk.spaceInput');
+                // スペースキーを入力して、辞書登録エディタを開く
+                await vscode.commands.executeCommand('skk.spaceInput');
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -131,75 +121,61 @@ suite('辞書登録単語挿入機能において', async () => {
 
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise(async (resolve, reject) => {
-            const disposable1 = vscode.window.onDidChangeActiveTextEditor(async editor => {
-                if (editor === undefined) {
-                    return;
-                }
-                disposable1.dispose();
-                const registrationDocument = editor?.document;
-                try {
-                    // 辞書登録エディタが開かれていることを確認
-                    expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:`);
+            try {
+                const disposable1 = vscode.window.onDidChangeActiveTextEditor(async editor => {
+                    if (editor === undefined) {
+                        return;
+                    }
+                    disposable1.dispose();
+                    const registrationDocument = editor?.document;
+                    try {
+                        // 辞書登録エディタが開かれていることを確認
+                        expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:`);
 
-                    await editor.edit(editBuilder => {
-                        // append unexistWord to the end of the document
-                        const lastLine = registrationDocument.lineAt(registrationDocument.lineCount - 1);
-                        const lastChar = lastLine.range.end.character;
-                        editBuilder.insert(lastLine.range.end, unexistWord);
-                    });
-
-                    // 少しだけ待つ
-                    // await new Promise(resolve => setTimeout(resolve, 20));
-
-                    expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:${unexistWord}`);
-
-                    const failTimer = setTimeout(() => {
-                        // 1秒経過しても expected がエディタに挿入されなかった場合、テストを失敗させる
-                        reject(new Error(`document.getText() is expeted to be ${expected} but it is ${document?.getText()}`));
-                    }, 1000);
-
-                    // 登録コマンド実行後、元のエディタに戻り、登録した単語が挿入されたことを確認
-                    const disposable2 = vscode.window.onDidChangeActiveTextEditor(async editor => {
-                        if (editor === undefined) {
-                            return;
-                        }
-                        disposable2.dispose();
-
-                        assert.equal(editor.document, document);
-
-                        // Wait for the document text to become the expected value
-                        await new Promise<void>((resolveTextChange, rejectTextChange) => {
-                            const textChangeFailTimer = setTimeout(() => {
-                                rejectTextChange(new Error(`document.getText() is expeted to be ${expected} but it is ${document?.getText()} after editor became active`));
-                            }, 1000); // Shorter timeout for text change
-
-                            const disposable3 = vscode.workspace.onDidChangeTextDocument(e => {
-                                if (e.document !== document) {
-                                    return;
-                                }
-
-                                if (document.getText() === expected) {
-                                    clearTimeout(textChangeFailTimer);
-                                    disposable3.dispose();
-                                    resolveTextChange();
-                                }
-                            });
+                        await editor.edit(editBuilder => {
+                            // append unexistWord to the end of the document
+                            const lastLine = registrationDocument.lineAt(registrationDocument.lineCount - 1);
+                            editBuilder.insert(lastLine.range.end, unexistWord);
                         });
 
-                        clearTimeout(failTimer); // clear the main fail timer
-                        resolve(); // Resolve the main test promise
+                        expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:${unexistWord}`);
 
-                    });
+                        const failTimer = setTimeout(() => {
+                            // 3秒経過しても expected がエディタに挿入されなかった場合、テストを失敗させる
+                            reject(new Error(`document.getText() is expeted to be ${expected} but it is ${document?.getText()}`));
+                        }, 3000);
 
-                    // 辞書登録コマンドを実行
-                    await vscode.commands.executeCommand('skk.registerMidashigo');
-                } catch (error) {
-                    reject(error);
-                }
-            });
+                        // 登録コマンド実行後、元のエディタに戻り、登録した単語が挿入されたことを確認
+                        const disposable2 = vscode.workspace.onDidChangeTextDocument(async e => {
+                            if (e.document !== document) {
+                                return;
+                            }
 
-            // 送り仮名の母音を入力して、変換を開始する
-            vscode.commands.executeCommand('skk.lowerAlphabetInput', okuriganaAlphabetVowel);
+                            if (document.getText() === expected) {
+                                clearTimeout(failTimer);
+                                disposable2.dispose();
+                                resolve();
+                            }
+                        });
+
+                        // 辞書登録コマンドを実行
+                        await vscode.commands.executeCommand('skk.registerMidashigo');
+
+                        if (document?.getText() === expected) {
+                            clearTimeout(failTimer);
+                            disposable2.dispose();
+                            resolve();
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+
+                // 送り仮名の母音を入力して、変換を開始する
+                await vscode.commands.executeCommand('skk.lowerAlphabetInput', okuriganaAlphabetVowel);
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -227,74 +203,78 @@ suite('辞書登録単語挿入機能において', async () => {
 
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise(async (resolve, reject) => {
-            // 送り仮名の母音を入力して、変換を開始する（InlineHenkanModeに入る）
-            await vscode.commands.executeCommand('skk.lowerAlphabetInput', okuriganaAlphabetVowel);
+            try {
+                // 変換候補が表示されたら、スペースキーを入力して次の候補に進む
+                // 候補が1つしかないので、これで辞書登録エディタが開く
+                const disposable1 = vscode.workspace.onDidChangeTextDocument(async e => {
+                    if (e.document !== document) {
+                        return;
+                    }
+                    disposable1.dispose();
 
-            // 変換候補が表示されたら、スペースキーを入力して次の候補に進む
-            // 候補が1つしかないので、これで辞書登録エディタが開く
-            const disposable1 = vscode.workspace.onDidChangeTextDocument(async e => {
-                if (e.document !== document) {
-                    return;
-                }
-                disposable1.dispose();
+                    try {
+                        // スペースキーを入力して、辞書登録エディタを開く
+                        await vscode.commands.executeCommand('skk.spaceInput');
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
 
-                // スペースキーを入力して、辞書登録エディタを開く
-                await vscode.commands.executeCommand('skk.spaceInput');
-            });
+                // 辞書登録エディタが開かれたら実行する処理
+                const disposable2 = vscode.window.onDidChangeActiveTextEditor(async editor => {
+                    if (editor === undefined) {
+                        return;
+                    }
+                    disposable2.dispose();
+                    const registrationDocument = editor?.document;
+                    try {
+                        // 辞書登録エディタが開かれていることを確認
+                        expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:`);
 
-            // 辞書登録エディタが開かれたら実行する処理
-            const disposable2 = vscode.window.onDidChangeActiveTextEditor(async editor => {
-                if (editor === undefined) {
-                    return;
-                }
-                disposable2.dispose();
-                const registrationDocument = editor?.document;
-                try {
-                    // 辞書登録エディタが開かれていることを確認
-                    expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:`);
+                        await editor.edit(editBuilder => {
+                            // append unexistWord to the end of the document
+                            const lastLine = registrationDocument.lineAt(registrationDocument.lineCount - 1);
+                            editBuilder.insert(lastLine.range.end, unexistWord);
+                        });
 
-                    await editor.edit(editBuilder => {
-                        // append unexistWord to the end of the document
-                        const lastLine = registrationDocument.lineAt(registrationDocument.lineCount - 1);
-                        editBuilder.insert(lastLine.range.end, unexistWord);
-                    });
+                        expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:${unexistWord}`);
 
-                    expect(registrationDocument?.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:${unexistWord}`);
+                        const failTimer = setTimeout(() => {
+                            // 3秒経過しても expected がエディタに挿入されなかった場合、テストを失敗させる
+                            reject(new Error(`document.getText() is expeted to be ${expected} but it is ${document?.getText()}`));
+                        }, 3000);
 
-                    const failTimer = setTimeout(() => {
-                        // 5秒経過しても expected がエディタに挿入されなかった場合、テストを失敗させる
-                        reject(new Error(`document.getText() is expeted to be ${expected} but it is ${document?.getText()}`));
-                    }, 5000);
-
-                    // 登録コマンド実行後、元のエディタに戻り、登録した単語が挿入されたことを確認
-                    const disposable3 = vscode.window.onDidChangeActiveTextEditor(async editor => {
-                        if (editor === undefined) {
-                            return;
-                        }
-                        disposable3.dispose();
-
-                        assert.equal(editor.document, document);
-                        const disposable4 = vscode.workspace.onDidChangeTextDocument(async e => {
-                            // ignore other document changes
+                        // 登録コマンド実行後、元のエディタに戻り、登録した単語が挿入されたことを確認
+                        const disposable3 = vscode.workspace.onDidChangeTextDocument(async e => {
                             if (e.document !== document) {
                                 return;
                             }
 
-                            // 元のエディタの内容が登録した単語+送りがなになっていたならば、テストを成功させる
                             if (document.getText() === expected) {
-                                clearTimeout(failTimer); // clear the fail timer
-                                disposable4.dispose(); // dispose the event listener
+                                clearTimeout(failTimer);
+                                disposable3.dispose();
                                 resolve();
                             }
                         });
-                    });
 
-                    // 辞書登録コマンドを実行
-                    await vscode.commands.executeCommand('skk.registerMidashigo');
-                } catch (error) {
-                    reject(error);
-                }
-            });
+                        // 辞書登録コマンドを実行
+                        await vscode.commands.executeCommand('skk.registerMidashigo');
+
+                        if (document?.getText() === expected) {
+                            clearTimeout(failTimer);
+                            disposable3.dispose();
+                            resolve();
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+
+                // 送り仮名の母音を入力して、変換を開始する（InlineHenkanModeに入る）
+                await vscode.commands.executeCommand('skk.lowerAlphabetInput', okuriganaAlphabetVowel);
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 
@@ -327,79 +307,79 @@ suite('辞書登録単語挿入機能において', async () => {
 
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise(async (resolve, reject) => {
-            // 変換候補が表示されたら、スペースキーを入力してMenuHenkanModeに入る
-            const disposable1 = vscode.workspace.onDidChangeTextDocument(async e => {
-                if (e.document !== document) {
-                    return;
-                }
-                disposable1.dispose();
-
-                // スペースキーを 3 回入力して、InlineHenkanModeからMenuHenkanModeに入る
-                await vscode.commands.executeCommand('skk.spaceInput');
-                while (e.document.getText() !== `▼${existWords[1]}`) {
-                    await new Promise(resolve => setTimeout(resolve, 10));
-                }
-                await vscode.commands.executeCommand('skk.spaceInput');
-                while (e.document.getText() !== `▼${existWords[2]}`) {
-                    await new Promise(resolve => setTimeout(resolve, 10));
-                }
-                await vscode.commands.executeCommand('skk.spaceInput');
-                while (e.document.getText() !== `▼`) {
-                    await new Promise(resolve => setTimeout(resolve, 10));
-                }
-
-                // MenuHenkanModeに入ったら、スペースキーを入力して辞書登録エディタを開く
-                await vscode.commands.executeCommand('skk.spaceInput');
-            });
-
-            // 辞書登録エディタが開かれたら実行する処理
-            const disposable2 = vscode.window.onDidChangeActiveTextEditor(async editor => {
-                if (editor === undefined) {
-                    return;
-                }
-                disposable2.dispose();
-                const registrationDocument = editor.document;
-                try {
-                    // 辞書登録エディタが開かれていることを確認
-                    expect(registrationDocument.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:`);
-
-                    await editor.edit(editBuilder => {
-                        // append unexistWord to the end of the document
-                        const lastLine = registrationDocument.lineAt(registrationDocument.lineCount - 1);
-                        editBuilder.insert(lastLine.range.end, unexistWord);
-                    });
-
-                    while (registrationDocument?.getText() !== `読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:${unexistWord}`) {
-                        await new Promise(resolve => setTimeout(resolve, 10));
+            try {
+                // 変換候補が表示されたら、スペースキーを入力してMenuHenkanModeに入る
+                const disposable1 = vscode.workspace.onDidChangeTextDocument(async e => {
+                    if (e.document !== document) {
+                        return;
                     }
+                    disposable1.dispose();
 
-                    const failTimer = setTimeout(() => {
-                        // 1秒経過しても expected がエディタに挿入されなかった場合、テストを失敗させる
-                        reject(new Error(`document.getText() is expeted to be ${expected} but it is ${document?.getText()}`));
-                    }, 1000);
+                    try {
+                        // スペースキーを 3 回入力して、InlineHenkanModeからMenuHenkanModeに入る
+                        await vscode.commands.executeCommand('skk.spaceInput');
+                        await waitForDocumentEquals(e.document, `▼${existWords[1]}`);
+                        await vscode.commands.executeCommand('skk.spaceInput');
+                        await waitForDocumentEquals(e.document, `▼${existWords[2]}`);
+                        await vscode.commands.executeCommand('skk.spaceInput');
+                        await waitForDocumentEquals(e.document, `▼`);
 
-                    const disposable4 = vscode.workspace.onDidChangeTextDocument(async e => {
-                        // ignore other document changes
-                        if (e.document !== document) {
-                            return;
-                        }
+                        // MenuHenkanModeに入ったら、スペースキーを入力して辞書登録エディタを開く
+                        await vscode.commands.executeCommand('skk.spaceInput');
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
 
-                        const text = document.getText();
-                        // 元のエディタの内容が登録した単語+送りがなになっていたならば、テストを成功させる
-                        if (document.getText() === expected) {
-                            clearTimeout(failTimer); // clear the fail timer
-                            disposable4.dispose(); // dispose the event listener
-                            resolve();
-                        }
-                    });
-                    // 辞書登録コマンドを実行
-                    await vscode.commands.executeCommand('skk.registerMidashigo');
-                } catch (error) {
-                    reject(error);
-                }
-            });
-            // 送り仮名の母音を入力して、変換を開始する（InlineHenkanModeに入る）
-            await vscode.commands.executeCommand('skk.lowerAlphabetInput', okuriganaAlphabetVowel);
+                // 辞書登録エディタが開かれたら実行する処理
+                const disposable2 = vscode.window.onDidChangeActiveTextEditor(async editor => {
+                    if (editor === undefined) {
+                        return;
+                    }
+                    disposable2.dispose();
+                    const registrationDocument = editor.document;
+                    try {
+                        // 辞書登録エディタが開かれていることを確認
+                        expect(registrationDocument.getText()).equal(`読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:`);
+
+                        await editor.edit(editBuilder => {
+                            // append unexistWord to the end of the document
+                            const lastLine = registrationDocument.lineAt(registrationDocument.lineCount - 1);
+                            editBuilder.insert(lastLine.range.end, unexistWord);
+                        });
+
+                        await waitForDocumentEquals(registrationDocument, `読み:${unexistYomi}${okuriganaAlphabetConsonant}\n単語:${unexistWord}`);
+
+                        const failTimer = setTimeout(() => {
+                            // 1秒経過しても expected がエディタに挿入されなかった場合、テストを失敗させる
+                            reject(new Error(`document.getText() is expeted to be ${expected} but it is ${document?.getText()}`));
+                        }, 1000);
+
+                        const disposable4 = vscode.workspace.onDidChangeTextDocument(async e => {
+                            // ignore other document changes
+                            if (e.document !== document) {
+                                return;
+                            }
+
+                            const text = document.getText();
+                            // 元のエディタの内容が登録した単語+送りがなになっていたならば、テストを成功させる
+                            if (document.getText() === expected) {
+                                clearTimeout(failTimer); // clear the fail timer
+                                disposable4.dispose(); // dispose the event listener
+                                resolve();
+                            }
+                        });
+                        // 辞書登録コマンドを実行
+                        await vscode.commands.executeCommand('skk.registerMidashigo');
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+                // 送り仮名の母音を入力して、変換を開始する（InlineHenkanModeに入る）
+                await vscode.commands.executeCommand('skk.lowerAlphabetInput', okuriganaAlphabetVowel);
+            } catch (err) {
+                reject(err);
+            }
         });
     });
 });
