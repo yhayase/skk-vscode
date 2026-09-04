@@ -1,15 +1,15 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { expect } from 'chai';
+import { closeAllEditorsAndWait, openNewUntitledFileAndWait } from '../testHelper';
 
 suite('バックスペース機能のテスト', () => {
     setup('新しい空のエディタを開く', async () => {
-        await vscode.commands.executeCommand('workbench.action.files.newUntitledFile');
-        await vscode.commands.executeCommand('skk.nop'); // skk 拡張を有効にするための何もしないコマンド呼び出し
+        await openNewUntitledFileAndWait();
     });
 
     teardown('エディタを閉じる', async () => {
-        await vscode.commands.executeCommand('workbench.action.closeAllEditors');
+        await closeAllEditorsAndWait();
     });
 
     async function input(char: string) {

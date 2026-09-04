@@ -32,8 +32,8 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         this.showCandidate(context);
     }
 
-    showCandidate(context: AbstractKanaMode) {
-        this.editor.showCandidate(this.jisyoEntry.getCandidateList()[this.candidateIndex], this.okuri, this.suffix);
+    async showCandidate(context: AbstractKanaMode): Promise<boolean | void> {
+        return await this.editor.showCandidate(this.jisyoEntry.getCandidateList()[this.candidateIndex], this.okuri, this.suffix);
     }
 
     /**
@@ -61,11 +61,11 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         if (key === 'x') {
             this.candidateIndex -= 1;
             if (this.candidateIndex < 0) {
-                this.returnToMidashigoMode(context);
+                await this.returnToMidashigoMode(context);
                 return;
             }
 
-            this.showCandidate(context);
+            await this.showCandidate(context);
             return;
         }
 
@@ -74,6 +74,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
             await this.fixateCandidate(context);
             context.toggleKanaMode();
             context.setHenkanMode(KakuteiMode.create(context, this.editor));
+            return;
         }
 
         // other keys
@@ -112,7 +113,8 @@ export class InlineHenkanMode extends AbstractHenkanMode {
                 throw new Error("Unconsistent state: Candidate list is not found in the global jisyo.");
             }
 
-            context.setHenkanMode(new CandidateDeletionMode(context, this.editor, this, rawMidashigo, rawCandidateList.getCandidateList()[this.candidateIndex]));
+            const deletionMode = await CandidateDeletionMode.create(context, this.editor, this, rawMidashigo, rawCandidateList.getCandidateList()[this.candidateIndex]);
+            context.setHenkanMode(deletionMode);
             return;
         }
 
@@ -154,7 +156,7 @@ export class InlineHenkanMode extends AbstractHenkanMode {
         }
 
         this.candidateIndex += 1;
-        this.showCandidate(context);
+        await this.showCandidate(context);
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {

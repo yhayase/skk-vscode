@@ -10,13 +10,13 @@ describe('AbbrevMode', () => {
     let mockEditor: MockEditor;
     let mockKanaMode: AbstractKanaMode;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         mockEditor = new MockEditor();
         // AbbrevMode constructor requires AbstractKanaMode context
         // MockKanaMode constructor now sets the editor in EditorFactory
         mockKanaMode = new MockKanaMode(mockEditor);
 
-        abbrevMode = new AbbrevMode(mockKanaMode, mockEditor);
+        abbrevMode = await AbbrevMode.create(mockKanaMode, mockEditor);
     });
 
     afterEach(() => {

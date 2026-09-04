@@ -10,13 +10,17 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
     private readonly candidate: Candidate;
     private readonly midashigo: string;
 
-    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: InlineHenkanMode, midashigo: string, candidate: Candidate) {
+    private constructor(context: AbstractKanaMode, editor: IEditor, prevMode: InlineHenkanMode, midashigo: string, candidate: Candidate) {
         super("Delete?", editor);
         this.prevMode = prevMode;
         this.midashigo = midashigo;
         this.candidate = candidate;
+    }
 
-        this.showInlineDialog(context, this.midashigo, this.candidate);
+    public static async create(context: AbstractKanaMode, editor: IEditor, prevMode: InlineHenkanMode, midashigo: string, candidate: Candidate): Promise<CandidateDeletionMode> {
+        const mode = new CandidateDeletionMode(context, editor, prevMode, midashigo, candidate);
+        await mode.showInlineDialog(context, midashigo, candidate);
+        return mode;
     }
 
     private async showInlineDialog(context: AbstractKanaMode, midashigo: string, candidate: Candidate): Promise<void> {
@@ -45,7 +49,7 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
 
         if (key === "N") {
             context.setHenkanMode(this.prevMode);
-            this.prevMode.showCandidate(context);
+            await this.prevMode.showCandidate(context);
             return;
         }
 
@@ -54,7 +58,7 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
 
     async onCtrlG(context: AbstractKanaMode): Promise<void> {
         context.setHenkanMode(this.prevMode);
-        this.prevMode.showCandidate(context);
+        await this.prevMode.showCandidate(context);
     }
 
     async onNumber(context: AbstractKanaMode, key: string): Promise<void> {

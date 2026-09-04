@@ -25,7 +25,7 @@ describe('CandidateDeletionMode', () => {
             const entry = new Entry('よみ', [candidate], '');
             const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'よみ', '', entry, '');
-            deletionMode = new CandidateDeletionMode(context, mockEditor, prevMode, 'よみ', candidate);
+            deletionMode = await CandidateDeletionMode.create(context, mockEditor, prevMode, 'よみ', candidate);
 
             context.setHenkanMode(deletionMode);
             mockEditor.setInputMode(context);
@@ -51,7 +51,7 @@ describe('CandidateDeletionMode', () => {
             const entry = new Entry('よみ', [candidate], '');
             const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'よみ', '', entry, '');
-            deletionMode = new CandidateDeletionMode(context, mockEditor, prevMode, 'よみ', candidate);
+            deletionMode = await CandidateDeletionMode.create(context, mockEditor, prevMode, 'よみ', candidate);
 
             context.setHenkanMode(deletionMode);
             mockEditor.setInputMode(context);
@@ -133,7 +133,7 @@ describe('CandidateDeletionMode', () => {
             const entry = new Entry('test', [candidate], '');
             const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'み', 'み', entry, '');
-            deletionMode = new CandidateDeletionMode(context, mockEditor, prevMode, 'key', candidate);
+            deletionMode = await CandidateDeletionMode.create(context, mockEditor, prevMode, 'key', candidate);
 
             context.setHenkanMode(deletionMode);
             mockEditor.setInputMode(context);
@@ -207,7 +207,7 @@ describe('CandidateDeletionMode', () => {
             const entry = new Entry('よみ', [candidate], '');
             const midashigoMode = await MidashigoMode.create(context, mockEditor);
             prevMode = new InlineHenkanMode(context, mockEditor, midashigoMode, 'よみ', '', entry, '');
-            deletionMode = new CandidateDeletionMode(context, mockEditor, prevMode, 'よみ', candidate);
+            deletionMode = await CandidateDeletionMode.create(context, mockEditor, prevMode, 'よみ', candidate);
         });
 
         it('should return a set containing all printable ASCII, enter, backspace, ctrl+j, ctrl+g', () => {

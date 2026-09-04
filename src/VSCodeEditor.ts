@@ -582,7 +582,7 @@ export class VSCodeEditor implements IEditor {
 
     // Input mode management methods
     setInputMode(mode: IInputMode): void {
-        mode.reset();
+        mode.reset().catch(() => {});
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             throw Error("No active text editor");

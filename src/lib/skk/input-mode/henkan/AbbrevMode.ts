@@ -5,12 +5,16 @@ import { InlineHenkanMode } from "./InlineHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
 
 export class AbbrevMode extends AbstractMidashigoMode {
-    constructor(context: AbstractKanaMode, editor: IEditor) {
+    private constructor(context: AbstractKanaMode, editor: IEditor) {
         super("▽", editor);
+    }
 
+    public static async create(context: AbstractKanaMode, editor: IEditor): Promise<AbbrevMode> {
+        const mode = new AbbrevMode(context, editor);
         const insertStr = "▽";
-        this.editor.setMidashigoStartToCurrentPosition();
-        context.insertStringAndShowRemaining(insertStr, "", false);
+        mode.editor.setMidashigoStartToCurrentPosition();
+        await context.insertStringAndShowRemaining(insertStr, "", false);
+        return mode;
     }
 
     resetOkuriState(): void {
@@ -25,7 +29,7 @@ export class AbbrevMode extends AbstractMidashigoMode {
         }
 
         const jisyoCandidates = await this.editor.getJisyoProvider().lookupCandidates(midashigo);
-        if (jisyoCandidates=== undefined) {
+        if (jisyoCandidates === undefined) {
             await this.editor.openRegistrationEditor(midashigo, "");
             return;
         }
@@ -33,31 +37,27 @@ export class AbbrevMode extends AbstractMidashigoMode {
     }
 
     async onLowerAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
-        this.editor.insertOrReplaceSelection(key).then((value) => {
-            this.editor.showRemainingRomaji("", false, 0);
-        });
+        await this.editor.insertOrReplaceSelection(key);
+        this.editor.showRemainingRomaji("", false, 0);
     }
 
     async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
-        this.editor.insertOrReplaceSelection(key).then((value) => {
-            this.editor.showRemainingRomaji("", false, 0);
-        });
+        await this.editor.insertOrReplaceSelection(key);
+        this.editor.showRemainingRomaji("", false, 0);
     }
 
     async onNumber(context: AbstractKanaMode, key: string): Promise<void> {
-        this.editor.insertOrReplaceSelection(key).then((value) => {
-            this.editor.showRemainingRomaji("", false, 0);
-        });
+        await this.editor.insertOrReplaceSelection(key);
+        this.editor.showRemainingRomaji("", false, 0);
     }
 
     async onSymbol(context: AbstractKanaMode, key: string): Promise<void> {
-        this.editor.insertOrReplaceSelection(key).then((value) => {
-            this.editor.showRemainingRomaji("", false, 0);
-        });
+        await this.editor.insertOrReplaceSelection(key);
+        this.editor.showRemainingRomaji("", false, 0);
     }
 
     async onSpace(context: AbstractKanaMode): Promise<void> {
-        this.henkan(context);
+        await this.henkan(context);
     }
 
     async onEnter(context: AbstractKanaMode): Promise<void> {
@@ -90,7 +90,7 @@ export class AbbrevMode extends AbstractMidashigoMode {
 
     async onCtrlG(context: AbstractKanaMode): Promise<void> {
         context.setHenkanMode(KakuteiMode.create(context, this.editor));
-        this.editor.clearMidashigo();
+        await this.editor.clearMidashigo();
     }
 
     public override getActiveKeys(): Set<string> {
