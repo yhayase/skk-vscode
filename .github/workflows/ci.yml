@@ -28,10 +28,9 @@ jobs:
     - name: Run Unit Tests
       run: npm run test:unit
 
-#    Disable integration tests due to flakiness
-#    - name: Run Integration Tests with Xvfb
-#      uses: GabrielBB/xvfb-action@v1
-#      with:
-#        run: npm run test:integration
-#      env:
-#        ELECTRON_DISABLE_SANDBOX: 1
+    - name: Run Integration Tests with Xvfb
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: npm run test:integration
+      env:
+        ELECTRON_DISABLE_SANDBOX: 1
