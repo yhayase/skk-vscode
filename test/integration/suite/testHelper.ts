@@ -45,9 +45,21 @@ export async function openNewUntitledFileAndWait(timeoutMs: number = 4000): Prom
     await closeAllEditorsAndWait(timeoutMs);
     await vscode.commands.executeCommand('workbench.action.files.newUntitledFile');
     const editor = await waitForActiveEditor(timeoutMs);
-    await vscode.window.showTextDocument(editor.document);
     await vscode.commands.executeCommand('skk.nop');
     return editor;
+}
+
+export async function insertTextAtCursor(text: string): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        throw new Error('No active editor to insert text into');
+    }
+    const pos = editor.selection.active;
+    await editor.edit(builder => {
+        builder.insert(pos, text);
+    });
+    const newPos = editor.document.positionAt(editor.document.offsetAt(pos) + text.length);
+    editor.selection = new vscode.Selection(newPos, newPos);
 }
 
 export async function waitForDocumentContent(

@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { getGlobalJisyo } from '../../../../../src/lib/skk/jisyo/jisyo';
 import { expect } from 'chai';
-import { closeAllEditorsAndWait, openNewUntitledFileAndWait } from '../../testHelper';
+import { closeAllEditorsAndWait, insertTextAtCursor, openNewUntitledFileAndWait } from '../../testHelper';
 
 suite('辞書登録機能において', async () => {
     const unexistYomi = 'りですごじめわゅょぼざうにろせふよふ';
@@ -37,7 +37,7 @@ suite('辞書登録機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに，辞書に存在しない語の読みを入力する
-        await vscode.commands.executeCommand('type', { text: unexistYomi });
+        await insertTextAtCursor(unexistYomi);
 
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise(async (resolve, reject) => {
@@ -72,7 +72,7 @@ suite('辞書登録機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに，辞書に存在しない語の読みの語感を入力する
-        await vscode.commands.executeCommand('type', { text: unexistYomi });
+        await insertTextAtCursor(unexistYomi);
 
         // 子音の大文字を入力し、送りがなの区切りとする
         await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
@@ -113,7 +113,7 @@ suite('辞書登録機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに，辞書に存在しない語の読みを入力する
-        await vscode.commands.executeCommand('type', { text: unexistYomi });
+        await insertTextAtCursor(unexistYomi);
 
         // 次の入力によって、1つ目の候補が表示されたら実行する処理
         const disposable1 = vscode.workspace.onDidChangeTextDocument(async e => {
@@ -169,7 +169,7 @@ suite('辞書登録機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに，辞書に存在しない語の読みを入力する
-        await vscode.commands.executeCommand('type', { text: unexistKatakanaYomi });
+        await insertTextAtCursor(unexistKatakanaYomi);
 
         // 次の入力によって、1つ目の候補が表示されたら実行する処理
         const disposable1 = vscode.workspace.onDidChangeTextDocument(async e => {
@@ -221,7 +221,7 @@ suite('辞書登録機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに，辞書に存在しない語の語幹を入力する
-        await vscode.commands.executeCommand('type', { text: unexistYomi });
+        await insertTextAtCursor(unexistYomi);
 
         // エディタに，辞書に存在しない語の読みの送り仮名を入力し、変換を開始する
         await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
@@ -265,7 +265,7 @@ suite('辞書登録機能において', async () => {
         const unexistWord = 'かおたへちぶぬもほゃぢめろめちゅのめ';
 
         // 辞書登録のフォーマットに従ったテキストを入力する
-        await vscode.commands.executeCommand('type', { text: `読み:${unexistYomi}\n単語:${unexistWord}` });
+        await insertTextAtCursor(`読み:${unexistYomi}\n単語:${unexistWord}`);
 
         return new Promise(async (resolve, reject) => {
             try {

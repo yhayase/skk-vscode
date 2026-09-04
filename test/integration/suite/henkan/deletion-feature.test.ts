@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { getGlobalJisyo } from '../../../../src/lib/skk/jisyo/jisyo';
 import { expect } from 'chai';
-import { closeAllEditorsAndWait, openNewUntitledFileAndWait, waitForDocumentContent } from '../testHelper';
+import { closeAllEditorsAndWait, insertTextAtCursor, openNewUntitledFileAndWait, waitForDocumentContent } from '../testHelper';
 
 suite('候補削除機能において', async () => {
     const existYomi = 'りですごじわゅょぼざごうにろせふよふ';
@@ -40,7 +40,7 @@ suite('候補削除機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに、候補が1つだけの見出し語を入力する
-        await vscode.commands.executeCommand('type', { text: existYomi });
+        await insertTextAtCursor(existYomi);
         await waitForDocumentContent(document, existYomi);
 
         return new Promise(async (resolve, reject) => {
@@ -102,7 +102,7 @@ suite('候補削除機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに、候補が1つだけの見出し語をカタカナで入力する
-        await vscode.commands.executeCommand('type', { text: existKatakanaYomi });
+        await insertTextAtCursor(existKatakanaYomi);
         await waitForDocumentContent(document, existKatakanaYomi);
 
         return new Promise(async (resolve, reject) => {
@@ -161,7 +161,7 @@ suite('候補削除機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに、候補が1つだけの見出し語を入力する
-        await vscode.commands.executeCommand('type', { text: existYomi });
+        await insertTextAtCursor(existYomi);
         await waitForDocumentContent(document, existYomi);
 
         // 送りがなの子音を入力する

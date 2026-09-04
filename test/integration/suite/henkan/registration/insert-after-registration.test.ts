@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { getGlobalJisyo } from '../../../../../src/lib/skk/jisyo/jisyo';
 import { expect } from 'chai';
-import { closeAllEditorsAndWait, openNewUntitledFileAndWait, waitForDocumentEquals } from '../../testHelper';
+import { closeAllEditorsAndWait, insertTextAtCursor, openNewUntitledFileAndWait, waitForDocumentEquals } from '../../testHelper';
 
 suite('辞書登録単語挿入機能において', async () => {
     const unexistYomi = 'りですごじめわゅょぼざうにろせふよふ';
@@ -39,7 +39,7 @@ suite('辞書登録単語挿入機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに、辞書に存在しない語の読みを入力する
-        await vscode.commands.executeCommand('type', { text: unexistYomi });
+        await insertTextAtCursor(unexistYomi);
 
         // 新しいエディタが開かれ、内容が辞書登録の初期コンテンツであることを確認する
         return new Promise(async (resolve, reject) => {
@@ -114,7 +114,7 @@ suite('辞書登録単語挿入機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに、辞書に存在しない語の語幹を入力する
-        await vscode.commands.executeCommand('type', { text: unexistYomi });
+        await insertTextAtCursor(unexistYomi);
 
         // 子音の大文字を入力し、送りがなの区切りとする
         await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
@@ -196,7 +196,7 @@ suite('辞書登録単語挿入機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに、辞書に存在する語の語幹を入力する
-        await vscode.commands.executeCommand('type', { text: unexistYomi });
+        await insertTextAtCursor(unexistYomi);
 
         // 子音の大文字を入力し、送りがなの区切りとする
         await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
@@ -300,7 +300,7 @@ suite('辞書登録単語挿入機能において', async () => {
         await vscode.commands.executeCommand('skk.upperAlphabetInput', 'Q');
 
         // エディタに、辞書に存在する語の語幹を入力する
-        await vscode.commands.executeCommand('type', { text: unexistYomi });
+        await insertTextAtCursor(unexistYomi);
 
         // 子音の大文字を入力し、送りがなの区切りとする
         await vscode.commands.executeCommand('skk.upperAlphabetInput', okuriganaAlphabetConsonant.toUpperCase());
