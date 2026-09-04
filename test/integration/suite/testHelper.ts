@@ -35,9 +35,7 @@ export async function waitForActiveEditor(timeoutMs: number = 4000): Promise<vsc
 }
 
 export async function closeAllEditorsAndWait(timeoutMs: number = 4000): Promise<void> {
-    if (vscode.window.activeTextEditor) {
-        await vscode.commands.executeCommand('workbench.action.closeAllEditors');
-    }
+    await vscode.commands.executeCommand('workbench.action.closeAllEditors');
     await waitForNoActiveEditor(timeoutMs);
 }
 

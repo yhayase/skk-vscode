@@ -10,7 +10,7 @@ export class CandidateDeletionMode extends AbstractHenkanMode {
     private readonly candidate: Candidate;
     private readonly midashigo: string;
 
-    constructor(context: AbstractKanaMode, editor: IEditor, prevMode: InlineHenkanMode, midashigo: string, candidate: Candidate) {
+    private constructor(context: AbstractKanaMode, editor: IEditor, prevMode: InlineHenkanMode, midashigo: string, candidate: Candidate) {
         super("Delete?", editor);
         this.prevMode = prevMode;
         this.midashigo = midashigo;

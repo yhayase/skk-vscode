@@ -5,7 +5,7 @@ import { InlineHenkanMode } from "./InlineHenkanMode";
 import { KakuteiMode } from "./KakuteiMode";
 
 export class AbbrevMode extends AbstractMidashigoMode {
-    constructor(context: AbstractKanaMode, editor: IEditor) {
+    private constructor(context: AbstractKanaMode, editor: IEditor) {
         super("▽", editor);
     }
 
