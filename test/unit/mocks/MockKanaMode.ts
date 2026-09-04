@@ -36,7 +36,7 @@ export class MockKanaMode extends AbstractKanaMode {
     // insertStringAndShowRemaining is not abstract in AbstractKanaMode, but it calls editor methods.
     // newRomajiInput is abstract and implemented above.
 
-    reset(): void {}
+    async reset(): Promise<void> {}
     async lowerAlphabetInput(key: string): Promise<void> {}
     async upperAlphabetInput(key: string): Promise<void> {}
     async spaceInput(): Promise<void> {}

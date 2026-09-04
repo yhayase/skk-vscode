@@ -150,7 +150,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(registerCandidateCommand);
 
-	vscode.window.onDidChangeTextEditorSelection(event => {
+	vscode.window.onDidChangeTextEditorSelection(async event => {
 		// On cursor moves in event.textEditor
 
 		// Ignore cursor moves caused by other key input events
@@ -162,7 +162,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 
 		// clear inputMode state
-		findInputMode().reset();
+		await findInputMode().reset();
 	});
 
 	vscode.window.showInformationMessage("SKK: initialization completed");
