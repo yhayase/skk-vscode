@@ -10,7 +10,7 @@ export class AsciiMode extends AbstractInputMode {
        return new AsciiMode();
     }
 
-    public async reset(): Promise<void> {
+    public reset(): void {
         // Do nothing
     }
 
@@ -26,11 +26,11 @@ export class AsciiMode extends AbstractInputMode {
         await this.editor.insertOrReplaceSelection(" ");
     }
 
-    public async ctrlJInput(): Promise<void> {
+    public ctrlJInput(): void {
         this.editor.setInputMode(HiraganaMode.getInstance());
     }
 
-    public async ctrlGInput(): Promise<void> {
+    public ctrlGInput(): void {
         // Do nothing
     }
 

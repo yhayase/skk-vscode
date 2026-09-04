@@ -38,7 +38,7 @@ export class ZeneiMode extends AbstractInputMode {
         return new ZeneiMode();
     }
 
-    public async reset(): Promise<void> {
+    public reset(): void {
         // Do nothing
     }
 
@@ -54,11 +54,11 @@ export class ZeneiMode extends AbstractInputMode {
         await this.editor.insertOrReplaceSelection(ZeneiMode.convertToZenkakuEisuu(" "));
     }
 
-    public async ctrlJInput(): Promise<void> {
+    public ctrlJInput(): void {
         this.editor.setInputMode(HiraganaMode.getInstance());
     }
 
-    public async ctrlGInput(): Promise<void> {
+    public ctrlGInput(): void {
         // Do nothing
     }
 

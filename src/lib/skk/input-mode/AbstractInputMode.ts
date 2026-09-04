@@ -7,16 +7,16 @@ export abstract class AbstractInputMode implements IInputMode {
     constructor() {
         this.editor = EditorFactory.getInstance().getEditor();
     }
-    abstract reset(): Promise<void>;
-    abstract lowerAlphabetInput(key: string): Promise<void>;
-    abstract upperAlphabetInput(key: string): Promise<void>;
-    abstract spaceInput(): Promise<void>;
-    abstract ctrlJInput(): Promise<void>;
-    abstract ctrlGInput(): Promise<void>;
-    abstract enterInput(): Promise<void>;
-    abstract backspaceInput(): Promise<void>;
-    abstract numberInput(key: string): Promise<void>;
-    abstract symbolInput(key: string): Promise<void>;
+    abstract reset(): void;
+    abstract lowerAlphabetInput(key: string): void | Promise<void>;
+    abstract upperAlphabetInput(key: string): void | Promise<void>;
+    abstract spaceInput(): void | Promise<void>;
+    abstract ctrlJInput(): void | Promise<void>;
+    abstract ctrlGInput(): void | Promise<void>;
+    abstract enterInput(): void | Promise<void>;
+    abstract backspaceInput(): void | Promise<void>;
+    abstract numberInput(key: string): void | Promise<void>;
+    abstract symbolInput(key: string): void | Promise<void>;
     public getActiveKeys(): Set<string> {
         return new Set<string>(); // Default: no keys are active by SKK
     }

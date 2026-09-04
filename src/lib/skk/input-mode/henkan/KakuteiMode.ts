@@ -18,10 +18,10 @@ export class KakuteiMode extends AbstractHenkanMode {
     private async insertKanaAndUpdateRomajiStatus(context: AbstractKanaMode , kana: string, remainingRomaji: string, isOkuri: boolean): Promise<void> {
         if (remainingRomaji.length > 0 && !this.treatEnterKey) {
             this.treatEnterKey = true;
-            context["editor"].notifyModeInternalStateChanged(); // Notify editor to update contexts
+            this.editor.notifyModeInternalStateChanged(); // Notify editor to update contexts
         } else if (remainingRomaji.length === 0 && this.treatEnterKey) {
             this.treatEnterKey = false;
-            context["editor"].notifyModeInternalStateChanged(); // Notify editor to update contexts
+            this.editor.notifyModeInternalStateChanged(); // Notify editor to update contexts
         }
 
         return await context.insertStringAndShowRemaining(kana, remainingRomaji, isOkuri);
@@ -41,7 +41,7 @@ export class KakuteiMode extends AbstractHenkanMode {
             context.toggleKanaMode();
             return;
         }
-        this.insertKanaAndUpdateRomajiStatus(context, this.romajiInput.processInput(key), this.romajiInput.getRemainingRomaji(), false);
+        await this.insertKanaAndUpdateRomajiStatus(context, this.romajiInput.processInput(key), this.romajiInput.getRemainingRomaji(), false);
     }
     
     async onUpperAlphabet(context: AbstractKanaMode, key: string): Promise<void> {
@@ -73,21 +73,21 @@ export class KakuteiMode extends AbstractHenkanMode {
         let remaining = this.romajiInput.getRemainingRomaji();
 
         // 変換できる文字があればそれを挿入する(例: "n" -> "ん")
-        await this.insertKanaAndUpdateRomajiStatus(context, kana, remaining, false).then(async () => {
-            // 「/」が入力された場合は SKK Abbrev mode に移行する
-            if (key === "/") {
-                // "/" 自体は挿入しない
-                this.romajiInput.reset();
-                context.setHenkanMode(new AbbrevMode(context, this.editor));
-                return;
-            }
+        await this.insertKanaAndUpdateRomajiStatus(context, kana, remaining, false);
 
-            // TODO: @ が単体で入力された場合などの特殊な処理を記述する
-
-            // 変換できない場合は， remaining に入っている記号をそのまま挿入
+        // 「/」が入力された場合は SKK Abbrev mode に移行する
+        if (key === "/") {
+            // "/" 自体は挿入しない
             this.romajiInput.reset();
-            await this.insertKanaAndUpdateRomajiStatus(context, remaining, "", false);
-        });
+            context.setHenkanMode(await AbbrevMode.create(context, this.editor));
+            return;
+        }
+
+        // TODO: @ が単体で入力された場合などの特殊な処理を記述する
+
+        // 変換できない場合は， remaining に入っている記号をそのまま挿入
+        this.romajiInput.reset();
+        await this.insertKanaAndUpdateRomajiStatus(context, remaining, "", false);
     }
 
     async onSpace(context: AbstractKanaMode): Promise<void> {

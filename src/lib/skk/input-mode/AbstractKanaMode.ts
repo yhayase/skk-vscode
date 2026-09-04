@@ -25,7 +25,7 @@ export abstract class AbstractKanaMode extends AbstractInputMode {
         this.editor.showRemainingRomaji(remaining, isOkuri, 0);
     }
 
-    public async reset(): Promise<void> {
+    public reset(): void {
         this.editor.showRemainingRomaji("", false, 0); // clear remaining romaji annotation
     }
 
