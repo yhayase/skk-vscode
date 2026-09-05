@@ -529,9 +529,10 @@
     "test:unit": "npm run pretest && mocha -R dot",
     "test:integration": "npm run pretest && node ./out/test/integration/runTest.js",
     "package": "vsce package",
-    "release:patch": "npm test && vsce publish patch && git push origin main --follow-tags",
-    "release:minor": "npm test && vsce publish minor && git push origin main --follow-tags",
-    "release:major": "npm test && vsce publish major && git push origin main --follow-tags"
+    "check:branch": "node -e \"if (require('child_process').execSync('git rev-parse --abbrev-ref HEAD').toString().trim() !== 'main') { console.error('Error: Release commands must be run on the main branch.'); process.exit(1); }\"",
+    "release:patch": "npm run check:branch && npm test && vsce publish patch && git push origin main --follow-tags",
+    "release:minor": "npm run check:branch && npm test && vsce publish minor && git push origin main --follow-tags",
+    "release:major": "npm run check:branch && npm test && vsce publish major && git push origin main --follow-tags"
   },
   "devDependencies": {
     "@microsoft/vscode-file-downloader-api": "^1.0.1",

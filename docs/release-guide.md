@@ -11,7 +11,7 @@
 
 1. **vsce login コマンドによる認証**:
    ```bash
-   npx vsce login hayase
+   npx @vscode/vsce login hayase
    ```
    プロンプトが表示されたら、Personal Access Token (PAT) を入力します。
 
@@ -80,5 +80,5 @@ git commit -m "docs: update release notes for vX.Y.Z"
 
 - **クリーンな作業ツリーの維持**: `vsce publish` は作業ツリーに変更が残っているとエラーになる場合があります。必ず事前にコミットまたはスタッシュしてください。
 - **実行ブランチの確認**: リリースコマンドは必ず `main` ブランチで実行してください。
-- **トークンの有効期限**: `vsce publish` 時に PAT の有効期限切れエラーが発生した場合は、Azure DevOps で新しい PAT を発行し、再度 `npx vsce login hayase` または `VSCE_PAT` の再設定を行ってください。
+- **トークンの有効期限**: `vsce publish` 時に PAT の有効期限切れエラーが発生した場合は、Azure DevOps で新しい PAT を発行し、再度 `npx @vscode/vsce login hayase` または `VSCE_PAT` の再設定を行ってください。
 - **パッケージ内容の事前確認**: リリース前にパッケージに含まれるファイルを確認したい場合は、`npx @vscode/vsce ls` を実行するのが推奨されます（一時ファイル `.vsix` を生成せずにパッケージ対象ファイルの一覧を確認できます）。実際のパッケージ生成を検証したい場合は `npm run package` を使用し、確認後に生成された `.vsix` ファイルを削除してください。
