@@ -20,6 +20,8 @@ VSCode エディタ内で動作する SKK の、コンセプト実証のため�
 - **主要技術**: TypeScript, Node.js
 - **開発環境**: VSCode拡張機能として開発・デバッグを行います。
 - **テスト**: `npm run test:unit` および `npm run test:integration` で実行します。
+- **パッケージング**: `npm run package` で `.vsix` パッケージを生成します。
+- **リリース**: リリース手順の詳細は [リリースガイド](docs/release-guide.md) を参照してください。
 - **バージョン管理**: Gitを使用し、`feature`や`bugfix`ブランチで開発を行います。
 
 ## Requirements
