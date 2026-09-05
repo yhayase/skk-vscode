@@ -4,6 +4,13 @@
 .clinerules/**
 memory-bank/**
 src/**
+test/**
+out/test/**
+docs/**
+GEMINI.md
+Next-ToDo.md
+eslint.config.mjs
+webpack.config.js
 .gitignore
 .yarnrc
 .mocharc.yml
