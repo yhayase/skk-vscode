@@ -525,9 +525,13 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "npm run test:unit; npm run test:integration",
+    "test": "npm run test:unit && npm run test:integration",
     "test:unit": "npm run pretest && mocha -R dot",
-    "test:integration": "npm run pretest && node ./out/test/integration/runTest.js"
+    "test:integration": "npm run pretest && node ./out/test/integration/runTest.js",
+    "package": "vsce package",
+    "release:patch": "npm test && vsce publish patch && git push origin main --follow-tags",
+    "release:minor": "npm test && vsce publish minor && git push origin main --follow-tags",
+    "release:major": "npm test && vsce publish major && git push origin main --follow-tags"
   },
   "devDependencies": {
     "@microsoft/vscode-file-downloader-api": "^1.0.1",
@@ -539,6 +543,7 @@
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
     "@vscode/test-electron": "^2.3.4",
+    "@vscode/vsce": "^3.9.2",
     "chai": "^4.4.1",
     "eslint": "^9.0.0",
     "glob": "^11.0.2",
