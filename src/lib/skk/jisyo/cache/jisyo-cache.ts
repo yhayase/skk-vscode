@@ -26,9 +26,9 @@ export async function decompressBrotli(data: Uint8Array): Promise<Uint8Array | n
     if (typeof process !== 'undefined' && process.versions?.node) {
         try {
             const zlibModuleName = 'zlib';
-            const zlib = await import(zlibModuleName);
+            const zlib = await import(/* webpackIgnore: true */ zlibModuleName);
             const utilModuleName = 'util';
-            const util = await import(utilModuleName);
+            const util = await import(/* webpackIgnore: true */ utilModuleName);
             const decompress = util.promisify(zlib.brotliDecompress);
             const result = await decompress(data);
             return new Uint8Array(result.buffer, result.byteOffset, result.byteLength);
