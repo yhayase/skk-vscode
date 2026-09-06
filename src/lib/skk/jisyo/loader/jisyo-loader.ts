@@ -46,10 +46,12 @@ export class JisyoLoader {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                rawJisyo = Buffer.from(await response.arrayBuffer());
+                rawJisyo = new Uint8Array(await response.arrayBuffer());
                 
                 // Save to cache asynchronously
-                this.cache.saveToCache(url, rawJisyo);
+                void this.cache.saveToCache(url, rawJisyo).catch((e) => {
+                    console.warn(`Failed to save dictionary cache for ${url}:`, e);
+                });
             }
 
             return this.parseRawJisyo(rawJisyo);
@@ -61,7 +63,7 @@ export class JisyoLoader {
     /**
      * Parse raw SKK dictionary data into a Jisyo object
      */
-    private parseRawJisyo(rawLines: Buffer): Jisyo {
+    private parseRawJisyo(rawLines: Uint8Array): Jisyo {
         const jisyo: Jisyo = new Map();
         const eucJpDecoder = new TextDecoder('euc-jp');
         const lines = eucJpDecoder.decode(rawLines).split("\n");

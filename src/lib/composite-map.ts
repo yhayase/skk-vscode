@@ -1,10 +1,10 @@
-import assert = require("assert");
-
 export class CompositeMap<K, V> implements Map<K, V> {
     protected maps: Map<K, V>[] = [];
 
     constructor(maps: Map<K, V>[]) {
-        assert(maps.length > 0);
+        if (maps.length === 0) {
+            throw new Error("maps must not be empty");
+        }
         this.maps = maps;
     }
 

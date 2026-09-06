@@ -34,3 +34,9 @@ jobs:
         run: npm run test:integration
       env:
         ELECTRON_DISABLE_SANDBOX: 1
+
+    - name: Run Web Extension Tests with Xvfb
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: npm run test:web
+

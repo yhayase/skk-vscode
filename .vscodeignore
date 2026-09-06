@@ -6,6 +6,7 @@ memory-bank/**
 src/**
 test/**
 out/test/**
+dist/web/test/**
 docs/**
 GEMINI.md
 Next-ToDo.md

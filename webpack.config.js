@@ -1,48 +1,72 @@
 //@ts-check
-
 'use strict';
 
 const path = require('path');
+const webpack = require('webpack');
 
-//@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 
-/** @type WebpackConfig */
-const extensionConfig = {
-  target: 'node', // VS Code extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
-	mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
+/**
+ * Webpackの設定を生成します。
+ * Web Extension環境（webworker）向けに拡張機能本体とテストスイートをバンドルします。
+ *
+ * @param {Record<string, any>} [env]
+ * @param {Record<string, any>} [argv]
+ * @returns {WebpackConfig[]}
+ */
+module.exports = (env, argv) => {
+	const isProduction = (argv && argv.mode === 'production') || process.env.NODE_ENV === 'production';
 
-  entry: './src/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
-  output: {
-    // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'extension.js',
-    libraryTarget: 'commonjs2'
-  },
-  externals: {
-    vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
-    // modules added here also need to be added in the .vscodeignore file
-  },
-  resolve: {
-    // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.ts', '.js']
-  },
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        exclude: /node_modules/,
-        use: [
-          {
-            loader: 'ts-loader'
-          }
-        ]
-      }
-    ]
-  },
-  devtool: 'nosources-source-map',
-  infrastructureLogging: {
-    level: "log", // enables logging required for problem matchers
-  },
+	/** @type WebpackConfig */
+	const webExtensionConfig = {
+		mode: isProduction ? 'production' : 'none',
+		target: 'webworker',
+		entry: {
+			extension: './src/extension.ts',
+			'test/suite/index': './test/web/index.ts'
+		},
+		output: {
+			filename: '[name].js',
+			path: path.join(__dirname, './dist/web'),
+			libraryTarget: 'commonjs',
+			devtoolModuleFilenameTemplate: '../../[resource-path]'
+		},
+		resolve: {
+			mainFields: ['browser', 'module', 'main'],
+			extensions: ['.ts', '.js'],
+			fallback: {
+				assert: require.resolve('assert/')
+			}
+		},
+		module: {
+			rules: [
+				{
+					test: /\.ts$/,
+					exclude: /node_modules/,
+					use: [
+						{
+							loader: 'ts-loader',
+							options: {
+								configFile: 'tsconfig.json'
+							}
+						}
+					]
+				}
+			]
+		},
+		plugins: [
+			new webpack.ProvidePlugin({
+				process: 'process/browser'
+			})
+		],
+		externals: {
+			vscode: 'commonjs vscode'
+		},
+		performance: {
+			hints: false
+		},
+		devtool: 'nosources-source-map'
+	};
+
+	return [webExtensionConfig];
 };
-module.exports = [ extensionConfig ];
