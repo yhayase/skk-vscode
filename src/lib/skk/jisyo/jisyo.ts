@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { JisyoLoader } from './loader/jisyo-loader';
 import { CompositeJisyo } from './composite-jisyo';
 
+const GLOBAL_JISYO_KEY = Symbol.for('skk.globalJisyo');
+
 let globalJisyo: CompositeJisyo;
 
 export async function init(memento: vscode.Memento, storageUri: vscode.Uri): Promise<void> {
@@ -17,6 +19,7 @@ export async function init(memento: vscode.Memento, storageUri: vscode.Uri): Pro
     const userJisyo = loader.loadUserJisyo(memento);
 
     globalJisyo = new CompositeJisyo([userJisyo, ...systemJisyos], memento);
+    (globalThis as Record<string | symbol, unknown>)[GLOBAL_JISYO_KEY] = globalJisyo;
     cleanUpOldMementoKeys(memento);
 }
 
@@ -33,9 +36,10 @@ async function cleanUpOldMementoKeys(memento: vscode.Memento) {
 }
 
 export function getGlobalJisyo(): CompositeJisyo {
-    return globalJisyo;
+    return ((globalThis as Record<string | symbol, unknown>)[GLOBAL_JISYO_KEY] as CompositeJisyo) ?? globalJisyo;
 }
 
 export function deactivate() {
-    return globalJisyo.saveUserJisyo();
+    return getGlobalJisyo()?.saveUserJisyo();
 }
+

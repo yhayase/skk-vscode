@@ -18,6 +18,7 @@
   ],
   "activationEvents": [],
   "main": "./out/src/extension.js",
+  "browser": "./dist/web/extension.js",
   "contributes": {
     "commands": [
       {
@@ -521,13 +522,18 @@
   "scripts": {
     "vscode:prepublish": "npm run build",
     "compile": "tsc -p ./",
-    "build": "rm -rf ./out; tsc --project tsconfig.build.json",
+    "compile-web": "webpack",
+    "watch-web": "webpack --watch",
+    "package-web": "webpack --mode production --devtool hidden-source-map",
+    "build": "rm -rf ./out ./dist && tsc --project tsconfig.build.json && npm run package-web",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "npm run test:unit && npm run test:integration",
+    "test": "npm run test:unit && npm run test:integration && npm run test:web",
     "test:unit": "npm run pretest && mocha -R dot",
     "test:integration": "npm run pretest && node ./out/test/integration/runTest.js",
+    "pretest:web": "npm run compile-web",
+    "test:web": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
     "package": "vsce package",
     "check:branch": "node -e \"if (require('child_process').execSync('git rev-parse --abbrev-ref HEAD').toString().trim() !== 'main') { console.error('Error: Release commands must be run on the main branch.'); process.exit(1); }\"",
     "release:patch": "npm run check:branch && npm test && vsce publish patch && git push origin main --follow-tags",
@@ -541,19 +547,29 @@
     "@types/mocha": "^10.0.7",
     "@types/node": "^22.15.21",
     "@types/vscode": "^1.88.0",
+    "@types/webpack-env": "^1.18.8",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
     "@vscode/test-electron": "^2.3.4",
+    "@vscode/test-web": "^0.0.81",
     "@vscode/vsce": "^3.9.2",
+    "assert": "^2.1.0",
     "chai": "^4.4.1",
     "eslint": "^9.0.0",
     "glob": "^11.0.2",
     "mocha": "^11.5.0",
+    "process": "^0.11.10",
+    "ts-loader": "^9.6.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "webpack": "^5.110.3",
+    "webpack-cli": "^7.2.3"
   },
   "dependencies": {
     "async-lock": "^1.4.1",
     "wanakana": "^5.3.1"
+  },
+  "mocha": {
+    "require": "./test/unit/mocks/setup.js"
   }
 }
