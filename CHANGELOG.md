@@ -1,9 +1,41 @@
 # Change Log
 
-All notable changes to the "skk" extension will be documented in this file.
+本プロジェクトの重要な変更履歴を記録します。フォーマットは [Keep a Changelog](http://keepachangelog.com/) に準拠しています。
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## [0.2.0] - 2026-09-07
 
-## [Unreleased]
+### 追加 (Added)
+- **接頭辞・接尾辞変換機能**: 「だい>」などの形式での接頭辞検索および変換中「>」入力による接尾辞入力への移行に対応
+- **Web Extensions 対応**: vscode.dev や github.dev などの Web ブラウザ環境での実行に対応（Webpack バンドル構成の追加）
+- **リリース自動化**: VS Code Marketplace への公開およびタグ作成に連動した GitHub Releases 自動発行パイプラインを整備
 
-- Initial release
+### 変更・改善 (Changed)
+- **キーバインディングの最適化**: 入力モードに応じた動的コンテキストによる他拡張機能との干渉軽減
+- **見出し語モードの改善**: 入力中の数字や改行キー入力の挙動改善
+- **テスト・CIの安定化**: 非同期処理の見直し、E2E統合テストの安定化およびWebテスト（`@vscode/test-web`）の追加
+
+### 修正 (Fixed)
+- Abbrevモードから辞書登録画面を開いた際の表示・動作不具合の修正
+
+## [0.1.0] - 2025-04-18
+
+### 追加 (Added)
+- **辞書登録機能**: 変換候補末尾到達時や辞書未登録見出し語の辞書登録機能
+- **候補削除機能**: インライン変換中の "x" キーによるユーザー辞書からの変換候補削除機能
+
+### 変更・改善 (Changed)
+- 辞書キャッシュ機構の改善によるメモリ・ロード時間の最適化
+- 見出し語モードへの復帰時の語幹モード復帰挙動の改善
+- 未確定の「n」の後に大文字が入力された場合の動作改善（DDSKK準拠）
+- コマンド実行の排他制御（async-lock）
+
+## [0.0.2] - 2024-12-31
+
+### 追加 (Added)
+- Abbrev モード（スラッシュ入力による英数字見出し語検索、郵便番号辞書の利用）
+- 複数辞書検索および辞書設定（`skk.dictUrls`）のサポート
+
+## [0.0.1] - 2024-05-11
+
+### 追加 (Added)
+- 初回リリース（文字入力、見出し語変換）
